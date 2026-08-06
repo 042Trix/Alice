@@ -4,15 +4,23 @@
 
 Alice is a tool-agnostic methodology for designing a personal or small-team operating system supported by agents. It provides a decision process and fillable templates for organizing persistent knowledge, reusable skills, agent roles, scheduled work, work tracking, and rules derived from repeated failures. The result is an operating system adapted to the reader’s goals, tools, and constraints—not a copy of another setup.
 
+**Alice is not an enterprise standards framework, not a turnkey installer, and not a vendor product.** It is a methodology you adapt; you provide the rest.
+
 **Status:** v0.1.0 draft. The methodology is usable, but terminology and public-release packaging may still change.
 
 ## 1. What is Alice?
 
-Alice is documentation-only: there is no build step, runtime, account, or private configuration required. You read it, copy the templates that match decisions you have already made, and adapt them to your own context. The result of applying Alice is **your** operating system, derived from **your** goals and constraints—not a frozen copy of someone else's setup.
+Alice is documentation-only: no build step, runtime, account, or private configuration is required. You read it, copy the templates that match decisions you have already made, and adapt them to your own context. Alice distinguishes the **methodology** (the decision process) from the **worked example** (an illustration of what that process can produce); the **method-not-instance** constraint keeps the method portable across tools and contexts. To use Alice you need Git, a Markdown editor, and a basic agent session you can describe. The first artifact typically takes 45–90 minutes to produce; the methodology is not "done" after that first pass.
 
-Alice distinguishes the **methodology** (the decision process) from the **worked example** (an illustration of what that process can produce). The methodology is the durable artifact; worked examples are evidence and inspiration, not normative defaults. The **method-not-instance** constraint (document the method, not one operator's implementation) is the single rule that keeps Alice portable across tools and contexts.
+### Non-goals
 
-To use Alice well, you only need Git (or another way to download the repository), a Markdown editor, and a basic agent session or agent-supported workflow you can describe. The first artifact typically takes 45–90 minutes to produce; the methodology is not "done" after that first pass.
+Alice explicitly is **not** any of the following:
+
+- **An enterprise standards framework.** Alice documents a method, not a governed policy set for an organization.
+- **A turnkey installer.** Alice has no install step, no account, no runtime — you copy templates and adapt them.
+- **A vendor product.** Alice is tool-agnostic; it does not privilege one commercial agent or platform.
+
+For the reader-facing "is Alice for me?" checklist, see §2 below; the methodology-level non-goals above are the positioning that anchors it.
 
 ### Ongoing cost
 
