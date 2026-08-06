@@ -12,7 +12,7 @@
 #
 # Deferred until the public repository and tag exist (filled by jarvis at tag time,
 # under the release card — do NOT fabricate earlier):
-#   repository-code: <TODO jarvis at tag time: public repo URL for Alice>
+#   repository-code: https://github.com/042Trix/Alice
 #   identifiers:     <TODO jarvis at tag time: Zenodo collection DOI + v0.1.0 archived-snapshot DOI>
 #
 # Rationale: per the prep plan Card E (lines 129–141), the operator owns authorship,
