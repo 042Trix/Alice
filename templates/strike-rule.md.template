@@ -1,0 +1,65 @@
+---
+id: alice-template-strike-rule
+created: 2026-08-04T12:30:00Z
+title: "Strike rule — fillable template"
+type: template
+status: draft
+source: alice-framework
+tags: [kind:template, kind:strike-rule, project:alice]
+confidence: 0.0
+links: []
+---
+
+# Strike rule — [N] — [short name]
+
+> A strike rule is a one-paragraph constraint derived from observed failures. **Don't write a rule until the same failure pattern has happened 3+ times.**
+
+## 1. Date
+
+[YYYY-MM-DD when the rule was created. The 3rd occurrence of the failure pattern is the trigger.]
+
+## 2. Shape
+
+The failure pattern, in one sentence.
+
+> "When [X happens], the [agent/cron/skill] [does Y, which is wrong]."
+
+**The shape is the abstract pattern, not the specific incident.** "When the user pastes an X link, the agent narrates the tool calls in chat" is too specific. "When the agent has a multi-tool-call action to perform, the agent narrates each tool call" is the right shape.
+
+## 3. Why
+
+What does the rule prevent? 1-2 sentences.
+
+> "Operator context window fills with narration instead of action. The actual work is still done, but the chat transcript is unreadable."
+
+The "why" is **the consequence, not the failure.** The failure is "agent narrates." The consequence is "operator context window fills." The rule prevents the consequence.
+
+## 4. What to do
+
+The correct behavior. 1-2 sentences.
+
+> "Agent does the action; chat only confirms with one sentence at the end."
+
+The "what to do" is **specific and bounded.** It says what the agent should do, not what the agent should think about. If the agent has to interpret the rule, the rule is too vague.
+
+## 5. Counter-example
+
+The antipattern the rule is correcting. A real example from the operator's system, redacted if needed.
+
+> "In the previous session, the agent narrated 5 tool calls in chat (read /path/to/file, then write to /path/to/output, then verify, etc.). The operator ran out of context room before the agent's actual work completed."
+
+The counter-example is **real, not hypothetical.** If the rule has no real example, the rule isn't ready.
+
+---
+
+## Approval
+
+- [ ] Failure pattern observed 3+ times (date and incident count documented)
+- [ ] Shape is abstract (not specific to one incident)
+- [ ] Why is the consequence (not the failure)
+- [ ] What to do is specific and bounded
+- [ ] Counter-example is real
+- [ ] Rule fits in one paragraph
+- [ ] Rule is operator-context (not portable)
+
+Once all 7 boxes are checked, the rule is ready. File it in the rules section of your vault.

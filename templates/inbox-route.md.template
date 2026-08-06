@@ -1,0 +1,68 @@
+---
+id: alice-template-inbox-route
+created: 2026-08-04T12:30:00Z
+title: "Inbox route — fillable template"
+type: template
+status: draft
+source: alice-framework
+tags: [kind:template, kind:inbox-route, project:alice]
+confidence: 0.0
+links: []
+---
+
+# Inbox route — [item title]
+
+> An inbox item is anything you've captured from outside the system. Use this template to route the item to its destination.
+
+## 1. Source
+
+Where did the item come from?
+
+- **Channel:** [X, RSS, conversation, screenshot, book, podcast, etc.]
+- **URL / reference:** [the canonical link or reference]
+- **Author / origin:** [who or what produced the item]
+- **Date captured:** [when you captured it]
+
+## 2. Type
+
+What kind of item is it?
+
+- **Type:** [article, post, screenshot, idea, decision, conversation, voice-memo, etc.]
+- **Length:** [short / medium / long]
+- **Format:** [text / image / audio / video]
+
+## 3. Action
+
+What routing decision did you make?
+
+- [ ] **Promote to atomic** (one idea per file, in your own words)
+- [ ] **Promote to literature** (external source you're referencing)
+- [ ] **File as skill-brief ticket** (recurring pattern, build a procedure)
+- [ ] **File as strike-rule ticket** (failure pattern, observe 3+ times)
+- [ ] **File as cron-spec ticket** (detection + surface + act pattern)
+- [ ] **File as council ticket** (multi-perspective review needed)
+- [ ] **File as operator-action ticket** (decision needs operator judgment)
+- [ ] **Archive** (informational, no use case)
+- [ ] **Delete** (noise, no value)
+
+## 4. Notes
+
+Why this routing? 1 sentence.
+
+> [The 1-sentence reason this routing decision is correct]
+
+The notes are **the audit trail.** When you look back at the inbox item 6 months later, the notes tell you why you made this decision.
+
+---
+
+## Approval
+
+- [ ] Source is documented (channel, URL, author, date)
+- [ ] Type is specific (article / post / etc.)
+- [ ] Action is from the 9-action list
+- [ ] Notes explain the routing
+- [ ] Item is in the inbox tier (not in atomic / literature yet)
+- [ ] Item is < 30 days old (if older, archive or re-evaluate)
+- [ ] If the action is "File as operator-action ticket" or similar — the ticket is routed to the correct board via the keyword-routing table (see `methodology/04b-decide-board-routing.md`)
+
+Once all 7 boxes are checked, the route is ready. Move the item to its destination tier.

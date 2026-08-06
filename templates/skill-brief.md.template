@@ -1,0 +1,95 @@
+---
+id: alice-template-skill-brief
+created: 2026-08-04T12:30:00Z
+title: "Skill brief — fillable template"
+type: template
+status: draft
+source: alice-framework
+tags: [kind:template, kind:skill-brief, project:alice]
+confidence: 0.0
+links: []
+---
+
+# Skill brief — [name]
+
+> A skill is a packaged procedure the agent can invoke. Use this template to design a skill before building it. **Don't build a skill until the brief is filled in.**
+
+## 1. Trigger conditions
+
+When does the agent load this skill? Be specific.
+
+- **Triggers on:** [list of specific inputs / events]
+- **Does NOT trigger on:** [list of similar-but-different inputs]
+
+**The trigger conditions must be specific enough that the agent can decide "yes, load this skill" vs "no, this is a different skill or no skill."** If the agent has to guess, the trigger conditions are too broad.
+
+## 2. Inputs
+
+What does the agent provide to this skill?
+
+- **Required:** [list of required inputs]
+- **Optional:** [list of optional inputs with default behavior]
+- **Forbidden:** [list of inputs that should reject the call]
+
+## 3. Outputs
+
+What does the agent receive from this skill?
+
+- **Primary output:** [the main result]
+- **Side effects:** [audit log, vault writes, etc.]
+- **Failure modes:** [what does the skill return on error?]
+
+## 4. Procedure
+
+The procedure itself. 1-2 paragraphs, not a wall of text.
+
+The procedure should be:
+- **Linear** — steps in order, with decision points clear
+- **Bounded** — each step has a clear "done" condition
+- **Reversible** — when possible, the procedure can be undone
+- **Observable** — each step produces a log line or audit line
+
+## 5. Edge cases
+
+What can go wrong?
+
+- **Common edge cases:** [list 3-5]
+- **Rare edge cases:** [list 1-3]
+- **Failure escalation:** [what does the agent do if the edge case is unhandled?]
+
+## 6. Verification
+
+How does the agent know it succeeded?
+
+- **Self-check:** [internal verification before returning]
+- **External check:** [verification by another tool / agent]
+- **Operator check:** [verification by the operator]
+
+## 7. Cost
+
+How many tokens, how long, how many tool calls?
+
+- **Per-call cost:** [tokens, tool calls, time]
+- **Frequency:** [how often is this skill called?]
+- **Monthly cost:** [per-call × frequency × 30]
+
+If the monthly cost is more than the work is worth, the skill is too expensive. Reduce the per-call cost or reduce the frequency.
+
+---
+
+## Approval
+
+- [ ] Trigger conditions are specific
+- [ ] Inputs are well-defined
+- [ ] Outputs are well-defined
+- [ ] Procedure is bounded and observable
+- [ ] Edge cases are listed
+- [ ] Verification is specific
+- [ ] Cost is estimated
+- [ ] SOP exists (if not, write the SOP first and run it 3+ times)
+
+## See also
+
+- `methodology/01a-decide-memory.md` — **skills are procedural memory (Tier 2).** Each skill is the agent's procedural memory; the skill set is loaded on trigger conditions. Use `templates/memory-budget.md.template` for the per-agent budget.
+
+Once all 8 boxes are checked, the brief is ready to be promoted to a skill.

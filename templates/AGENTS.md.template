@@ -1,0 +1,132 @@
+---
+id: alice-template-agents-md
+created: 2026-08-04T12:30:00Z
+title: "AGENTS.md — fillable template (cold-start operating schema)"
+type: template
+status: draft
+source: alice-framework
+tags: [kind:template, kind:agents-md, project:alice]
+confidence: 0.0
+links: []
+---
+
+# AGENTS.md — cold-start operating schema
+
+> The AGENTS.md is the document the agent reads on cold-start. It tells the agent **what your system is, what the rules are, and what the agent can and cannot do.** This template is tool-agnostic. Your tool will inject the contents on cwd-only load.
+
+> **Length target:** well under 20,000 characters. If your AGENTS.md is longer, you're putting too much in the schema. Move detail to atomic notes and link.
+
+---
+
+# [Your Project / Vault Name]
+
+> [1 sentence — what is this system?]
+
+This file is the **stable operating manual** a cold-start agent reads on launch when the working directory is your vault root. It is **navigational on purpose**: each section points to the authoritative skill or file, rather than duplicating its procedures.
+
+---
+
+## 1. Source of truth
+
+- [What is the source of truth in your system? Markdown files? A specific database? A wiki tool?]
+- [What is the source-of-truth rule? "Markdown is canonical, derived state mirrors, never replaces" or similar]
+- [What is the side-channel rule? "Never write to a vault other than the designated one"]
+
+## 2. Routing tiers
+
+| Tier | Folder | Edit policy |
+|---|---|---|
+| 0 — Inbox | [path] | [append-only, never edit] |
+| 1 — Literature | [path] | [append-only after first write] |
+| 2 — Atomic | [path] | [edit freely] |
+| 3 — Indexes | [path] | [regenerate] |
+| 4 — Archive | [path] | [move, never delete] |
+
+[Helpers: scratch, templates, index, etc. — list them and their edit policy]
+
+## 3. Required frontmatter and tags
+
+[What frontmatter does every note need? id, created, updated, type, status, source, tags, confidence, links, etc.] — see `templates/frontmatter-schema.md.template` for the fillable schema and `methodology/01b-decide-vault-content.md` for the design methodology.
+
+[What tag namespacing do you use? domain:, project:, kind:, source:, private:]
+
+[Where are templates stored?]
+
+## 4. Retrieval
+
+[How do you search the vault? FTS5 (full-text search index, e.g., SQLite FTS5), manifest.db (a derived metadata index over your notes), plain grep, etc.]
+
+[What helpers do you use? List the canonical search commands]
+
+[Edge cases the indexer handles that you should not re-derive: id-vs-path collision, wikilink forward-reference race, FTS5 hyphen-tokenization, etc.]
+
+## 5. End-to-end verification
+
+[What are the 4 checks you run after any build?]
+
+1. [Check 1]
+2. [Check 2]
+3. [Check 3]
+4. [Check 4]
+
+## 6. Audit + log discipline
+
+[Where do audit lines go? vault log.md? per-task audit/ folder?]
+
+[What is the format? ISO8601-UTC timestamp + event-kind + short summary, 3-5 body lines max?]
+
+[Append-only or editable?]
+
+## 7. Kanban lifecycle
+
+- **Pick the board by work-product domain, not by executor.** Your project work goes on the `[your-project]` board (or a project-named board); tool-internal work (vault, kanban, cron, skill infrastructure) goes on the `[your-tool]-infrastructure` board (or the tool's equivalent); cross-cutting one-offs go on `default`. Workers can't see tasks on other boards (env-var isolation), so misfiling strands the work. See `references/board-routing.md` for the friend-portable routing rule.
+- **Default workdir for the project board is the project repo root.** Tickets filed on the project board default to working in `[absolute path to your project repo root]`.
+- **Use the dispatcher's default profile as the assignee** for new work created from a chat session. Chat-side identities are not assignees (see the agent typology in `references/glossary.md`).
+- **Every `ready` task must move forward immediately** — dispatch or block. No stranded `ready` rows past 30 minutes.
+- **Substantive completion result.** Not "done." Capture files created, decisions made, evidence cited, next actions.
+- **Survival-class tickets must ship a real artifact.** The completion record must include a real handle (file path, ticket id, URL) — either as a structured field on the task record, or in the human-readable summary.
+- **Heartbeat on long ops.** >1h task → heartbeat at least once an hour. Stale claims are reclaimed.
+
+### 7a. Blocked-ticket recovery procedure (doc-writer + verifier lanes)
+
+The doc-writer profile's toolset is narrow (`file`, `kanban`, `memory`, `todo`, `session_search`). It does not include process-kill or dispatcher-control. When a doc-writer or verifier ticket is stuck in `blocked` or stuck-`running`, the agent cannot self-rescue; the chat-side agent (jarvis) follows the recovery procedure in `methodology/06b-decide-blocked-ticket-recovery.md` (Part 2 investigation + Part 3 rescue actions).
+
+**Trigger conditions (any one):**
+
+- ticket in `blocked` state > 1 hour
+- ticket in `running` state with no heartbeat > 4 hours
+- ticket in `running` state with stale heartbeat > 2 hours
+- ticket in `running` state with recent heartbeat but no completion > 1 hour
+
+**Cadence:** the chat-side agent checks the `[your-project]` board and `[your-tool]-infrastructure` board every 30 minutes for stuck tickets. The check is text-based (`sqlite3 ... WHERE status='blocked'`); no tooling implementation required.
+
+**Rescue actions (priority order):**
+
+1. **Re-scope** if the work is shipped but the original criteria cannot be met (toolset mismatch, scope drift). Edit the ticket body, cite the re-scope in a `kanban_comment`, then `kanban_complete` with the new criteria.
+2. **Close as filed-in-error** if the work is shipped but the ticket duplicates a real outcome. Set `metadata.disposition=filed_in_error`, cite the duplicate ticket id, then `kanban_complete`. Authorized by strike-10 v2 §1.3.
+3. **File a kill-stuck-process follow-up** if the work is NOT shipped and the original criteria are correct. New ticket: `assignee=default`, `parents=[<candidate-stuck-ticket-id>]`, body cites the crashed pid and the original ticket. The default profile has the process toolset the doc-writer lacks.
+4. **Document the recovery** in `~/Documents/HermesVault/log.md` via `vault_log.append_audit_line` regardless of which action fires. Schema: `## [<isots>] strike-17-recovery — <candidate-ticket-id> — <action> — <reason> — source=<ticket-id>`.
+
+**Why this is a methodology, not a strike rule:** a strike rule is a one-paragraph constraint derived from 3+ observed failures; the recovery procedure is conditional and multi-step. Promote to a strike rule only if the same root cause produces the stuck ticket 3 times (per `methodology/05-strike-rules.md` 3-failure rule). See `methodology/06b-decide-blocked-ticket-recovery.md` Part 7 for the promotion criteria.
+
+## 8. [Your domain-specific section, if any]
+
+[Add 1-3 sections specific to your operator's context. Examples: a "Curriculum source gate" for a homeschool context, a "Compliance review" for a regulated context, or an "Operator priority" block for a multi-operator context.]
+
+---
+
+## Approval
+
+- [ ] Each section is 1-2 paragraphs (navigational, not exhaustive)
+- [ ] Each section points to the authoritative skill or file (not duplicates)
+- [ ] Total length < 20,000 characters
+- [ ] Section 1 has a clear source-of-truth rule
+- [ ] Section 2 lists all routing tiers
+- [ ] Section 3 lists all required frontmatter + tag namespacing
+- [ ] Section 4 lists retrieval helpers
+- [ ] Section 5 lists end-to-end verification
+- [ ] Section 6 lists audit discipline
+- [ ] Section 7 lists kanban lifecycle (if you use kanban)
+- [ ] Section 8 (optional) is operator-specific
+
+Once all 10 boxes are checked, the AGENTS.md is ready.

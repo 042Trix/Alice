@@ -1,0 +1,211 @@
+---
+id: alice-template-operator-interaction-patterns
+created: 2026-08-04T12:30:00Z
+title: "Operator interaction patterns — fillable template"
+type: template
+status: draft
+source: alice-framework
+tags: [kind:template, kind:operator-interaction, project:alice]
+confidence: 0.0
+links: ["[[methodology/03b-decide-operator-agent-interaction.md]]", "[[methodology/03-decide-agents.md]]", "[[methodology/03a-decide-agent-vault-interaction.md]]", "[[templates/agent-soul.md.template]]"]
+---
+
+# Operator interaction patterns — fillable template
+
+> An operator's interaction patterns define how the operator engages with each agent. Use this template to fill in the role distribution per agent. **The friend running Alice's methodology fills in this template for their own agents, not the operator's specific agents.**
+
+---
+
+# Operator: [operator name]
+
+**Style:** [one sentence — how the operator prefers to engage, e.g., "terse, direct, prefers action confirmation"]
+
+**Chat budget per session:** [tokens, default 3,000]
+
+---
+
+## Role distribution
+
+The 5 roles from `methodology/03b-decide-operator-agent-interaction.md`:
+
+| Role | Active? | Notes |
+|---|---|---|
+| Launcher | [yes/no] | every cold-start session |
+| Approver | [yes/no] | for Pattern 2/4 proposals |
+| Governor | [yes/no] | writes strike rules, runs audits |
+| Curator | [yes/no] | writes skill-briefs, SOULs, templates |
+| Fallback | [yes/no] | manual override when agent fails |
+
+---
+
+## Per-agent role distribution
+
+For each agent, fill in which roles the operator plays with that agent:
+
+| Agent | Launcher | Approver | Governor | Curator | Fallback |
+|---|---|---|---|---|---|
+| [agent 1] | [yes/no] | [yes/no] | [yes/no] | [yes/no] | [yes/no] |
+| [agent 2] | [yes/no] | [yes/no] | [yes/no] | [yes/no] | [yes/no] |
+| [agent 3] | [yes/no] | [yes/no] | [yes/no] | [yes/no] | [yes/no] |
+
+**Notes:**
+- [Any role-agent overrides, e.g., "the operator approves the coder's proposals but not the verifier's"]
+- [Any role-specific cadences]
+
+---
+
+## Per-agent chat budget
+
+| Agent | Default chat budget | This agent's budget |
+|---|---|---|
+| [agent 1] | ≤200 words/msg, ≤3000 tokens/session | [words/tokens] |
+| [agent 2] | ≤200 words/msg, ≤3000 tokens/session | [words/tokens] |
+| [agent 3] | ≤200 words/msg, ≤3000 tokens/session | [words/tokens] |
+
+**Notes:**
+- [Any budget overrides, e.g., "the verifier uses longer chat for explanations"]
+- [Any session-length considerations]
+
+---
+
+## Operator-action ticket cadence
+
+How often does the operator expect operator-action tickets from each agent?
+
+| Agent | Expected cadence | SLA |
+|---|---|---|
+| [agent 1] | [N per day/week] | [respond within N hours] |
+| [agent 2] | [N per day/week] | [respond within N hours] |
+
+**Notes:**
+- [Any agent-specific cadences]
+- [Any priority overrides]
+
+---
+
+## Operator-action ticket format
+
+When the operator responds to an operator-action ticket, the format is:
+
+```
+Approve: "Approved. Proceed."
+Reject: "Rejected. [Reason]"
+Modify: "Modified: [what changed]"
+Defer: "Deferred. [When to revisit]"
+```
+
+**Notes:**
+- [Any operator-specific response conventions]
+- [Any ticket-comment vs chat-only rules]
+
+---
+
+## Escalation chain
+
+The escalation chain (from `methodology/03b-decide-operator-agent-interaction.md` Part 9):
+
+```
+request → action → escalation → decision → resume
+```
+
+**Operator's escalation SLA:**
+- **Priority 1 (irreversible / public / policy):** respond within [N] minutes
+- **Priority 2 (judgment call):** respond within [N] hours
+- **Priority 3 (routine):** respond within [N] days
+
+**Notes:**
+- [Any priority overrides]
+- [Any escalation format requirements]
+
+---
+
+## Operator-as-feedback-giver format
+
+When the operator corrects the agent, the format is:
+
+```
+You're doing X. The right behavior is Y. Reason: Z.
+```
+
+**Notes:**
+- [Any operator-specific feedback conventions]
+- [Any memory-update requirements, e.g., "every feedback updates Tier 6 (operator preferences)"]
+
+---
+
+## Operator-as-curator cycle
+
+When the operator curates skills / SOULs / templates, the cycle is:
+
+```
+1. Observe a recurring need
+2. Write the skill-brief / SOUL (agent identity + operating rules) revision / template update
+3. Approve the agent's implementation
+4. Review the agent's compliance (quarterly)
+```
+
+**Notes:**
+- [Any operator-specific cadence, e.g., "monthly skill audit"]
+- [Any archive / deprecation cadence]
+
+---
+
+## Operator-as-fallback pattern
+
+When the agent fails, the fallback pattern is:
+
+```
+1. Operator notices the failure
+2. Operator does the work manually
+3. Operator captures the work (atomic note / ticket comment / skill-brief)
+4. Agent loads the work on next session
+```
+
+**Notes:**
+- [Any operator-specific fallback conventions]
+- [Any capture format requirements]
+
+---
+
+## The 5-question operator-agent interaction audit (run quarterly)
+
+1. **Is the operator-action ticket cadence correct?** (Not too sparse, not flooded.) → adjust.
+2. **Is the chat budget correct?** (Operator context not filling, agent not silent.) → adjust.
+3. **Is the approval discipline holding?** (Operator reviews proposals, agent acts on response.) → fix if not.
+4. **Is the fallback being captured?** (Operator's manual work is in the vault.) → fix if not.
+5. **Is the curation cycle running?** (Skill / SOUL / template updates happen at the cadence.) → fix if not.
+
+---
+
+## Approval
+
+- [ ] Role distribution is filled (which of the 5 roles active)
+- [ ] Per-agent role distribution is filled
+- [ ] Per-agent chat budget is set
+- [ ] Operator-action ticket cadence is set per agent
+- [ ] Operator-action ticket format is documented
+- [ ] Escalation chain SLA is set per priority
+- [ ] Operator-as-feedback-giver format is documented
+- [ ] Operator-as-curator cycle is documented
+- [ ] Operator-as-fallback pattern is documented
+- [ ] The 5-question interaction audit is scheduled quarterly
+
+Once all 10 boxes are checked, the operator interaction patterns are ready.
+
+---
+
+## How the friend uses this template
+
+1. **Define your style.** (Terse / verbose / detailed / etc.)
+2. **Set your chat budget.** (Default: 200 words/msg, 3000 tokens/session.)
+3. **Pick which roles you play.** (All 5 by default; deselect the ones you delegate.)
+4. **Fill in the per-agent matrix.** (Which agent gets which roles from you.)
+5. **Set the operator-action cadence.** (How often each agent should ask.)
+6. **Document the response format.** (Approve / reject / modify / defer.)
+7. **Set the escalation SLA.** (Per-priority response time.)
+8. **Document the feedback format.** (You're doing X. The right behavior is Y. Reason: Z.)
+9. **Document the curator cycle.** (When do you write skills / SOULs / templates?)
+10. **Document the fallback pattern.** (What do you do when the agent fails?)
+11. **Schedule the quarterly audit.** (Use the 5-question audit.)
+
+The operator interaction patterns are **operator-context.** The friend running Alice's methodology designs their own patterns for their own context. They do NOT copy the operator's specific patterns; they apply the method to derive their own.

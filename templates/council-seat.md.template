@@ -1,0 +1,72 @@
+---
+id: alice-template-council-seat
+created: 2026-08-04T12:30:00Z
+title: "Council seat — fillable template"
+type: template
+status: draft
+source: alice-framework
+tags: [kind:template, kind:council-seat, project:alice]
+confidence: 0.0
+links: []
+---
+
+# Council seat — [name]
+
+> A council seat is a perspective in a multi-seat deliberation. Use this template to design a seat before convening. **Don't convene a council with empty seats.**
+
+## 1. Identity
+
+- **Name:** [seat name, used in the council output file]
+- **Role:** [1 sentence — what perspective does this seat represent?]
+- **Lens:** [the worldview this seat deliberates from]
+
+## 2. Inputs
+
+What does the seat read before deliberating?
+
+- **Required reading:** [the docs, tickets, prior councils the seat must read]
+- **Optional reading:** [the docs the seat may read if needed]
+- **Forbidden reading:** [the docs the seat should NOT read — e.g., operator-personal items]
+
+The forbidden list is as important as the required list. A seat should not have access to information that biases its perspective.
+
+## 3. Outputs
+
+What does the seat produce?
+
+- **Position paragraph:** [1-2 paragraphs, with explicit citations to inputs]
+- **Disagreement note:** [if the seat disagrees with other seats, the note cites the dissent and the reason]
+- **Recommendation:** [the seat's recommendation, formatted as: BUILD / VALIDATE-FIRST / PARK / KILL]
+
+## 4. Boundaries
+
+What does the seat NOT consider?
+
+- **Out of scope:** [the topics the seat refuses to opine on]
+- **Escalation:** [when the seat defers to another seat or the operator]
+- **Hard limits:** [the topics the seat will not consider, even if asked]
+
+The boundaries are **non-negotiable.** A seat that opines on everything is not a seat; it's a megaphone.
+
+## 5. Disagreement protocol
+
+When does the seat escalate?
+
+- **Disagreement threshold:** [e.g., "if 2+ other seats disagree, escalate to operator"]
+- **Escalation format:** [how does the seat document the dissent?]
+- **Dissent retention:** [does the seat remember the dissent, or is it forgotten after the council?]
+
+The dissent retention is important. A council that forgets its disagreements is the same as a council that didn't have them.
+
+---
+
+## Approval
+
+- [ ] Identity is specific (name, role, lens)
+- [ ] Inputs are well-defined (required / optional / forbidden)
+- [ ] Outputs are well-defined (position / disagreement / recommendation)
+- [ ] Boundaries are non-negotiable and listed
+- [ ] Disagreement protocol is specific
+- [ ] Seat fits in 1-2 pages
+
+Once all 6 boxes are checked, the seat is ready. Convene the council.

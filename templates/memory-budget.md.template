@@ -1,0 +1,147 @@
+---
+id: alice-template-memory-budget
+created: 2026-08-04T12:30:00Z
+title: "Memory budget — fillable template"
+type: template
+status: draft
+source: alice-framework
+tags: [kind:template, kind:memory-budget, project:alice]
+confidence: 0.0
+links: ["[[methodology/01a-decide-memory.md]]", "[[templates/AGENTS.md.template]]", "[[templates/agent-soul.md.template]]", "[[templates/skill-brief.md.template]]"]
+---
+
+# Memory budget — [agent name]
+
+> The memory budget defines what each memory tier holds for a specific agent, who owns it, what its budget is, and when it's recalled. Use this template to define the per-agent memory budget. **The friend running Alice's methodology fills in this template for each of their agents, not for the operator's specific agents.**
+
+---
+
+# Agent: [agent name]
+
+**Role:** [1 sentence — what this agent does]
+
+**Total per-session budget:** [sum of all tiers]
+
+---
+
+## Tier 1: Cold-start memory
+
+- **Purpose:** what the agent reads on launch when the working directory is the vault root.
+- **Owner:** operator
+- **Storage:** [path to the AGENTS.md or equivalent]
+- **Budget:** [number] characters
+- **Recall trigger:** cold-start (every launch)
+- **Lifecycle:**
+  - Add: when a new operating rule emerges that the agent must know on every launch
+  - Remove: when the rule is no longer operative or has moved to a different tier
+- **Last revised:** [ISO8601-UTC]
+
+## Tier 2: Procedural memory (skills)
+
+- **Purpose:** what the agent knows how to do.
+- **Owner:** agent (operator scaffolds)
+- **Storage:** [path to skills directory]
+- **Budget:** [number] skills loaded per session / [number] skills total in the system
+- **Recall trigger:** the skill's trigger conditions
+- **Lifecycle:**
+  - Add: when a procedure recurs weekly AND is bounded AND verifiable
+  - Remove: when the procedure is no longer needed or has been absorbed into another skill
+- **Last revised:** [ISO8601-UTC]
+
+## Tier 3: Identity memory (SOUL)
+
+- **Purpose:** who the agent is.
+- **Owner:** operator
+- **Storage:** [path to the SOUL.md or equivalent]
+- **Budget:** [number] pages / [number] characters
+- **Recall trigger:** cold-start (loaded with session)
+- **Lifecycle:**
+  - Add: when a new agent is scaffolded (the SOUL is the first artifact)
+  - Remove: when the agent is archived (the SOUL is archived with it)
+- **Last revised:** [ISO8601-UTC]
+
+## Tier 4: Episodic memory (events)
+
+- **Purpose:** what happened.
+- **Owner:** system + agent
+- **Storage:** [path to audit log] + [path to kanban DB] + [path to council verdicts]
+- **Budget:** [number] audit lines per session surface / [number] kanban events per task lifecycle
+- **Recall trigger:** on-demand query
+- **Lifecycle:**
+  - Add: when something happens that needs to be auditable
+  - Remove: archive after 1+ years; never delete
+- **Last revised:** [ISO8601-UTC]
+
+## Tier 5: Long-form memory (vault atomic notes)
+
+- **Purpose:** what the operator knows.
+- **Owner:** operator
+- **Storage:** [path to vault atomic tier]
+- **Budget:** unlimited in storage; query/index is the size constraint
+- **Recall trigger:** on-demand query (FTS5, manifest lookup, wikilink traversal)
+- **Lifecycle:**
+  - Add: when the operator has a new idea, rule, decision, or external source to reference
+  - Remove: archive to the archive tier (e.g., `4-archive/` per the naming chosen in `methodology/01-decide-vault-tier.md`) when no longer active
+- **Last revised:** [ISO8601-UTC]
+
+## Tier 6: Operator preferences
+
+- **Purpose:** environment facts, recurring corrections, durable preferences.
+- **Owner:** operator
+- **Storage:** [path to user.md / MEMORY.md or equivalent]
+- **Budget:** [number] characters
+- **Recall trigger:** cold-start (loaded with AGENTS.md)
+- **Lifecycle:**
+  - Add: when the operator states a preference, corrects a recurring mistake, or surfaces a stable environment fact
+  - Remove: when the preference is no longer operative
+- **Last revised:** [ISO8601-UTC]
+
+## Tier 7: System memory (seen-state, indexes)
+
+- **Purpose:** what the system has learned.
+- **Owner:** system
+- **Storage:** [path to seen-state directory] + [path to index directory]
+- **Budget:** unlimited in storage; size constraint is the query/index
+- **Recall trigger:** on every cron run (seen-state) or on every query (indexes)
+- **Lifecycle:**
+  - Add: automatically, when the system needs to track state
+  - Remove: rotate periodically (cron rotates seen-state; indexer rebuilds from source)
+- **Last revised:** [ISO8601-UTC]
+
+---
+
+## 5-question memory audit (run quarterly)
+
+For each tier:
+
+1. **Is this tier bloated?** (Cold-start > 20K? Skills > 30 per session? Operator prefs > 3K?) → trim.
+2. **Is this tier stale?** (SOUL > 1 year without revision? Strike rule > 6 months without incident?) → review or archive.
+3. **Is this tier conflicting?** (AGENTS.md says X, SOUL says Y?) → reconcile.
+4. **Is this tier being used?** (Skill loaded 0 times in 90 days?) → archive.
+5. **Is this tier the right home?** (Episodic event should be a long-form note?) → migrate.
+
+---
+
+## Approval
+
+- [ ] Each tier has a clear purpose (1 sentence)
+- [ ] Each tier has a single owner
+- [ ] Each tier has a defined budget (size or count)
+- [ ] Each tier has a defined recall trigger
+- [ ] Each tier has a defined lifecycle (add/remove criteria)
+- [ ] The 5-question memory audit is scheduled quarterly
+- [ ] The agent's per-session budget is the sum of all tiers
+
+Once all 7 boxes are checked, the memory budget is ready. Use it to design the agent's memory footprint.
+
+---
+
+## How the friend uses this template
+
+1. **List your agents.** (The friend has 1 default + 2-4 named agents.)
+2. **Fill in the budget for each agent.** Use the 7-tier template above.
+3. **Schedule the quarterly memory audit.** Use the 5-question audit per tier.
+4. **Revise when the system is the bottleneck, not before.** A system that works for 6 months doesn't need a revision.
+5. **Track per-tier usage.** If a tier is under-used, archive. If bloated, trim.
+
+The memory budget is operator-context. The friend running Alice's methodology designs their own budgets for their own agents — they apply the method to derive their own, not to copy the operator's specific tiers.

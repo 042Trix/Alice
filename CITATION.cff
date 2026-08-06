@@ -1,0 +1,52 @@
+# Citation File Format (CITATION.cff) for Alice.
+#
+# Source-cited contract (canonical): /Users/homestead/Documents/HermesVault/2-ATOMIC/specs/alice-citation-metadata-spec.md
+# Operator gate (closed): kanban:t_4054ccac + parent kanban:t_968068b0 (BA-confirmed values recorded 2026-08-04).
+#
+# Confirmed CFF string values (do NOT edit without re-opening the operator gate):
+#   title:           "Alice — A framework for deriving your own agent-augmented operating system"
+#   authors:         single entity, name "042Trix" (operator pen name; no ORCID; not split into family/given)
+#   version:         0.1.0           (release tag stays v0.1.0)
+#   date-released:   2026-08-04
+#   license:         MIT             (Card C; ticket t_d7868cd3 done; mechanical sync t_209c09be)
+#
+# Deferred until the public repository and tag exist (filled by jarvis at tag time,
+# under the release card — do NOT fabricate earlier):
+#   repository-code: <TODO jarvis at tag time: public repo URL for Alice>
+#   identifiers:     <TODO jarvis at tag time: Zenodo collection DOI + v0.1.0 archived-snapshot DOI>
+#
+# Rationale: per the prep plan Card E (lines 129–141), the operator owns authorship,
+# optional ORCID, title, and version. Repository URL and DOI are tag-time follow-ups
+# — filling them now would publish fabricated URLs.
+
+cff-version: 1.2.0
+message: "If you use Alice in academic work, in a methodology you publish, or as a framework you cite, please cite it using the metadata in this file."
+type: software
+title: "Alice — A framework for deriving your own agent-augmented operating system"
+abstract: >-
+  Alice is a tool-agnostic methodology for designing and running a personal
+  or small-team agent-augmented operating system. It captures the decision
+  process behind building a setup (skills, agent profiles, crons, rules)
+  rather than shipping a snapshot of one operator's choices. The output of
+  applying Alice is the reader's own setup, derived from their own context.
+authors:
+  - name: "042Trix"
+version: 0.1.0
+date-released: "2026-08-04"
+license: MIT
+# repository-code: <TODO jarvis at tag time>
+# identifiers:
+#   - description: "This is the collection of archived snapshots of all versions"
+#     type: doi
+#     value: <TODO jarvis at tag time>
+#   - description: "This is the archived snapshot of version 0.1.0"
+#     type: doi
+#     value: <TODO jarvis at tag time>
+keywords:
+  - agent-augmented-systems
+  - methodology
+  - framework
+  - decision-process
+  - personal-operating-system
+  - documentation-framework
+  - tool-agnostic

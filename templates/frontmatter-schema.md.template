@@ -1,0 +1,102 @@
+---
+id: alice-template-frontmatter-schema
+created: 2026-08-04T12:30:00Z
+title: "Frontmatter schema — fillable template"
+type: template
+status: draft
+source: alice-framework
+tags: [kind:template, kind:frontmatter, project:alice]
+confidence: 0.0
+links: ["[[methodology/01b-decide-vault-content.md]]", "[[templates/AGENTS.md.template]]"]
+---
+
+# Frontmatter schema — fillable template
+
+> A frontmatter schema defines the structured metadata that every note has. Use this template to design your schema. **The friend running Alice's methodology fills in this template for their own vault, not the operator's specific schema.**
+
+---
+
+# Frontmatter schema — [vault name]
+
+## Required fields (every note has these)
+
+| Field | Type | Format | Source | Purpose |
+|---|---|---|---|---|
+| `id` | string | 7-char alphanumeric hash | generator | unique identifier |
+| `created` | ISO8601-UTC | YYYY-MM-DDTHH:MM:SSZ | writer | when first written |
+| `updated` | ISO8601-UTC | YYYY-MM-DDTHH:MM:SSZ | editor | when last edited |
+| `type` | enum | atomic / literature / inbox / moc / decision / archive / citation / ... | writer | what kind of note |
+| `status` | enum | draft / active / stale / archived | writer | lifecycle stage |
+| `source` | string | who/where wrote this | writer | provenance |
+
+## Optional fields (some notes have these)
+
+| Field | Type | Format | Source | Purpose |
+|---|---|---|---|---|
+| `tags` | array | `<namespace>:<value>, ...` | writer | namespaced filter |
+| `confidence` | float | 0.0-1.0 | writer | operator's confidence |
+| `links` | array | `<note-id>, ...` | writer | wikilinks to related notes |
+
+## Tag namespaces (closed list)
+
+| Namespace | Purpose | Example values |
+|---|---|---|
+| `domain:` | topical area | `domain:<area>` |
+| `project:` | project the note belongs to | `project:<slug>` |
+| `kind:` | kind of note | `kind:spec`, `kind:rule`, `kind:incident` |
+| `source:` | where the note came from | `source:operator`, `source:x-post` |
+| `private:` | privacy marker | `private:operator`, `private:redact` |
+
+## Field validation rules
+
+- **Date format:** ISO8601-UTC (`YYYY-MM-DDTHH:MM:SSZ`)
+- **Tag values:** lowercase, namespaced (`domain:foo`, not `Domain: Foo`)
+- **Confidence:** 0.0-1.0 (not "high" / "medium" / "low")
+- **Note IDs:** 7-char alphanumeric hash, unique per note
+- **Wikilinks:** `[[note-id]]` for internal; `[text](path)` for external
+
+## Field lifecycle (when to revise)
+
+| Trigger | Action |
+|---|---|
+| A new field is queryable | Add the field; migrate existing notes |
+| An existing field is unused | Mark as deprecated; remove after migration |
+| A field's source is unclear | Resolve source or remove field |
+| Schema crosses 15 fields | Audit and consolidate |
+
+---
+
+## The 5-question schema audit (run quarterly)
+
+1. **Is each field queryable?** (Operator or agent can filter / sort / group by it.)
+2. **Is each field stable?** (The value doesn't change every edit.)
+3. **Is each field's source clear?** (Operator or agent knows who fills it.)
+4. **Is each field actually used?** (At least 50% of notes have it set.)
+5. **Is each field in the right tier?** (See `methodology/01a-decide-memory.md`.)
+
+---
+
+## Approval
+
+- [ ] Required fields are listed with type, format, source, purpose
+- [ ] Optional fields are listed with type, format, source, purpose
+- [ ] Tag namespaces are a closed list with example values
+- [ ] Field validation rules are documented
+- [ ] Field lifecycle triggers are documented
+- [ ] The 5-question schema audit is scheduled quarterly
+- [ ] The schema fits in 1-2 pages (longer = needs audit)
+
+Once all 7 boxes are checked, the frontmatter schema is ready. Use it to design new notes and migrate existing notes.
+
+---
+
+## How the friend uses this template
+
+1. **List your required fields.** Start with the Alice minimum (id, created, updated, type, status, source).
+2. **Add optional fields.** Add a field only when it's queryable, stable, and has a clear source.
+3. **Define your tag namespaces.** Start with the Alice minimum (domain, project, kind, source, private).
+4. **Document validation rules.** Date formats, tag conventions, ID format.
+5. **Schedule the quarterly schema audit.** Use the 5-question audit.
+6. **Migrate existing notes.** When the schema changes, update all existing notes.
+
+The frontmatter schema is **operator-context.** The friend running Alice's methodology designs their own schema for their own context. They do NOT copy the operator's specific fields; they apply the method to derive their own.

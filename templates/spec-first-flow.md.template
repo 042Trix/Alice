@@ -1,0 +1,98 @@
+---
+id: alice-template-spec-first-flow
+created: 2026-08-05T15:55:00Z
+updated: 2026-08-05T22:00:00Z
+title: "Spec-first flow — fillable ticket template with phase markers (7-step: phase + V per transition)"
+type: template
+status: draft
+source: alice-framework
+tags: [kind:template, kind:spec-first, kind:verifier-step, project:alice]
+confidence: 0.0
+links: ["[[methodology/M-decide-spec-first-flow.md]]", "[[templates/parity-check.md.template]]"]
+---
+
+# Spec-first flow — fillable ticket template with phase markers
+
+> Every ticket filed on the `alice-framework` board carries a phase marker. The 7-step flow is `phase 1 → V-1 → phase 2 → V-2 → phase 3 → V-3 → phase 4` (the canonical graph node order with explicit verifier steps; see `methodology/M-decide-spec-first-flow.md`). Copy this section into the ticket body, fill in the phases that apply.
+
+## Spec-first flow
+
+**Phase 1 — doc:** <one-line description of the methodology doc this ticket writes>
+
+**V-1 — verify phase 1:** <verifier (assignee=verifier) confirms phase 1's doc is internally consistent, Alice-compliant, parity-checked; emits acceptance comment; transitions V-1 to `done`>
+
+**Phase 2 — validate doc:** <who validates (verifier profile or operator)>
+
+**V-2 — verify phase 2:** <verifier confirms the doc is fit for phase-3 environment updates; transitions V-2 to `done`>
+
+**Phase 3 — update environment:** <list the environment changes; one per line; assign to a non-doc-writer profile; cite this doc as the canonical reference; or "none — this ticket is spec-only">
+
+**V-3 — verify phase 3:** <verifier confirms the environment change matches the doc's spec; transitions V-3 to `done`>
+
+**Phase 4 — validate update:** <who validates the environment change matches the doc; or "none — no environment change in phase 3">
+
+**Parity check:** <copy the section from `templates/parity-check.md.template`>
+
+---
+
+## How the friend uses this template
+
+1. **Phase markers AND V markers are mandatory.** Every ticket on the alice-framework board carries phase markers (1/2/3/4) and verifier-step markers (V-1/V-2/V-3). A ticket without all markers is rejected at filing time (or amended before work begins).
+2. **Most tickets are phase 1+V-1+phase 2+V-2+phase 4 only.** If the methodology doc describes a pattern that already exists in the operator's environment, the ticket writes the doc (phase 1), verifies it (V-1), validates it (phase 2), verifies the validation (V-2), and validates on completion (phase 4). No phase 3 / V-3.
+3. **Aspirational tickets require phase 3+V-3.** If the parity-check verdict is "aspirational" (no operator-environment evidence), the ticket carries an explicit phase 3 + V-3 that adds and verifies the missing infrastructure. The phase-3 assignee is NOT the doc-writer; it's a non-doc-writer agent (operator, coder, planner, business-analyst).
+4. **The doc-writer is spec-only.** The doc-writer files phases 1+2+4 + V-1+V-2 (doc, verify phase-1, validate doc, verify phase-2, validate update); a non-doc-writer agent files phase 3 + V-3 (update environment + verify environment change). The doc-writer is never on a phase-3 or V-3 assignee list.
+5. **Phase 4 confirms the parity-check.** When phase 3+V-3 ship and phase 4 passes, the doc's parity-check section moves from "aspirational" to "confirmed." This is the durable record that the operator's environment now matches the spec.
+6. **The V markers are explicit ticket IDs, not just labels.** Each V-1/V-2/V-3 is a child ticket with `assignee=verifier`, parent=[phase-ticket-id], and the 6 required metadata fields per `methodology/04a-decide-work-graph.md` Part 5. The V tickets gate the next phase; they cannot be elided.
+
+## Worked example (parity-checked, no phase 3)
+
+```
+## Spec-first flow
+
+**Phase 1 — doc:** Add Part 13 ("Who creates an agent — the two paths") to `methodology/03-decide-agents.md`.
+
+**V-1 — verify phase 1:** verifier (t_<new>) — confirms phase-1 doc is internally consistent and Alice-compliant.
+
+**Phase 2 — validate doc:** verifier (t_94a24a3c).
+
+**V-2 — verify phase 2:** verifier (t_<new>) — confirms the validated doc is fit for phase-3.
+
+**Phase 3 — update environment:** none — operator's `agent-resources` board already exists with 17+ done; pattern is parity-checked.
+
+**V-3 — verify phase 3:** none.
+
+**Phase 4 — validate update:** none.
+
+**Parity check:** see parity-check.md.template (filled).
+```
+
+## Worked example (aspirational, phase 3 + V-3 required)
+
+```
+## Spec-first flow
+
+**Phase 1 — doc:** Document the retro + human-feedback pattern in `methodology/04d-decide-flow-spec.md`.
+
+**V-1 — verify phase 1:** verifier (t_<new>) — confirms phase-1 doc is internally consistent and Alice-compliant.
+
+**Phase 2 — validate doc:** verifier.
+
+**V-2 — verify phase 2:** verifier (t_<new>) — confirms the validated doc is fit for phase-3.
+
+**Phase 3 — update environment:**
+- Add `retro-cron` to `~/.hermes/cron/jobs.json` (e.g. `0 9 * * *` running `python3 ~/.hermes/tools/post_graph_retro.py`). Assignee: coder.
+- Add `feedback-cron` to surface retro feedback. Assignee: default profile.
+
+**V-3 — verify phase 3:** verifier (t_<new>) — confirms the crons exist, run, and match the doc's retro pattern.
+
+**Phase 4 — validate update:** verifier confirms the crons exist, run, and match the doc's retro pattern.
+
+**Parity check:** see parity-check.md.template (filled; verdict: aspirational before phase 3; confirmed after phase 4).
+```
+
+## Approval
+
+- [ ] Every alice-framework ticket carries phase markers (phase 1, 2, 3, 4 as applicable) AND V markers (V-1, V-2, V-3 as applicable).
+- [ ] Aspirational tickets carry an explicit phase 3 + V-3 with a non-doc-writer assignee.
+- [ ] Phase 4 verifies the environment change matches the doc; on pass, the doc's parity-check section moves from "aspirational" to "confirmed."
+- [ ] Each V-1/V-2/V-3 is a child ticket with `assignee=verifier` and the 6 required metadata fields per `methodology/04a-decide-work-graph.md` Part 5.

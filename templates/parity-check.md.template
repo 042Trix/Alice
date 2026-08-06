@@ -1,0 +1,86 @@
+---
+id: alice-template-parity-check
+created: 2026-08-05T15:18:00Z
+updated: 2026-08-05T15:55:00Z
+title: "Parity-check section — fillable template"
+type: template
+status: draft
+source: alice-framework
+tags: [kind:template, kind:parity, project:alice]
+confidence: 0.0
+links: ["[[methodology/M-decide-parity-check.md]]", "[[methodology/M-decide-spec-first-flow.md]]", "[[templates/spec-first-flow.md.template]]"]
+---
+
+# Parity-check section — fillable template
+
+> Every ticket filed on the `alice-framework` board includes a "Parity check" section. This template is the fillable form. Copy this section into the ticket body, fill in the evidence, and pick a verdict.
+
+---
+
+## Parity check
+
+**Pattern this ticket describes:** <one-line summary>
+
+**Evidence in operator's environment:** <cite specific files / cron ids / boards / skills / vault notes that prove the operator's environment supports this pattern; paste small excerpts if helpful>
+
+**Verdict:** <one of: parity-checked | partially-supported | aspirational>
+
+**If partially supported — which aspects are aspirational:** <list>
+
+**If aspirational — infrastructure gap:** <name the missing crons / boards / skills / vault notes that need to exist before this pattern can be re-filed>
+
+**Follow-up tickets:** <list the ticket ids that close the infrastructure gap>
+
+---
+
+## How the friend uses this template
+
+1. **Cite evidence, not vibes.** Every claim that the operator's environment supports the pattern must name a specific file path, cron id, board name, or skill name. "The operator has this" is not evidence; "the operator's `~/.hermes/cron/jobs.json` row `0c55371e15df` runs `python3 ~/.hermes/tools/dispatch_liveness_60s.py`" is.
+2. **Pick a verdict.** Parity-checked means the pattern is real and the methodology doc describes the existing operator behavior. Partially supported means the methodology doc should describe the supported subset only. Aspirational means do not write the methodology doc — file an infrastructure follow-up instead.
+3. **For aspirational tickets, the ticket body should change to a single line:** "deferred; infrastructure gap being filled by ticket <id>." The friend reads alice-framework to find what is real, not what is aspirational.
+4. **The 5 evidence sources.** Crons (`~/.hermes/cron/jobs.json`); boards (`hermes kanban boards list`); skills (`ls ~/.hermes/skills/`); vault (`~/Documents/HermesVault/2-ATOMIC/...`); cron output (`0-INBOX/...`). One of these is enough; two or more is better.
+5. **Skip the section only when the ticket is meta-infrastructure** (rules about how to file tickets, how to name them, etc.). The parity check still applies in spirit — but the evidence is "the operator's `kanban-discipline` skill + `00-decide-ticket-naming.md` doc."
+
+## Worked example (parity-checked)
+
+```
+## Parity check
+
+**Pattern this ticket describes:** Skills have a 1-layer rule (no nesting, no implicit model knowledge).
+
+**Evidence in operator's environment:**
+- `~/.hermes/skills/jarvis/SKILL.md` declares `no nesting below this skill` in its Rules section.
+- `~/.hermes/skills/autonomous-ai-agents/hermes-skill-architecture/SKILL.md` says "skills are leaf artifacts; nesting is forbidden" in Part 1.
+- Operator's `AGENTS.md` (line ~145) writes "agents don't import nested skills."
+
+**Verdict:** parity-checked.
+
+**Follow-up tickets:** none.
+```
+
+## Worked example (aspirational)
+
+```
+## Parity check
+
+**Pattern this ticket describes:** Every graph (and execution) ends with a retro that improves the next execution.
+
+**Evidence in operator's environment:** none. `hermes cron list` shows no retro cron. `0-INBOX/retro-*.md` does not exist. The operator has `06-iteration-loop.md` covering detect→surface→act but no post-execution retro step.
+
+**Verdict:** aspirational.
+
+**Infrastructure gap:**
+- Add a `retro-cron` to `~/.hermes/cron/jobs.json` (e.g. `0 9 * * *` running `python3 ~/.hermes/tools/post_graph_retro.py`).
+- Add `tools/post_graph_retro.py` that walks done graph children, generates a one-page retro template, and writes to `0-INBOX/retro-<graph-id>-<date>.md`.
+- Add a `1d-open human-feedback window` mechanism (auto-archive after 24h unless operator comments).
+
+**Follow-up tickets:** <will be filed on the `hermes` board as t_<new>>
+```
+
+## Approval
+
+- [ ] Every new alice-framework ticket has a Parity check section AND phase markers (phase 1/2/3/4 as applicable — see `templates/spec-first-flow.md.template`).
+- [ ] Every Parity check verdict cites specific evidence (file path / cron id / board name / skill name / vault note).
+- [ ] Aspirational tickets have phase-3 follow-up infrastructure tickets filed on the appropriate (non-alice-framework) board; the doc-writer is NOT on the phase-3 assignee list (per `methodology/M-decide-spec-first-flow.md`).
+- [ ] Methodology docs that resulted from partially-supported tickets explicitly call out which aspects are aspirational and link to the phase-3 follow-up tickets.
+- [ ] Phase-4 verification has been performed for each phase-3 follow-up; on pass, the doc's parity-check section moves from "aspirational" to "confirmed."

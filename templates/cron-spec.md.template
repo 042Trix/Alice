@@ -1,0 +1,93 @@
+---
+id: alice-template-cron-spec
+created: 2026-08-04T12:30:00Z
+title: "Cron spec — fillable template"
+type: template
+status: draft
+source: alice-framework
+tags: [kind:template, kind:cron-spec, project:alice]
+confidence: 0.0
+links: []
+---
+
+# Cron spec — [name]
+
+> A cron is a scheduled task. Use this template to design a cron before adding it. **Every cron must satisfy detect → surface → act.**
+
+## 1. Name
+
+[What is the cron called? This is the name in the cron registry.]
+
+## 2. Schedule
+
+- **Cron expression:** [e.g., `*/5 * * * *` for every 5 minutes, `0 4 * * *` for daily 04:00]
+- **Time zone:** [the operator's time zone, e.g., `America/Chicago`]
+- **First run:** [when does this cron first run?]
+- **TTL:** [how long does this cron run before the operator reviews it? Common: 90 days for new crons]
+
+## 3. Detect
+
+What does the cron observe?
+
+- **Observable:** [the file / state / count / condition the cron watches]
+- **Frequency:** [how often does the cron check? (matches the schedule)]
+- **False-positive rate:** [expected false-positive rate per day]
+- **False-negative rate:** [expected false-negative rate per day]
+
+**The detect must be specific.** "Is the system healthy?" is not a detection. "Is the dispatcher alive?" is — but only if you have a way to check that.
+
+## 4. Surface
+
+Where does the observation go?
+
+- **Surface to operator (DM):** [when findings are operator-actionable]
+- **Surface to kanban (ticket):** [when findings should be tracked as work]
+- **Surface to log (audit line):** [when the cron ran, even if no findings]
+- **Silent on no-action:** [the cron produces no output when there's nothing to surface]
+
+**Silent on no-action is the discipline that keeps the system quiet.** If the cron is producing output every run, the cron is misconfigured.
+
+## 5. Act
+
+What action does the cron take?
+
+- **Auto-recover:** [the action the cron takes without operator input]
+- **File ticket:** [when the cron files a ticket for operator action]
+- **Escalate:** [when the cron notifies the operator directly]
+- **Defer:** [when the cron does nothing and re-checks next run]
+
+The act is **for known patterns**, not for novel situations. If the situation is novel, the cron defers, doesn't act.
+
+## 6. Cost
+
+- **Per-run cost:** [tokens, tool calls, time]
+- **Frequency:** [matches the schedule]
+- **Monthly cost:** [per-run × frequency × 30]
+
+If the monthly cost is more than the work is worth, the cron is too expensive. Either:
+- Reduce the frequency
+- Reduce the per-run cost
+- Kill the cron
+
+## 7. Audit line
+
+What does the cron write when it acts?
+
+- **Per-run line:** [e.g., `## [ISO8601-UTC] cron=<name> — detected=N acted=M surfaced=K`]
+- **Per-act line:** [when the cron takes a specific action, the audit line is longer]
+- **Per-failure line:** [when the cron can't run, log the failure]
+
+---
+
+## Approval
+
+- [ ] Name is specific
+- [ ] Schedule is fixed (not variable)
+- [ ] Detect is specific (one observable)
+- [ ] Surface is silent on no-action
+- [ ] Act is for known patterns (not novel situations)
+- [ ] Cost is estimated and acceptable
+- [ ] Audit line is specific and brief
+- [ ] Satisfies the detect → surface → act rule
+
+Once all 8 boxes are checked, the cron is ready to add.

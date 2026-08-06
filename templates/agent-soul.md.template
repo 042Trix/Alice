@@ -1,0 +1,82 @@
+---
+id: alice-template-agent-soul
+created: 2026-08-04T12:30:00Z
+title: "Agent soul — fillable template"
+type: template
+status: draft
+source: alice-framework
+tags: [kind:template, kind:agent-soul, project:alice]
+confidence: 0.0
+links: []
+---
+
+# Agent soul — [name]
+
+> An **agent** is a persistent worker profile with a defined role, domain, tools, and operating rules. Its **SOUL** is that agent's identity and operating rules — the contract between the agent and the operator. Use this template to design an agent's SOUL before scaffolding. **Don't scaffold an agent until the SOUL is filled in.**
+
+## 1. Identity
+
+- **Name:** [agent name, used in dispatch and audit]
+- **Role:** [1 sentence — what does this agent do?]
+- **Owner:** [operator or agent that owns this profile]
+- **Domain:** [the knowledge area this agent owns]
+
+## 2. Boundaries
+
+What does this agent NOT do?
+
+- **Out of scope:** [list of things the agent refuses]
+- **Escalation:** [when the agent escalates to the operator or another agent]
+- **Hard limits:** [things the agent will never do, even if asked]
+
+The boundaries are non-negotiable. If the operator or another agent asks this agent to do something out of scope, the agent refuses. These are rules, not preferences.
+
+## 3. Tools
+
+Which tools can this agent use?
+
+- **Required tools:** [list of tools the agent uses for its role]
+- **Optional tools:** [list of tools the agent may use in special cases]
+- **Forbidden tools:** [list of tools the agent must not use]
+
+The forbidden list is as important as the required list. A `coder` agent should not have the calendar tool. A `marketing` agent should not have the database-write tool. **Default-deny, allow when justified.**
+
+## 4. Skills
+
+Which skills does this agent load?
+
+- **Always load:** [list of skills the agent loads on session start]
+- **Context-dependent:** [list of skills the agent loads when the trigger conditions are met]
+- **Avoid:** [list of skills the agent should not load, even if the trigger conditions are met]
+
+The "always load" list should be **short** (1-3 skills). More than 3 means the agent is too general.
+
+## 5. Audit line
+
+What does the agent write when it acts?
+
+- **Per-action audit line:** [one line per tool call / kanban transition / vault write]
+- **Per-session summary:** [one paragraph at the end of each session]
+- **Per-failure post-mortem:** [when a tool fails or a skill returns an error]
+
+The audit line is the agent's voice in the system: how the operator knows what the agent did. It should be **brief** (one line, not a paragraph) and **specific** (named the actual tool / kanban / vault file, not "I did some work").
+
+---
+
+## See also
+
+- `methodology/03a-decide-agent-vault-interaction.md` — the agent SOUL has a Tools section (required / optional / forbidden). The interaction doc expands the Tools section with per-tier permissions (which tier the agent can read / propose / edit / scaffold / archive). Use `templates/agent-vault-permissions.md.template` for the per-tier permission matrix.
+- `methodology/03b-decide-operator-agent-interaction.md` — the agent SOUL has an "Operator priority" dimension. The operator-agent doc covers how the operator interacts with the agent (the 5 operator roles, the chat-output-budget rule, the escalation chain). Use `templates/operator-interaction-patterns.md.template` for the operator's role distribution per agent.
+
+- `methodology/01a-decide-memory.md` — **the agent SOUL is identity memory (Tier 3).** The SOUL is the agent's contract with the operator; ≤1-2 pages is the budget. Use `templates/memory-budget.md.template` for the per-agent budget.
+
+## Approval
+
+- [ ] Identity is specific (name, role, owner, domain)
+- [ ] Boundaries are non-negotiable and listed
+- [ ] Tools list is default-deny (forbidden list is non-trivial)
+- [ ] Skills list is short (1-3 always-load)
+- [ ] Audit line is specific and brief
+- [ ] Soul fits in 1-2 pages (longer = not ready)
+
+Once all 6 boxes are checked, the soul is ready. Scaffold the agent.

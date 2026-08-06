@@ -1,0 +1,20 @@
+# OS / editor cruft
+.DS_Store
+*.swp
+*.swo
+*~
+*.bak
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# Editor / IDE
+.vscode/
+.idea/
+
+# Agent / Scribe internal process material (NOT for public release)
+_inbox/
+_polish/

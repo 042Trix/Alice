@@ -1,0 +1,178 @@
+---
+id: alice-template-agent-vault-permissions
+created: 2026-08-04T12:30:00Z
+title: "Agent vault permissions — fillable template"
+type: template
+status: draft
+source: alice-framework
+tags: [kind:template, kind:agent-permissions, project:alice]
+confidence: 0.0
+links: ["[[methodology/03a-decide-agent-vault-interaction.md]]", "[[methodology/03-decide-agents.md]]", "[[templates/agent-soul.md.template]]"]
+---
+
+# Agent vault permissions — fillable template
+
+> An agent's vault permissions define which interaction patterns are active for which tiers. Use this template to fill in the per-agent permission matrix. **The friend running Alice's methodology fills in this template for each of their agents, not the operator's specific agents.**
+
+---
+
+# Agent: [agent name]
+
+**Role:** [1 sentence — what this agent does]
+
+**Active patterns:** [list of the 5 patterns that are active for this agent]
+
+- [ ] Read-only
+- [ ] Propose
+- [ ] Edit
+- [ ] Scaffold
+- [ ] Archive
+
+**Default patterns for new agents:** Read-only + Propose.
+
+---
+
+## Per-tier permission matrix
+
+For each tier, fill in the patterns that are active. Tier folder names below use the lowercase convention from methodology `01-decide-vault-tier.md` (e.g., `0-inbox/`, `1-literature/`, `2-atomic/`, `3-indexes/`, `4-archive/`) — substitute your own chosen names if different.
+
+| Tier | Read | Propose | Edit | Scaffold | Archive |
+|---|---|---|---|---|---|
+| **0-inbox** | [yes/no] | [yes/no] | [yes/no] | [yes/no] | [yes/no] |
+| **1-literature** | [yes/no] | [yes/no] | [yes/no (append-only after first write)] | [yes/no] | [yes/no] |
+| **2-atomic** | [yes/no] | [yes/no] | [yes/no] | [yes/no] | [yes/no] |
+| **3-indexes** | [yes/no] | [yes/no] | [yes/no (regenerate)] | [yes/no] | [yes/no] |
+| **4-archive** | [yes/no] | [yes/no] | [yes/no (move-only)] | [yes/no] | [yes/no] |
+
+**Notes:**
+- [Any tier-specific rules, e.g., "Tier 0 edit is allowed only for triage; new items require operator review"]
+- [Any tier-specific audit-line format]
+- [Any tier-specific concurrent-write strategy]
+
+---
+
+## Tool-call budget per session
+
+| Pattern | Default budget | This agent's budget |
+|---|---|---|
+| Read-only | ≤50 tool calls | [number] |
+| Propose | ≤30 tool calls | [number] |
+| Edit | ≤30 tool calls | [number] |
+| Scaffold | ≤20 tool calls | [number] |
+| Archive | ≤20 tool calls | [number] |
+
+**Notes:**
+- [Any budget overrides, e.g., "this agent is heavy on reads; budget raised to 80"]
+- [Any per-tier budget subdivisions]
+- [Any session-length considerations]
+
+---
+
+## On-demand context budget
+
+| Load strategy | Default budget | This agent's budget |
+|---|---|---|
+| Cold-start (AGENTS.md — the file every agent reads on launch) | ≤20K chars | [number] |
+| Topic load (MOC — Map of Content, a topic-level index that crosses folders — plus linked notes) | ≤50K chars / ≤5 per session | [number] |
+| Note load (single note + 1-hop wikilinks) | ≤30K chars / ≤10 per session | [number] |
+| Query load (FTS5 result — a full-text search result from your index) | ≤10K chars / ≤20 per session | [number] |
+| Cumulative on-demand | ≤100K chars | [number] |
+
+**Notes:**
+- [Any strategy overrides]
+- [Any query patterns specific to this agent]
+
+---
+
+## Concurrent-write strategy
+
+The default strategy for this agent is: [last-write-wins / optimistic locking / explicit locking].
+
+**Notes:**
+- [Any per-tier overrides]
+- [Any concurrent-write events the agent should flag]
+
+---
+
+## Agent-as-scaffolder approved patterns
+
+| Scaffold pattern | Approved by | When to apply |
+|---|---|---|
+| [pattern 1] | [operator name / date / scope] | [trigger condition] |
+| [pattern 2] | [operator name / date / scope] | [trigger condition] |
+
+**Notes:**
+- [Any pattern that requires operator review per-occurrence, not just per-pattern]
+- [Any pattern that requires a vault-template match]
+
+---
+
+## Agent-as-archivist triggers
+
+This agent archives a note when **at least one** of these is true:
+
+- [ ] The note's status is `stale`
+- [ ] The note is older than 30 days AND has no wikilinks from active notes
+- [ ] The note is a duplicate (confirmed by a wikilink audit)
+- [ ] The operator has explicit approved the archive
+
+**Notes:**
+- [Any archive reason not in this list — agent CANNOT archive for those reasons]
+- [Any archive format requirement]
+
+---
+
+## Audit-line format
+
+Per-tool audit lines are written to: [vault log.md path / kanban event log / both].
+
+**Format:**
+```
+## [ISO8601-UTC] <action-kind> — <subject>: <what changed> (<optional strategy>)
+```
+
+**Action kinds:** `read`, `propose`, `edit`, `scaffold`, `archive`, `wikilink-create`, `tag-apply`, `move`, `delete`.
+
+**Notes:**
+- [Any agent-specific audit-line additions, e.g., "include confidence score in every edit audit line"]
+- [Any audit-line suppression, e.g., "don't audit per-file-access reads"]
+
+---
+
+## The 5-question interaction audit (run quarterly)
+
+1. **Is the agent respecting the read-then-write discipline?** (Every edit has a read in the same session.) → fix if not.
+2. **Is the agent within budget?** (Tool calls < budget per session.) → adjust budget or agent behavior.
+3. **Is the agent creating parallel structures?** (New tiers / sub-vaults without operator review.) → flag for review.
+4. **Is the agent archiving by judgment?** (Any archive without the 4 evidence triggers.) → flag for review.
+5. **Is the agent writing audit lines?** (Every state-change has an audit line.) → fix if not.
+
+---
+
+## Approval
+
+- [ ] Active patterns are listed (which of the 5 patterns)
+- [ ] Per-tier permission matrix is filled in
+- [ ] Tool-call budget per pattern is set
+- [ ] On-demand context budget per load strategy is set
+- [ ] Concurrent-write strategy is chosen
+- [ ] Approved scaffold patterns are listed
+- [ ] Archivist triggers are listed (4 evidence-based)
+- [ ] Audit-line format is documented
+- [ ] The 5-question interaction audit is scheduled quarterly
+
+Once all 9 boxes are checked, the agent vault permissions are ready.
+
+---
+
+## How the friend uses this template
+
+1. **List your agents.** (The friend has 1 default + 2-4 named agents.)
+2. **Fill in the permissions for each agent.** Start with Read-only + Propose as defaults.
+3. **Tune the per-tier matrix.** Each agent's role determines which tiers it can edit.
+4. **Set the tool-call budget.** Start with defaults; adjust based on actual usage.
+5. **List the approved scaffold patterns.** New patterns are operator-actionable.
+6. **Set the archive triggers.** The 4 evidence-based triggers only.
+7. **Schedule the quarterly interaction audit.** Use the 5-question audit.
+
+The agent vault permissions are operator-context. The friend running Alice's methodology designs their own permissions for their own agents — they apply the method to derive their own, not to copy the operator's specific choices.

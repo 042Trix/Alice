@@ -1,0 +1,137 @@
+---
+id: alice-template-board-catalog
+created: 2026-08-04T12:30:00Z
+title: "Board catalog — fillable template"
+type: template
+status: draft
+source: alice-framework
+tags: [kind:template, kind:board-catalog, project:alice]
+confidence: 0.0
+links: ["[[methodology/04b-decide-board-routing.md]]", "[[methodology/04a-decide-work-graph.md]]"]
+---
+
+# Board catalog — fillable template
+
+> A board catalog documents the work-type domain for each board in your ticket system. Use this template to fill in the catalog for your context. **The friend running Alice's methodology fills in this template for their own boards, not the operator's specific boards.**
+
+---
+
+# Board catalog — [operator name]
+
+This catalog records the work-product domain for each active board. The board follows the artifact being produced, not the executor's profile.
+
+---
+
+## <board-name-1> — <display-name>
+
+**Domain:** [what work types the board accepts — 1-2 sentences]
+
+**Use for:**
+- [specific work type 1]
+- [specific work type 2]
+- [specific work type 3]
+
+**Do not use for:**
+- [work type that looks related but belongs elsewhere — 1]
+- [work type that looks related but belongs elsewhere — 2]
+
+**Routing invariant:** [any cross-board contract that holds, e.g., "Future AR scaffolding children must be created with `board=<this>`, `target_board=<this>`, `path=<this>`"]
+
+**Workers (default profile stack):** [which agents work on this board, e.g., "planner (design + decompose) → coder (build) → verifier (validate) → default (cross-cutting catchall)"]
+
+**Cron cadence (if any):** [any scheduled jobs that target this board, e.g., "host-scoped crons sweep all boards; recurring project cadences (weekly deploy review, nightly smoke) target this board explicitly"]
+
+**Operator gate (if any):** [any gates required for tickets on this board, e.g., "first public-deploy ticket, any ticket touching the public domain, and final launch ticket require an explicit `needs-input` block + operator approval; the work-system command for blocking a ticket lives in `references/tool-mapping-guide.md`"]
+
+**Cross-board contract (if any):** [any formal agreements with other boards, e.g., "Tickets moved from Board A to this board retain their parent_id"]
+
+---
+
+## <board-name-2> — <display-name>
+
+[same format as above]
+
+---
+
+# Keyword-routing table
+
+The keyword-routing table is the **mechanical** part of the routing system. It maps title/body keywords to boards. The operator reads the table to find a board, not to find a keyword.
+
+| Title/body keywords | Board |
+|---|---|
+| [keyword1, keyword2, ...] | [board-name-1] |
+| [keyword3, keyword4, ...] | [board-name-2] |
+| ... | ... |
+
+**Notes:**
+- [Any specific patterns the operator uses, e.g., "Multi-keyword patterns: 'loop AND requirements' routes to Board A; 'loop AND build' routes to Board B"]
+- [Any exceptions or edge cases]
+- [When the table was last reviewed]
+
+---
+
+# Cross-board move procedure
+
+The cross-board move canonical pattern:
+
+1. **Close the source ticket** with `--result` citing the superseding ticket id and the reason. The closure is auditable.
+2. **Switch active board** to the target board (if your tool has an "active board" concept).
+3. **Re-file on the target board** with the full body preserved. The new ticket has a new id; the old ticket is closed.
+4. **Restore previous active board** (if step 2 changed it).
+
+**Audit-line on every cross-board move:**
+
+```
+## [ISO8601-UTC] cross-board-move — <source_tid> -> <target_board>: <reason>
+```
+
+---
+
+# When to add a new board
+
+Add a new board when **at least 2** of the following are true:
+
+1. The work-type has its own worker profile.
+2. The work-type has its own cron cadence.
+3. The work-type has an operator gate.
+4. The work-type has a separate dashboard view.
+5. The work-type is expected to have >50 tickets over its lifetime.
+
+If only 1 is true, **don't add a new board.** Use the default board.
+
+---
+
+# When to revise the catalog
+
+The catalog is **not static.** Revise when:
+
+1. A new work type emerges (5+ tickets in a week that don't fit any existing board) → add a new board
+2. A board is underused (<5 tickets in a month) → demote to default board
+3. A keyword is producing false positives → refine the keyword
+4. A cross-board move becomes routine (>5 moves/week) → consider merging or splitting
+
+---
+
+# How the friend uses this template
+
+1. **List the boards you have.** (The friend has 4-8 boards depending on their context.)
+2. **Fill in the catalog** for each board, using the 9-section format above.
+3. **Design the keyword-routing table** based on the catalog entries. Each board gets a row.
+4. **Document the cross-board contracts** if any.
+5. **Review the catalog** when the routing system fails (false positives, missed tickets, etc.).
+6. **Update the catalog** when the routing system is revised.
+
+The catalog is **operator-context.** The friend running Alice's methodology designs their own catalog for their own context. They do NOT copy the operator's specific boards; they apply the method to derive their own.
+
+---
+
+# Approval
+
+- [ ] Each board has a 9-section entry (domain, use-for, do-not-use-for, routing invariant, workers, cron, operator-gate, cross-board-contract, ...)
+- [ ] The keyword-routing table is in operator-context
+- [ ] The cross-board move procedure is documented with audit-line format
+- [ ] The "when to add a new board" test (2-of-5) is in the catalog
+- [ ] The "when to revise" criteria are in the catalog
+- [ ] The default board is documented (catch-all, not a junk drawer)
+
+Once all 6 boxes are checked, the catalog is ready.
