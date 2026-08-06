@@ -12,7 +12,21 @@ Alice is documentation-only: there is no build step, runtime, account, or privat
 
 Alice distinguishes the **methodology** (the decision process) from the **worked example** (an illustration of what that process can produce). The methodology is the durable artifact; worked examples are evidence and inspiration, not normative defaults. The **method-not-instance** constraint (document the method, not one operator's implementation) is the single rule that keeps Alice portable across tools and contexts.
 
-To use Alice well, you only need Git (or another way to download the repository), a Markdown editor, and a basic agent session or agent-supported workflow you can describe. The first pass takes about 45–90 minutes.
+To use Alice well, you only need Git (or another way to download the repository), a Markdown editor, and a basic agent session or agent-supported workflow you can describe. The first artifact typically takes 45–90 minutes to produce; the methodology is not "done" after that first pass.
+
+### Ongoing cost
+
+After the first artifact, the work continues. The recurring costs that dominate day-to-day operation are:
+
+- **Routing accuracy.** Verifying that work items reach the right tier, agent, or skill.
+- **Memory pruning.** Removing outdated notes, expired references, and superseded rules.
+- **Scheduled work review.** Checking that recurring jobs still match the current operating context.
+- **Skill updating.** Refreshing skill content when underlying tools or assumptions change.
+- **Tool reconciliation.** Re-mapping Alice's abstract terms to changes in your tool's mechanisms.
+- **Agent-behavior testing.** Spot-checking that downstream agents follow the rules and templates you wrote.
+- **Strike-rule conversion and deduplication.** Turning repeated failures into durable rules and merging or retiring rules that overlap.
+
+The 45–90 minute figure covers only the first artifact. The ongoing-cost items above are what determine whether Alice remains useful after week one.
 
 ## 2. Is Alice for me?
 
