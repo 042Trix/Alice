@@ -298,6 +298,66 @@ Promote when the repeated structure is clear and the fixed route reduces risk.
 
 ---
 
+## Maintenance
+
+Flow derivation is a decision methodology, not a runtime surface.
+The 3 modes (pre-defined, dynamic, hybrid) and the 3-question routing test are stable, but the operator's actual flow mix drifts as the vault grows.
+This section audits the methodology itself so the routing test stays matched to real practice.
+
+### 1. Audit cadence
+
+Every **180 days** (flow derivation is rare and changes slowly).
+An off-cycle audit fires if two consecutive new flows skip the routing test entirely.
+
+### 2. Quality threshold
+
+The methodology is healthy when:
+
+- the 3 modes (pre-defined, dynamic, hybrid) are each represented in the operator's vault (counts visible from the decision-record archive);
+- the 3-question routing test has been applied to every flow added since the last audit;
+- the routing test's defaults have not been re-litigated against contradictory evidence;
+- the trade-off table in Part 4 still matches observed operator behavior.
+
+If two of these drop, schedule the next audit 60 days early.
+
+### 3. Drift signals
+
+Drift is detected by inspecting the decision-record archive and recent flow additions:
+
+- **All flows pre-defined, none dynamic:** the operator is over-routinizing novelty; novel work will stall.
+- **All flows dynamic, none pre-defined:** the operator is rediscovering known procedures and loses the safety net of repeated routes.
+- **Flows added without the routing test:** the test has degraded to a documentation ritual; agents and the operator are picking modes by feel.
+- **New "modes" invented in flow descriptions** (e.g. "ad-hoc", "exploratory", "implicit"): the closed set of 3 is leaking; either the new mode is a misuse of an existing one or the methodology needs an extension.
+- **Promotion stalled:** a hybrid flow has run repeatedly without promotion to pre-defined, wasting generation cost.
+- **Pre-defined flows never revisited:** the lifecycle in Part 8 (return to hybrid when new conditions appear) is not being honored.
+
+### 4. Fix actions
+
+When drift is confirmed:
+
+1. File a `flow-routing-audit` ticket on the operator's kanban (board: hermes). Cite which drift signal fired and the count or example.
+2. The audit ticket body lists every flow added since the last audit with the routing-test answer that should have been recorded.
+3. For flows missing the routing test, file the answer retroactively on the decision record (do not rewrite history; annotate).
+4. If a "new mode" was invented, decide first whether it fits an existing mode, then either reclassify or escalate to a methodology revision ticket.
+5. Close the audit ticket when every new flow has a recorded routing-test answer.
+
+### 5. Retirement conditions
+
+The methodology retires when:
+
+- the operator only uses one mode consistently for more than 12 months (e.g. only pre-defined) and the other modes have produced no examples in that window — at that point, the routing test is unnecessary noise and the methodology can collapse to the used mode;
+- the routing test yields the same answer for every new flow for more than 12 months — the test itself has become a no-op and a simpler default can replace it;
+- the work graph in 04a changes its invariants such that flow derivation no longer applies (e.g. all routes become illegal or all become mandatory).
+
+Retirement is a methodology-revision decision, not a maintenance action.
+File a `flow-routing-retire` ticket with evidence; do not delete the section without operator sign-off.
+
+### Maintenance parity check
+
+This section defines a friend-portable method, not a claim that every platform supplies flow-mode telemetry or routing-test enforcement. Before adopting it, map each function — flow-mode count, routing-test application, decision-record archive, retirement archival — to mechanisms available in your own tool. The 180-day cycle and the four quality conditions are methodology defaults; adjust them when measured flow volume, drift rate, or operator-stated risk provides better evidence, but record the exception so the flow-derivation methodology remains auditable.
+
+---
+
 ## Decision record template
 
 ```text

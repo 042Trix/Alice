@@ -5,6 +5,11 @@ title: "Agent vault permissions — fillable template"
 type: template
 status: draft
 source: alice-framework
+derived_from:
+  project: Alice
+  template: templates/agent-vault-permissions.md.template
+  version: 0.1.1
+  customized_on: <YYYY-MM-DD>
 tags: [kind:template, kind:agent-permissions, project:alice]
 confidence: 0.0
 links: ["[[methodology/03a-decide-agent-vault-interaction.md]]", "[[methodology/03-decide-agents.md]]", "[[templates/agent-soul.md.template]]"]

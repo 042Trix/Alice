@@ -116,7 +116,7 @@ The destination is one of:
 - **Promote to atomic** (one idea per file, in your own words)
 - **Promote to literature** (external source you're referencing)
 - **File as skill-brief ticket** (recurring pattern, build a procedure)
-- **File as strike-rule ticket** (failure pattern, observe 3+ times)
+- **File as op-guard ticket** (failure pattern, observe 3+ times)
 - **File as cron-spec ticket** (detection + surface + act pattern)
 - **File as council ticket** (multi-perspective review needed)
 - **File as operator-action ticket** (decision needs operator judgment)

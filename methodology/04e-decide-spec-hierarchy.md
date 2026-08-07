@@ -1,7 +1,7 @@
 ---
 id: alice-methodology-04e-decide-spec-hierarchy
 created: 2026-08-05T15:36:00Z
-updated: 2026-08-05T15:38:00Z
+updated: 2026-08-06T19:00:00Z
 title: "Methodology 04e — Decide your spec hierarchy (request → architecture → impl plan → tests → tickets)"
 type: methodology
 status: draft
@@ -649,6 +649,73 @@ Do not revise the method merely because a tool renames a field or a CLI changes.
 
 ---
 
+## Part 13: Maintenance
+
+A spec hierarchy is structural — the chain shape (request → supporting docs → work tickets) is what gives the methodology its durability. Stale specs are tolerable; a broken chain is not. Without an explicit maintenance cadence, the chain rots: request docs go stale, supporting docs lose their `parent`, work tickets drop their `spec:` metadata. This section gives the methodology a self-audit loop.
+
+### 13.1 Audit cadence
+
+The spec hierarchy is audited **every 90 days**. The cadence is structural rather than project-driven: a single quarterly sweep over the active `specs/` tree catches drift before it accumulates past one quarter of work. The audit is a read pass — it does not modify any spec doc; it produces a list of drift items (per 13.3) and an action queue (per 13.4).
+
+A 90-day cadence is chosen because:
+
+- Shorter intervals (e.g., 30 days) produce noise — most chains are stable across a single quarter.
+- Longer intervals (e.g., 180 days) let two quarters of drift accumulate before anyone notices.
+- The cadence aligns with quarterly operator reviews (per `methodology/01b-decide-vault-content.md` §maintenance).
+
+### 13.2 Quality threshold
+
+A spec hierarchy passes the 90-day audit when **every link in the chain holds**:
+
+- Every active project has a request doc (a `specs/<request-id>/README.md` with `type: spec` and `tags: [kind:request]`).
+- Every request doc declares which supporting docs it expects (a `## Supporting docs` section listing concrete filenames).
+- Every declared supporting doc exists on disk with `parent: <request-doc-id>`.
+- Every architecture supporting doc links to an implementation plan.
+- Every implementation plan has spawned at least one work ticket on the originating board.
+- Every work ticket carries a `spec:` metadata block with `request` and at least one `supporting` doc id.
+- Every major work ticket has a paired verifier ticket with its own `spec:` block.
+
+If any link is missing, the chain has a hole — record it under 13.3 and act on it under 13.4.
+
+### 13.3 Drift signals
+
+The audit hunts for four classes of drift:
+
+1. **Orphan tickets.** A work ticket exists without a `spec:` block, or its `spec.request` resolves to no request doc on disk. The ticket is a leaf with no root — the worker who picks it up has no way to navigate to the original ask.
+2. **Stale architecture.** An `architecture.md` doc whose `status` is still `active` while all of its children have transitioned to `done` more than 90 days ago. The doc is alive on paper; the request is over in practice.
+3. **Abandoned requests.** A request doc whose `status` is `draft` or `active` with no children, no master ticket, and no recent activity. The request died before it was ever picked up.
+4. **Missing parent.** A supporting doc whose `parent` field points to a non-existent or already-archived request doc. The chain link is broken; a reader following `parent` lands on a dead end.
+
+A drift signal is not a bug — it is a maintenance item. The audit logs each one with its doc id, ticket id, and the date the drift was first observed.
+
+### 13.4 Fix actions
+
+When drift is detected during the 90-day audit, apply the matching fix:
+
+- **Orphan ticket.** Add the missing `spec:` block by following the ticket's master ticket → request doc chain. If the chain is unrecoverable (the master and request doc are both gone), archive the ticket with a comment explaining the gap. Do not leave orphans visible.
+- **Stale architecture.** Bump the architecture's `status` to `done` if the request is genuinely closed; if the implementation has moved on, refresh the architecture to reflect the current state and transition it to `active` (or `review` if the refresh needs verifier sign-off). Do not leave a doc half-active.
+- **Abandoned request.** Transition the request doc to `archived` with a one-line reason in the body (e.g., "Archived 2026-11-15: no children, no master ticket, request abandoned by operator decision"). The work is either picked up later (un-archive) or never (the archive is final).
+- **Missing parent.** Fix the `parent` field to point to the actual request doc. If the parent is genuinely gone, treat the supporting doc as orphan and archive it with the same comment pattern as the abandoned-request fix.
+
+The 90-day audit is the right time to act on accumulated drift. Do not wait for a verifier or an operator to flag it — drift accumulates quietly and a missed quarter becomes a broken chain.
+
+### 13.5 Retirement conditions
+
+Retire this methodology (transition this doc's own `status` to `archived` and remove the spec hierarchy from the active method set) when **either** of the following holds for two consecutive quarters:
+
+- **The operator does not use the spec hierarchy.** Work goes straight to master ticket without opening a `specs/<request-id>/` folder. The signal is two consecutive 90-day windows with zero new `specs/*/README.md` creations. The hierarchy is dead weight if no one is opening it.
+- **The chain is too heavy for the operator's scope.** Most requests are 1-day, 1-decision, 1-ticket work that does not benefit from a supporting doc hierarchy. The signal is that the audit (13.1) consistently finds the same drift pattern (most requests abandoned before supporting docs are written) — the chain does not fit the work.
+
+Retirement is a method change, not a doc edit. When retiring:
+
+1. Update `04e-decide-spec-hierarchy.md` frontmatter `status: archived` with a one-line reason in the body.
+2. Migrate any in-flight projects (`status: active` request docs) to a lighter pattern — either an inline-spec ticket (request lives in the master ticket body) or a single-doc-per-request pattern (no supporting docs).
+3. Add an entry to `methodology/01b-decide-vault-content.md`'s retirement log so future readers can find the successor.
+
+Retirement is a deliberate operator decision, not a quiet archive. Do not retire this methodology on a single bad quarter.
+
+---
+
 ## See also
 
 - `methodology/04a-decide-work-graph.md` — defines the work-graph state machine and relationship edges that the spec hierarchy connects to via the `spec:` metadata field.
@@ -656,7 +723,7 @@ Do not revise the method merely because a tool renames a field or a CLI changes.
 - `methodology/04c-decide-master-ticket.md` — defines the master ticket as the operator-facing status surface; the request doc is the documentation root that the master points to.
 - `methodology/01b-decide-vault-content.md` — defines the frontmatter schema, atomicity rules, and wikilink convention that spec docs follow.
 - `methodology/03b-decide-operator-agent-interaction.md` — defines the operator-facing status and approval surfaces that the spec hierarchy feeds.
-- `references/kanban-lite-disciplines.md` — supplies the minimal state, board, and 3-strike-system context on which the spec chain builds.
+- `references/kanban-lite-disciplines.md` — supplies the minimal state, board, and 3-element-system context on which the spec chain builds.
 - `references/tool-mapping-guide.md` — owns per-tool CLI invocations and rendering rules; this methodology owns the chain and the frontmatter contract.
 - `templates/frontmatter-schema.md.template` — the canonical frontmatter template; the spec-frontmatter pattern is an application of that schema.
 - HARNESS / work-graph metadata ticket (downstream) — defines the `spec:` metadata field on work tickets.

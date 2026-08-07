@@ -1,7 +1,7 @@
 ---
 id: alice-methodology-06a-decide-retro-v2
 created: 2026-08-06T07:40:00Z
-updated: 2026-08-06T08:00:00Z
+updated: 2026-08-07T11:15:00Z
 title: "Methodology 06a (v2, Amendment 1+2) — Decide the retro (flow-level retro by a different agent on master-ticket flows; retro is a kanban task)"
 type: methodology
 status: draft
@@ -11,7 +11,7 @@ amendment_initial_v2_draft_by: "[[ticket:t_3569c32c]]"
 source: alice-framework
 tags: [kind:methodology, kind:retro, kind:iteration-loop, kind:feedback, kind:self-improvement, kind:flow-level, project:alice, amendment:1, amendment:2]
 confidence: 0.0
-links: ["[[methodology/06-iteration-loop.md]]", "[[methodology/04a-decide-work-graph.md]]", "[[methodology/04b-decide-board-routing.md]]", "[[methodology/04c-decide-master-ticket.md]]", "[[methodology/04d-decide-flow-spec.md]]", "[[methodology/05-strike-rules.md]]", "[[methodology/M-decide-spec-first-flow.md]]", "[[methodology/06a-decide-retro.md]]", "[[worked-examples/01-solo-founder-skeleton/AGENTS.md]]"]
+links: ["[[methodology/06-iteration-loop.md]]", "[[methodology/04a-decide-work-graph.md]]", "[[methodology/04b-decide-board-routing.md]]", "[[methodology/04c-decide-master-ticket.md]]", "[[methodology/04d-decide-flow-spec.md]]", "[[methodology/05-op-guards.md]]", "[[methodology/M-decide-spec-first-flow.md]]", "[[methodology/06a-decide-retro.md]]", "[[worked-examples/01-solo-founder-skeleton/AGENTS.md]]"]
 ---
 
 # Methodology 06a (v2, Amendment 1+2) — Decide the retro (flow-level retro by a different agent on master-ticket flows; retro is a kanban task)
@@ -151,7 +151,7 @@ If all three are true, the retro fires. If any is false, the retro does not fire
 - **Crons** — even crons that fire and act every hour. A cron's "retro" is the iteration loop's `feedback` element (per `methodology/06-iteration-loop.md`); it is a per-tick audit-line, not a flow-level retro.
 - **Ad-hoc operator requests** — "add this to the doc" with no master ticket. The retro would have no master to scope it.
 - **Standalone tickets** — single tickets, no children, no flow. Same logic: no master, no retro.
-- **Failed / blocked / aborted runs** — the crash/block/abort is itself the lesson; record it in the kanban event log and the post-mortem (per `methodology/05-strike-rules.md`). A retro on a non-`done` run is a post-mortem, not a retro; the two are different artifacts.
+- **Failed / blocked / aborted runs** — the crash/block/abort is itself the lesson; record it in the kanban event log and the post-mortem (per `methodology/05-op-guards.md`). A retro on a non-`done` run is a post-mortem, not a retro; the two are different artifacts.
 - **Council verdicts that did not spawn a flow** — see Open Question Q2.
 
 #### Why this rule exists
@@ -235,7 +235,7 @@ The retro task transitions from `open` to `applied` when:
 2. For each ACCEPTED finding, a child ticket exists in the kanban DB (`kanban_create` returned an id; `kanban_show` confirms the child row).
 3. The retro's audit-line is appended: `retro-applied: <master-id> at <ISO> — <N accepted, N rejected, N deferred>; child tickets: <id-list>`.
 
-The operator (or a verifier-gate, per `methodology/05-strike-rules.md` strike-13) verifies the closure conditions before the retro task transitions to `done`. The retro task is closed via `kanban_complete` once all child tickets are filed.
+The operator (or a verifier-gate, per `methodology/05-op-guards.md` op-guard-13) verifies the closure conditions before the retro task transitions to `done`. The retro task is closed via `kanban_complete` once all child tickets are filed.
 
 #### What the executor MUST NOT do
 
@@ -272,7 +272,7 @@ That is **one finding.** A flow may produce zero findings (a clean run with all 
 
 #### What "proposed corrective action" must contain
 
-- **A destination.** The artifact (doc, skill, flow, profile, strike-rule file) that the corrective action will modify.
+- **A destination.** The artifact (doc, skill, flow, profile, op-guard file) that the corrective action will modify.
 - **The change.** What will be added, removed, or edited. Prefer concrete edits ("add a 7th field to the flow spec") over aspirational goals ("make flows more rigorous").
 - **A verifier check** when possible. How the operator or verifier will confirm the corrective action took effect. "Verify with the verifier that the master's body includes a Sources section" is a verifier check; "should improve" is not.
 
@@ -315,7 +315,7 @@ Three v2 adjustments:
 
 1. **Trigger.** `drafting` starts when the master ticket transitions to `done`, not when a node completes. The writer waits for the whole flow to land before drafting. The retro task is filed with `parents=[master_ticket_id]` so the parent's `done` transition auto-promotes the retro to `ready`.
 2. **Window length.** v1 used 24h fixed. The initial v2 draft used the "flow's natural review window" (24–72h+). **The operator's clarification on 2026-08-06 (per `t_f0cd340b`) restores the fixed 24h window.** Reasoning: predictable windows are easier to reason about; ad-hoc windows invite the operator to forget a retro mid-vacation. The operator may amend the window length per retro (e.g. for a release-grade flow), but the default is 24h.
-3. **Closure gating.** `applied → done` is gated by a verifier-check, per `methodology/05-strike-rules.md` strike-13 (the verifier-gate pattern). The verifier confirms that every finding has a disposition and that every ACCEPTED finding has a child ticket in the kanban DB.
+3. **Closure gating.** `applied → done` is gated by a verifier-check, per `methodology/05-op-guards.md` op-guard-13 (the verifier-gate pattern). The verifier confirms that every finding has a disposition and that every ACCEPTED finding has a child ticket in the kanban DB.
 
 The other states (`open`, `applied`) and their transitions are unchanged from v1. The auto-apply step at `applied` is described in Part 4.
 
@@ -346,7 +346,7 @@ For each ACCEPTED finding, a follow-up ticket is filed. The mapping:
 | Methodology doc change (`methodology/*`) | work-graph substrate board | parent = the methodology doc + the retro task id |
 | Skill change (skill prompt, skill content) | agent-profiles board | parent = the skill + the retro task id |
 | Flow-spec change (`methodology/04d-decide-flow-spec.md`) | work-graph substrate board | parent = the flow-spec doc + the retro task id |
-| Strike-rule change | platform-config board | parent = the relevant strike-rule file + the retro task id |
+| Op-guard change | platform-config board | parent = the relevant op-guard file + the retro task id |
 | Profile / agent change | agent-profiles board | parent = the profile + the retro task id |
 | Anything else | default-routing board | parent = the master ticket that ran + the retro task id |
 
@@ -521,13 +521,59 @@ If you find yourself wanting v1's per-node retro or its 3-freeform-fields shape,
 
 ---
 
+## Maintenance
+
+This section defines the maintenance cadence for the flow-level retro pattern. Retros are the engine of self-improvement, so this surface is reviewed more frequently than slow-moving methodology: every 30 days.
+
+### 1. Audit cadence
+
+Audit the retro pattern every **30 days**. The audit reviews the preceding period's master-ticket flows and checks whether eligible flows generated a retro task after reaching `done`. Record the audit date, reviewer, number of eligible flows, number of retro tasks, and next-audit date in the audit ticket or methodology changelog. Run an off-cycle audit when any drift signal below fires.
+
+### 2. Quality threshold
+
+The retro pattern passes when all of these conditions hold:
+
+- Every eligible master-ticket flow generated a retro task.
+- The retro task was written by a different agent than the executor.
+- All **6 evaluation axes** have a pass/partial/fail assessment with evidence.
+- Every finding contains an observed issue and a proposed corrective action with a destination.
+- Findings were ACCEPTED, REJECTED, or DEFERRED within the fixed **24-hour** operator window—therefore within the **7-day** maintenance ceiling—and each ACCEPTED finding has a child ticket.
+
+A missing axis, unsupported finding, or missing disposition is a failed check, not partial credit. Record the verdict and corrective action for each failed condition.
+
+### 3. Drift signals
+
+Surface drift before the next scheduled audit when any of these occurs:
+
+- No eligible master-ticket flow has produced a retro in **30 days**.
+- Retro findings repeatedly remain PROPOSED or are not actioned after acceptance.
+- Retro tasks accumulate in `ready` or `running` without resolution.
+- A retro omits one or more axes, lacks verifiable evidence, or uses an executor as writer.
+- The 24-hour review window is routinely missed or dispositions are not reflected in the task body.
+
+These signals indicate that the retro pattern or its implementation is no longer producing usable learning.
+
+### 4. Fix actions
+
+When no retro has fired in 30 days, file a `retro-trigger` ticket against the relevant master-ticket flow or, if no eligible flow exists, record that fact in the audit. When findings are not actioned, trace each ACCEPTED finding to its child ticket; file a maintenance ticket for any missing edge and escalate unresolved disposition or execution gaps to the operator. When tasks build up in `ready`, inspect board routing and assignee availability before changing this methodology. Do not edit the quality threshold merely to make a failed audit pass; fix the trigger, routing, writer, or follow-up flow and verify the next eligible run.
+
+### 5. Retirement conditions
+
+If retro tasks consistently go **30+ days without acceptance** or the pattern produces no actionable learning across repeated audits, treat the retro pattern as failing and propose a council review. The council may retire, merge, or revise this section, but retirement is an operator decision. Preserve existing retro tasks, findings, and child-ticket links as historical evidence; update cross-references if a successor pattern is adopted.
+
+### Maintenance parity check
+
+The maintenance contract is portable: map audit, quality checks, drift detection, corrective routing, and retirement review to the kanban and review mechanisms available in the deployment. Any deviation from the 30-day cadence, 24-hour window, or six-axis threshold must be recorded with its reason and next review date.
+
+---
+
 ## See also
 
 - `methodology/06-iteration-loop.md` — the iteration loop primitive that the retro wraps around; the retro is the *post-execution* step that closes the loop after one full iteration. The retro is also the `feedback` element of the iteration loop, raised from per-tick (cron) to per-flow (retro).
 - `methodology/04c-decide-master-ticket.md` — master tickets are the scope of the retro. The retro fires on a master's `done` transition.
 - `methodology/04a-decide-work-graph.md` — work-graph states (`ready`, `running`, `done`); the retro fires on the `done` transition of a master.
 - `methodology/04d-decide-flow-spec.md` — the 6-field flow spec; the retro's findings on axis d (flow defined optimally) target this doc.
-- `methodology/05-strike-rules.md` — strike rules often originate from retro findings on axis c (skills adequate) or axis f (right agents used).
+- `methodology/05-op-guards.md` — operational guards often originate from retro findings on axis c (skills adequate) or axis f (right agents used).
 - `methodology/03b-decide-operator-agent-interaction.md` — the operator-action ticket lifecycle (surface → respond → resume); the retro's window is one instance of this lifecycle.
 - `methodology/07-council-methodology.md` (forthcoming) — councils may run retros for cross-flow findings when the verifier is not enough.
 - `methodology/06a-decide-retro.md` — v1 of this doc; superseded by v2. Preserved in git history for reference; do not edit.
@@ -554,7 +600,7 @@ If you find yourself wanting v1's per-node retro or its 3-freeform-fields shape,
 11. **"The retro is a file in 0-INBOX/."** → No. The retro is a kanban task on a substrate board (Rule 4). Files in `0-INBOX/` were the v1 pattern and the initial v2 draft's pattern; both are superseded.
 12. **"The cron auto-applies unvetoed findings."** → No. The disposition is operator-driven (ACCEPT / REJECT / DEFER per finding, per Rule 4). The cron's role at the window's close is to fire the verifier-gate, not to file follow-up tickets.
 13. **"The operator dispositions the retro all-or-nothing."** → No. The disposition is per-finding. A retro with 5 findings may have 3 ACCEPTED, 1 REJECTED, 1 DEFERRED.
-14. **"The retro closes when the writer publishes."** → No. The retro closes (`applied → done`) only after every finding has a disposition and every ACCEPTED finding has a child ticket, gated by the verifier-gate (strike-13).
+14. **"The retro closes when the writer publishes."** → No. The retro closes (`applied → done`) only after every finding has a disposition and every ACCEPTED finding has a child ticket, gated by the verifier-gate (op-guard-13).
 
 ## Touch-points with other methodology docs
 
@@ -565,7 +611,7 @@ This doc touches:
 - `methodology/04c-decide-master-ticket.md` — add section: "a master's done-gate includes the retro trigger. The master is `done` only after the retro reaches `open` (i.e., the writer has published). The retro's `applied → done` transition runs in parallel with the master closing — the master does NOT wait for the retro's terminal state, only for the retro's open transition. (This avoids coupling master close to retro close; the retro may stay open for 24h while downstream work proceeds.)"
 - `methodology/04b-decide-board-routing.md` — add retro board routing table from Part 6 (alice-framework → alice-framework, skills → agent-resources, hermes → hermes, patchwork → patchwork, msaa → msaa-pipeline, default → default).
 - `methodology/04d-decide-flow-spec.md` — extend the 6-field spec with a 7th optional field: `retro_writer` (the profile that runs the retro; default verifier; council for cross-flow findings).
-- `methodology/05-strike-rules.md` — add strike-17 candidate: "retro writer is the executor" — same shape as strike-13's verifier-gate pattern; the writer's profile must be checked against the executor's profile at retro `applied → done`. Add strike-18 candidate: "retro is a file in 0-INBOX/" — the durable artifact is the kanban task, not a vault file.
+- `methodology/05-op-guards.md` — add op-guard-17 candidate: "retro writer is the executor" — same shape as op-guard-13's verifier-gate pattern; the writer's profile must be checked against the executor's profile at retro `applied → done`. Add op-guard-18 candidate: "retro is a file in 0-INBOX/" — the durable artifact is the kanban task, not a vault file.
 - `methodology/04e-decide-spec-hierarchy.md` — note: a retro finding that proposes a methodology doc change should specify the destination section/Part, not just the doc title. Findings without a destination section are anti-patterns.
 
 ## Operator-environment implications
@@ -579,7 +625,7 @@ The retro-as-kanban-task pattern (Rule 4) has implications for the operator's ex
 3. **Manage the 24h window** (per Amendment 2) instead of the "flow's natural review window" the initial v2 draft proposed.
 4. **Fire the verifier-gate** at the window's close (per Part 3's Closure gating and Part 4's disposition step) — the verifier confirms every finding has a disposition and every ACCEPTED finding has a child ticket, before the retro transitions to `done`.
 
-**This is a separate spec.** Per the spec-first flow rule (`methodology/M-decide-spec-first-flow.md`, `strike-16-spec-first-flow`), the doc-writer (this doc's author) does NOT modify the operator's cron or script. The doc is the spec. The operator (or a coder, per the spec-first flow) will file a separate ticket to update the cron + script to call `kanban_create` instead of writing a file.
+**This is a separate spec.** Per the spec-first flow rule (`methodology/M-decide-spec-first-flow.md`, `op-guard-16-spec-first-flow`), the doc-writer (this doc's author) does NOT modify the operator's cron or script. The doc is the spec. The operator (or a coder, per the spec-first flow) will file a separate ticket to update the cron + script to call `kanban_create` instead of writing a file.
 
 **The doc-writer does NOT file infrastructure tickets.** Filing the cron-update ticket is the operator's decision, not the doc-writer's.
 
@@ -628,4 +674,4 @@ The diff between the initial v2 draft and the Amendment 1 + 2 version is summari
 
 `## [2026-08-06T07:40Z] retro-v2-methodology — methodology/06a-decide-retro-v2.md shipped; 4 rules (different agent / 6 axes / master-only / structured findings), flow-level scope, supersedes v1. Open questions Q1–Q4 await operator answers; v1 preserved in git history.`
 
-`## [2026-08-06T08:00Z] retro-v2-amendment-1+2 — methodology/06a-decide-retro-v2.md amended per t_f0cd340b. Rule 4 added (retro is a kanban task, not a file); prior Rule 4 (structured findings) renumbered to Rule 5. Window length restored to fixed 24h (Amendment 2). Operator disposition is per-finding ACCEPT/REJECT/DEFER (Amendment 1); verifier-gate at applied→done (strike-13). Q1, Q2, Q3, Q4 resolved. Operator-env implication: existing post-graph-retro cron (if any) is superseded; cron-update is a separate ticket (per spec-first flow, strike-16). Doc is canonical as of this amendment.`
+`## [2026-08-06T08:00Z] retro-v2-amendment-1+2 — methodology/06a-decide-retro-v2.md amended per t_f0cd340b. Rule 4 added (retro is a kanban task, not a file); prior Rule 4 (structured findings) renumbered to Rule 5. Window length restored to fixed 24h (Amendment 2). Operator disposition is per-finding ACCEPT/REJECT/DEFER (Amendment 1); verifier-gate at applied→done (op-guard-13). Q1, Q2, Q3, Q4 resolved. Operator-env implication: existing post-graph-retro cron (if any) is superseded; cron-update is a separate ticket (per spec-first flow, op-guard-16). Doc is canonical as of this amendment.`

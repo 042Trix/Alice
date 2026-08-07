@@ -5,6 +5,11 @@ title: "AGENTS.md — fillable template (cold-start operating schema)"
 type: template
 status: draft
 source: alice-framework
+derived_from:
+  project: Alice
+  template: templates/AGENTS.md.template
+  version: 0.1.1
+  customized_on: <YYYY-MM-DD>
 tags: [kind:template, kind:agents-md, project:alice]
 confidence: 0.0
 links: []
@@ -103,11 +108,11 @@ The doc-writer profile's toolset is narrow (`file`, `kanban`, `memory`, `todo`, 
 **Rescue actions (priority order):**
 
 1. **Re-scope** if the work is shipped but the original criteria cannot be met (toolset mismatch, scope drift). Edit the ticket body, cite the re-scope in a `kanban_comment`, then `kanban_complete` with the new criteria.
-2. **Close as filed-in-error** if the work is shipped but the ticket duplicates a real outcome. Set `metadata.disposition=filed_in_error`, cite the duplicate ticket id, then `kanban_complete`. Authorized by strike-10 v2 §1.3.
+2. **Close as filed-in-error** if the work is shipped but the ticket duplicates a real outcome. Set `metadata.disposition=filed_in_error`, cite the duplicate ticket id, then `kanban_complete`. Authorized by op-guard-10 v2 §1.3.
 3. **File a kill-stuck-process follow-up** if the work is NOT shipped and the original criteria are correct. New ticket: `assignee=default`, `parents=[<candidate-stuck-ticket-id>]`, body cites the crashed pid and the original ticket. The default profile has the process toolset the doc-writer lacks.
-4. **Document the recovery** in `~/Documents/HermesVault/log.md` via `vault_log.append_audit_line` regardless of which action fires. Schema: `## [<isots>] strike-17-recovery — <candidate-ticket-id> — <action> — <reason> — source=<ticket-id>`.
+4. **Document the recovery** in `~/Documents/HermesVault/log.md` via `vault_log.append_audit_line` regardless of which action fires. Schema: `## [<isots>] op-guard-17-recovery — <candidate-ticket-id> — <action> — <reason> — source=<ticket-id>`.
 
-**Why this is a methodology, not a strike rule:** a strike rule is a one-paragraph constraint derived from 3+ observed failures; the recovery procedure is conditional and multi-step. Promote to a strike rule only if the same root cause produces the stuck ticket 3 times (per `methodology/05-strike-rules.md` 3-failure rule). See `methodology/06b-decide-blocked-ticket-recovery.md` Part 7 for the promotion criteria.
+**Why this is a methodology, not an operational guard:** an operational guard is a one-paragraph constraint derived from 3+ observed failures; the recovery procedure is conditional and multi-step. Promote to an operational guard only if the same root cause produces the stuck ticket 3 times (per `methodology/05-op-guards.md` 3-failure rule). See `methodology/06b-decide-blocked-ticket-recovery.md` Part 7 for the promotion criteria.
 
 ## 8. [Your domain-specific section, if any]
 

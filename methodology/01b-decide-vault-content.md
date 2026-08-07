@@ -607,4 +607,80 @@ This doc touches:
 - `methodology/09-inbox-from-external-sources.md` — X post → literature is a specific lifecycle path
 - `references/tier-routing-cheatsheet.md` — quick reference for tier routing
 - `references/x-ingestion-pipeline.md` — X post ingestion
+
+## Maintenance
+
+Designing the content-management discipline completes the build phase; it does not end the lifecycle. The 6-stage note lifecycle (Part 7) moves notes from `Capture` through `Archive`, but a vault with the right schema and no audit drifts quietly: notes get stuck in `Triage`, the daily triage cron stops firing, and a stage that has zero notes either is over-deployed or never sees a mover. The maintenance loop below mirrors `methodology/01-decide-vault-tier.md` and `methodology/02-decide-skills.md` §Skill maintenance in shape so a friend reading any of the maintenance sections in `methodology/` sees the same rhythm: when to audit, what counts as healthy, what drift looks like, what to do when drift is found, and when the section itself should be retired.
+
+### 1. Audit cadence
+
+Audit the content-management discipline on a **fixed cadence** (default: every **90 days**). Note lifecycle is slow — a 90-day sweep is the right resolution for catching notes stuck in a single stage and for surfacing stages that are silently unused. The cadence is a calendar event, not "when I remember."
+
+Two cadences are appropriate:
+
+- **Routine triage scan:** daily (or per the agent's triage cron schedule). It collects; it does not decide. The scan moves inbox items forward, identifies notes with no `stage` field, and flags items that have sat past their stage's age threshold.
+- **Full content-management audit:** every 90 days, with the operator or named reviewer profile confirming schema discipline, tag namespacing, wikilink health, atomicity, and lifecycle movement.
+
+Off-cycle audits fire when a drift signal below trips before the next scheduled review. High-risk surfaces (e.g. a regulated vault where stale notes carry compliance exposure) may use a shorter cadence; record the override and the reason.
+
+### 2. Quality threshold
+
+A healthy content-management discipline passes the 90-day check when **all** of the following hold:
+
+- **Every note has a stage.** The note's frontmatter (or its inferred state from location and `status`) maps to one of the 6 lifecycle stages: `Capture`, `Triage`, `Process`, `Mature`, `Stale`, `Archive`. A note with no identifiable stage is "stuck" — it has left the inbox without entering the next stage.
+- **The agent's triage cycle is running daily.** The triage cron has fired at least once in the last 24 hours; the run log shows notes were moved (not just listed). A cron that is configured but has not fired in 7 days is a maintenance failure.
+- **Stale notes are identified and proposed for archive.** Each 90-day audit produces a list of notes whose `Mature` age exceeds the discipline's `Stale` threshold (a methodology default; record overrides). The list is operator-actionable — the agent cannot unilaterally archive.
+- **Schema discipline holds.** Frontmatter has all required fields, tags are namespaced, wikilinks resolve, atomic notes are under the size budget (default 2000 words). The 5 failure modes in Part 1 are not regressing.
+- **The 5 conditions are explicit and binary.** Each condition is `pass` or `revise`; partial credit hides drift. A maintenance pass that ends in "looks fine" without per-condition verdicts is a maintenance pass that did not fix anything.
+
+The thresholds are review gates, not formatting games. Collapsing two checks to satisfy a count, or adding a sixth to look rigorous, both fail the underlying test.
+
+### 3. Drift signals
+
+Drift is observable. Surface at least one of the following before the next 90-day audit:
+
+- **A note stuck in `Triage` for 30+ days.** The note was captured, sat in the inbox-equivalent, and was never routed. The 30-day window per Part 7's lifecycle discipline is the cap; longer means triage is failing or the routing rule is wrong.
+- **A note stuck in `Process` for 60+ days.** The note was routed but never reached `Mature` (full frontmatter, tags, wikilinks). Processing is bounded (Part 7: <30 min per note); a multi-month `Process` is either a write that grew past atomicity or a writer who stopped mid-edit.
+- **No audit of the `Stale` stage in 90+ days.** The stage exists in the lifecycle but no one has looked at it. Stale notes pile up; the discipline collapses into "everything lives in `Mature`."
+- **Triage cron has not fired in 7+ days.** The schedule exists; the runs do not. The cadence is broken at the execution layer, not the policy layer.
+- **A new frontmatter field emerged in practice that the schema does not name.** Operators are writing fields ad-hoc. The schema's check list has grown stale; the practice has moved on.
+- **Operators are skipping the audit because the cadence is wrong.** A 90-day cadence for a discipline that drifts weekly is itself drift.
+- **A signal observed in adjacent methodology files (tier routing, skill maintenance) is not surfaced here.** Maintenance sections that ignore drift their siblings catch are incomplete.
+
+A drift signal does not always mean the rule is wrong. Sometimes the rule is right and the writer is wrong; sometimes the tool cannot enforce it; occasionally the rule is obsolete and the signal is the prompt to revise. The audit names the signal and proposes a disposition; the owner confirms.
+
+### 4. Fix actions
+
+When drift is detected, the canonical response is:
+
+1. **Run the triage cron manually** when the daily cadence has slipped. The cron is the first line of defense; restoring it surfaces what the routine pass should have caught. Confirm via the cron run log that notes moved.
+2. **File a `stale-note-cleanup` ticket** on the operator's kanban board (default board: `hermes`) when notes are stuck. Name the drift signal, the stage(s) involved, the offending notes (if known), and the suspected cause.
+3. **The vault curator reviews** the audit record, the schema discipline, and the corrective actions from prior audits. The curator does not unilaterally rewrite the methodology; the curator proposes.
+4. **The curator re-issues the conditions or the corrective actions.** Two outcomes are valid: (a) the rule was right and the writer was wrong — fix the writer and re-apply the rule; (b) the rule is obsolete — open a methodology-revision ticket, then re-apply after the new rule lands.
+5. **The disposition is recorded** on the ticket: cause, corrective action, next review date. A drift signal with no recorded disposition is unresolved.
+
+Do not auto-fix drift by editing notes in place to make the audit green. A note stuck in `Triage` is a routing failure; the fix is to route it (or to revise the routing rule), not to mark it `Mature` to clear the alert.
+
+### 5. Retirement conditions
+
+Retire the content-management discipline (or this methodology) when **at least one** of the following is observable for 90 consecutive days:
+
+- **A stage has zero notes for 90 consecutive days.** The stage exists in the lifecycle but no note has moved through it in a quarter. Either the stage is over-deployed (collapse it into an adjacent stage) or the routing rule never fires (the discipline is incomplete).
+- **A stage is consistently skipped.** Operators file notes that match the lifecycle's scope but never invoke this stage; the stage has become documentation theater.
+- **A simpler discipline has replaced it.** A different methodology in `methodology/` (e.g. a tier-only or skill-only discipline) covers the same ground with lower overhead; the older section is dead weight.
+- **The owner explicitly retires it.** Methodology retirement is an operator call, not a self-acting rule; the section stays on disk as historical reference after retirement.
+
+The retirement sequence:
+
+1. Propose merging the discipline with an adjacent methodology that covers the same ground. Name the surviving methodology.
+2. Move all in-flight instances (open tickets, audit records, schema definitions) to the surviving methodology, preserving references and adding a `migrated_from:` field so the move is auditable.
+3. Update every MOC, catalog entry, agent assignment, and cross-reference that pointed at the retired section.
+4. Keep the section present as an empty placeholder for one full audit cycle (90 days) so any late-arriving references surface. Remove the placeholder only after the cycle completes with no inbound references.
+5. Record the retirement in the methodology changelog: date, surviving methodology, contents moved, references updated, owner.
+
+### Maintenance parity check
+
+This section defines a friend-portable method, not a claim that every platform supplies automated triage crons, schema validators, wikilink audits, or lifecycle-stage detectors. Before adopting it, map each function — daily triage scan, schema validation, drift surfacing, corrective routing, retirement archival — to mechanisms available in your own tool. The 90-day cadence and the 30/60-day stage thresholds are methodology defaults; adjust them when measured drift rate, note volume, or operator-stated risk provides better evidence, but record the exception so the audit trail remains intact.
+
+> **Method-not-instance reminder.** Alice documents the method, not the specific tool or operator. Replace platform-specific commands and paths with your own tool's equivalents; do not paste instance-specific paths, commands, or platform names into the section body.
 - `templates/frontmatter-schema.md.template` — the fillable form for the frontmatter schema

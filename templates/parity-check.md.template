@@ -6,6 +6,11 @@ title: "Parity-check section — fillable template"
 type: template
 status: draft
 source: alice-framework
+derived_from:
+  project: Alice
+  template: templates/parity-check.md.template
+  version: 0.1.1
+  customized_on: <YYYY-MM-DD>
 tags: [kind:template, kind:parity, project:alice]
 confidence: 0.0
 links: ["[[methodology/M-decide-parity-check.md]]", "[[methodology/M-decide-spec-first-flow.md]]", "[[templates/spec-first-flow.md.template]]"]

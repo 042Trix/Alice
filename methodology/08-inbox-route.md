@@ -7,7 +7,7 @@
 **Inbox routing** is the process of taking items from your external inbox (X posts, articles, conversations, screenshots, voice memos) and deciding:
 - Does this become a vault note? (Promote to atomic or literature)
 - Does this become a skill? (Build a procedure)
-- Does this become a strike rule? (Observe 3 of the same shape)
+- Does this become an operational guard? (Observe 3 of the same shape)
 - Does this become a cron? (Detect + surface + act on a pattern)
 - Does this become a council question? (Multi-perspective review)
 - Does this become nothing? (Delete or archive)
@@ -58,7 +58,7 @@ Use `templates/inbox-route.md.template`. The route has 4 sections:
 
 1. **Source** — where did the item come from? (X, RSS, conversation, etc.)
 2. **Type** — what kind of item is it? (article, post, screenshot, idea, decision)
-3. **Action** — what routing decision did you make? (Promote, archive, skill-ticket, strike-rule-ticket, council-ticket, etc.)
+3. **Action** — what routing decision did you make? (Promote, archive, skill-ticket, op-guard-ticket, council-ticket, etc.)
 4. **Notes** — why this routing? (1 sentence)
 
 If any section is empty, the route isn't ready.
@@ -70,7 +70,7 @@ Different sources have different routing patterns:
 - **X posts** — see `methodology/09-inbox-from-external-sources.md`
 - **Articles (RSS)** — usually literature tier; rarely skill-brief
 - **Conversations (chat, voice memos)** — usually operator-action ticket
-- **Screenshots** — usually strike-rule or skill-brief input (visual patterns)
+- **Screenshots** — usually op-guard or skill-brief input (visual patterns)
 - **Books** — usually literature; very rarely atomic (if a passage becomes a method)
 - **Emails** — usually operator-action or archive; rarely anything else
 - **Voice memos** — transcribed first, then routed like any other text item

@@ -44,7 +44,7 @@ Alice distinguishes four mechanisms that are often grouped under the word “age
 | **Skill** | A packaged, repeatable procedure an agent can invoke. | Use for bounded work that recurs, can be repeated, and has a verifiable result. | Do not use **skill** for a one-off prompt, a task, a person, or an unbounded workflow. | [`02-decide-skills.md`](../methodology/02-decide-skills.md) |
 | **Agent** | A persistent worker profile with a defined role, domain, tools, and operating rules. | Use when a stable role recurs often enough to justify its own persistent context. Qualify the term using the agent typology when the mechanism matters. | Do not use **agent** as a synonym for a procedure, schedule, chat lane, or every ephemeral execution. | [`03-decide-agents.md`](../methodology/03-decide-agents.md) |
 | **Cron** | A recurring task triggered on a fixed schedule. | Use when cadence, cost, and output are bounded and the task has a complete detect → surface → act path. | Do not use **cron** for an event-triggered hook, personal reminder, one-off schedule, or persistent worker. | [`04-decide-crons.md`](../methodology/04-decide-crons.md) |
-| **Strike rule** | A constraint derived from repeated failures of the same shape. | Use to prevent a known behavioral failure from recurring. | Do not use **rule** for a procedure, preference, speculative risk, or single isolated failure. | [`05-strike-rules.md`](../methodology/05-strike-rules.md) |
+| **Operational guard** | A constraint derived from a repeated failure of the same shape; designed to prevent that failure from recurring. | Use to prevent a known behavioral failure from recurring. | Do not use **rule** for a procedure, preference, speculative risk, or single isolated failure. | [`05-op-guards.md`](../methodology/05-op-guards.md) |
 
 ## Aliases and deprecated forms
 
@@ -57,7 +57,8 @@ Alice distinguishes four mechanisms that are often grouped under the word “age
 | **Subagent**, **sub agent** | Deprecated spelling | **Sub-agent**; preferably **spawned sub-agent** | The qualified form prevents confusion with a downstream agent. |
 | **Default agent** | Deprecated | **Default profile** | The catch-all is a profile used for one-offs, not a separate agent category. |
 | **Scheduled agent** | Deprecated unless literally accurate | **Cron** for the schedule; name the invoked agent separately | A schedule and a worker are different mechanisms. |
-| **Rule** when referring to a repeated-failure constraint | Ambiguous shorthand | **Strike rule** | The qualifier distinguishes governance constraints from general instructions. |
+| **Rule** when referring to a repeated-failure constraint | Ambiguous shorthand | **Operational guard** | The qualifier distinguishes governance constraints from general instructions. |
+| **Strike rule** | Deprecated (soft-rename) | **Operational guard** | Renamed in v0.1.1 (2026-08-06). The new term is self-explanatory; "strike" read as labor/military/baseball to outsiders. Old filenames still exist as redirect stubs for backward compatibility. |
 | **Snapshot** as a synonym for Alice | Deprecated | **Methodology** or **framework** | Alice teaches a derivation method rather than prescribing one implementation. |
 
 ## See also

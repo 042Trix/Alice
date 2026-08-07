@@ -8,7 +8,7 @@ status: draft
 source: alice-framework
 tags: [kind:methodology, kind:retro, kind:iteration-loop, kind:feedback, kind:self-improvement, project:alice]
 confidence: 0.0
-links: ["[[methodology/06-iteration-loop.md]]", "[[methodology/04a-decide-work-graph.md]]", "[[methodology/04d-decide-flow-spec.md]]", "[[methodology/05-strike-rules.md]]", "[[worked-examples/01-solo-founder-skeleton/AGENTS.md]]"]
+links: ["[[methodology/06-iteration-loop.md]]", "[[methodology/04a-decide-work-graph.md]]", "[[methodology/04d-decide-flow-spec.md]]", "[[methodology/05-op-guards.md]]", "[[worked-examples/01-solo-founder-skeleton/AGENTS.md]]"]
 ---
 
 # Methodology 06a — Decide the retro (post-execution retro + human feedback window)
@@ -48,7 +48,7 @@ Per the operator's GRAPH notes (2026-08-05):
 Without the retro:
 
 - The same surface-level friction repeats every run ("step 3 was slow" — every run).
-- Strike rules accumulate because nobody looks back at *why* the operator corrected.
+- Operational guards accumulate because nobody looks back at *why* the operator corrected.
 - The system plateaus: the same flows ship the same way, the same humans see the same warnings, the same agents produce the same marginal output.
 
 The retro is the **ratchet**. Each run is at-least-as-good as the last run. The 1-day-open window is the operator's veto; the auto-apply at 24h is the ratchet.
@@ -195,7 +195,7 @@ When the 24h window closes, the auto-apply step runs. The auto-apply takes every
 | Graph node change (e.g., "add a verifier step") | New ticket on the work-graph substrate board, parent = the master ticket that ran |
 | Flow-spec change (e.g., "spec field needs clarifying") | New ticket on the work-graph substrate board, parent = the flow-spec doc |
 | Skill change (e.g., "skill prompt needs tightening") | New ticket on the agent-profiles board, parent = the skill |
-| Strike-rule change (e.g., "add a new rule") | New ticket on the platform-config board, parent = the relevant strike-rule file |
+| Op-guard change (e.g., "add a new guard") | New ticket on the platform-config board, parent = the relevant op-guard file |
 | Anything else | Default to the default-routing board with parent = the master ticket |
 
 **Why these board assignments.** Per `methodology/04b-decide-board-routing.md`, board routing is the audit-trail of where work lives. Graph/flow changes go to the work-graph substrate board; agent/skill changes go to the agent-profiles board; platform-config changes go to the platform-config board; everything else goes to the default-routing board.
@@ -245,7 +245,7 @@ The doc-producing agent (the one closest to "what worked / what didn't" for a do
 **Field 3: What to change**
 1. Add a "cross-reference audit" cron to the polish loop — see `doc-cross-reference-audit` skill, run before each release. (skill change)
 2. Add `--help` and `--dry-run` flags to the code-producing agent's CLI tool as a default in the skill prompt. (skill change)
-3. Change the operator-LGTM-expected-window rule from 2h to 24h (so the system's "stale-operator-LGTM" detector doesn't fire on normal operator-side delays). (strike-rule change, not this doc)
+3. **Change the operator-LGTM-expected-window rule from 2h to 24h** (so the system's "stale-operator-LGTM" detector doesn't fire on normal operator-side delays). (op-guard change, not this doc)
 
 ### The 1-day window
 
@@ -294,7 +294,7 @@ The retro captures *what was learned from this run*. If the operator has a thoug
 - `methodology/06-iteration-loop.md` — the iteration loop primitive that the retro wraps around; the retro is the *post-execution* step that closes the loop after one full iteration
 - `methodology/04a-decide-work-graph.md` — work-graph states (`ready`, `running`, `done`); the retro fires on the `done` transition
 - `methodology/04d-decide-flow-spec.md` — the 6-field flow spec; the retro's output ("what to change") becomes a follow-up ticket against the flow-spec doc
-- `methodology/05-strike-rules.md` — strike rules often originate from retro's "what to change" recommendations; the auto-apply step files them as hermes-board tickets
+- `methodology/05-op-guards.md` — operational guards often originate from retro's "what to change" recommendations; the auto-apply step files them as hermes-board tickets
 - `methodology/03b-decide-operator-agent-interaction.md` — the operator-action ticket lifecycle (surface → respond → resume); the retro's 1-day-open window is one instance of this lifecycle
 
 ## What's next
@@ -308,7 +308,7 @@ The retro captures *what was learned from this run*. If the operator has a thoug
 1. **"The retro is a post-mortem that only fires on failure."** → No. The retro fires on *every* run. A retro that only fires on failure is a debugging tool, not a learning engine.
 2. **"The retro waits indefinitely for the operator to respond."** → No. 24 hours is a hard timeout. The system moves forward at the 24h mark regardless of operator availability.
 3. **"The retro is a meeting."** → No. The retro is a written artifact with a fixed shape (3 fields), not a synchronous gathering.
-4. **"The retro's 'what to change' is just a wish list."** → No. Every entry must name a concrete artifact (graph node, flow-spec line, skill prompt, strike-rule file) and be bounded to one graph/flow/skill.
+4. **"The retro's 'what to change' is just a wish list."** → No. Every entry must name a concrete artifact (graph node, flow-spec line, skill prompt, op-guard file) and be bounded to one graph/flow/skill.
 5. **"The retro applies silently to the next run."** → No. The retro spawns follow-up tickets; the next iteration's work is the union of those tickets, not a silent diff against the previous run's graphs.
 6. **"The operator can extend the window."** → No. 24 hours is 24 hours. If the operator needs more time, they disable the retro cron for one cycle (the next cycle's retro files as normal).
 7. **"We have 7 retro styles across 7 flows."** → No. One retro shape (3 fields + 1 optional) across all flows. Variation breaks the operator's mental model.

@@ -1,0 +1,67 @@
+## Maintenance
+
+> This section is the audit surface for `<METHODOLOGY-TOPIC>`. It mirrors the canonical 5-subsection shape so a friend reading any maintenance section in `methodology/` sees the same rhythm: when to audit, what counts as healthy, what drift looks like, what to do when drift is found, and when the section itself should be retired. The cadence and quality bar are methodology defaults; map each to your tool before adopting.
+
+### 1. Audit cadence
+
+Audit `<METHODOLOGY-TOPIC>` on a **fixed cadence** (default: every **90 days** for slow-moving methodology, every **30 days** for high-frequency surfaces like crons or loops). The cadence is a calendar event, not "when I remember." Off-cycle audits fire when a signal below trips before the next scheduled review.
+
+Record each audit with: date, auditor (operator or named reviewer profile), `<METHODOLOGY-TOPIC>` id, verdict per check, corrective action if any, next-audit date. Store the audit record on the relevant comment thread, master ticket, or the methodology's changelog so the trail survives across sessions.
+
+### 2. Quality threshold
+
+`<METHODOLOGY-TOPIC>` passes the maintenance check when **all** of the following hold:
+
+- **The 5 conditions are explicit.** Each condition names a measurable property; vague "looks good" verifications fail.
+- **The threshold is binary per condition.** Each condition is `pass` or `revise`; partial credit collapses into a vague overall score and hides drift.
+- **The corrective action is named per verdict.** A maintenance pass that ends in "we'll think about it later" is a maintenance pass that did not fix anything.
+- **The disposition is recorded.** Date, reviewer, verdict per condition, action taken, next review. No record = no maintenance pass.
+- **High-risk overrides are explicit.** When the operator shortens the cadence or tightens a threshold, the override is logged with the reason; unlogged overrides are drift.
+
+The thresholds are review gates, not formatting games. Collapsing two checks to satisfy a count, or adding a sixth to look rigorous, both fail the underlying test.
+
+### 3. Drift signals
+
+Drift is observable. Surface at least one of the following before the next scheduled audit:
+
+- **A named check fails on the most recent audit.** The methodology is being applied but the application no longer matches the documented condition.
+- **A signal repeats across audits without a corrective action.** Two consecutive audits showing the same drift signal is a structural problem, not a noise pattern.
+- **A new condition emerged in practice that the methodology does not name.** The methodology's check list has grown stale; the practice has moved on.
+- **Operators are skipping the audit because the cadence is wrong.** A 90-day cadence for a surface that drifts weekly is itself drift.
+- **A signal is observed in adjacent methodology files but not surfaced here.** Maintenance sections that ignore drift their siblings catch are incomplete.
+
+A drift signal does not always mean the rule is wrong. Sometimes the rule is right and the writer is wrong; sometimes the tool cannot enforce it; occasionally the rule is obsolete and the signal is the prompt to revise. The audit names the signal and proposes a disposition; the owner confirms.
+
+### 4. Fix actions
+
+When drift is detected, the canonical response is:
+
+1. **File a maintenance ticket** on the operator's kanban board (default board: `hermes`). Name the drift signal, the methodology involved, the offending instances (if known), and the suspected cause.
+2. **The methodology owner reviews** the audit record, the section's conditions, and the corrective actions from prior audits. The owner does not unilaterally rewrite the methodology; the owner proposes.
+3. **The owner re-issues the conditions or the corrective actions.** Two outcomes are valid: (a) the rule was right and the writer was wrong — fix the writer and re-apply the rule; (b) the rule is obsolete — open a methodology-revision ticket, then re-apply after the new rule lands.
+4. **The disposition is recorded** on the ticket: cause, corrective action, next review date. A drift signal with no recorded disposition is unresolved.
+
+Do not auto-fix drift by editing the methodology doc in place to make the audit green. A condition that fails is a routing failure or a tooling failure; the fix is to address the underlying cause, not to rewrite the condition to match observed behavior.
+
+### 5. Retirement conditions
+
+Retire the maintenance section (or the methodology it audits) when **at least one** of the following is observable for 90 consecutive days:
+
+- **The methodology is no longer in use.** No new instance of the methodology has been authored or applied in three months; the operator has shifted to a different methodology or the underlying need has disappeared.
+- **The methodology is consistently skipped.** Operators file tickets that match the methodology's scope but never invoke the maintenance check; the section has become documentation theater.
+- **A simpler methodology has replaced it.** A different section in `methodology/` covers the same ground with lower overhead; the older section is dead weight.
+- **The owner explicitly retires it.** Methodology retirement is an operator call, not a self-acting rule; the section stays on disk as historical reference after retirement.
+
+The retirement sequence:
+
+1. Propose merging the methodology with an adjacent section that covers the same ground. Name the surviving methodology.
+2. Move all in-flight instances (open tickets, audit records) to the surviving methodology, preserving references and adding a `migrated_from:` field so the move is auditable.
+3. Update every MOC, catalog entry, agent assignment, and cross-reference that pointed at the retired section.
+4. Keep the section present as an empty placeholder for one full audit cycle so any late-arriving references surface. Remove the placeholder only after the cycle completes with no inbound references.
+5. Record the retirement in the methodology changelog: date, surviving methodology, contents moved, references updated, owner.
+
+### Maintenance parity check
+
+This section defines a friend-portable method, not a claim that every platform supplies automated audit scans, drift detection, or retirement archival. Before adopting it, map each function — routine audit, drift surfacing, corrective routing, retirement archival — to mechanisms available in your own tool. The cadence and threshold defaults are methodology defaults; adjust them when measured drift rate, instance volume, or operator-stated risk provides better evidence, but record the exception so the audit trail remains intact.
+
+> **Method-not-instance reminder.** Alice documents the method, not the specific tool or operator. Replace `<METHODOLOGY-TOPIC>` with the topic this section audits (e.g., `vault tiers`, `crons`, `iteration loops`); do not paste instance-specific paths, commands, or platform names into the section body.

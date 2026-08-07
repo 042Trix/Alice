@@ -7,7 +7,7 @@ status: draft
 source: alice-framework
 tags: [kind:methodology, kind:operator-agent, project:alice]
 confidence: 0.0
-links: ["[[methodology/03-decide-agents.md]]", "[[methodology/03a-decide-agent-vault-interaction.md]]", "[[methodology/05-strike-rules.md]]", "[[methodology/06-iteration-loop.md]]", "[[methodology/07-council-methodology.md]]", "[[methodology/01a-decide-memory.md]]", "[[templates/operator-interaction-patterns.md.template]]", "[[templates/agent-soul.md.template]]", "[[templates/AGENTS.md.template]]"]
+links: ["[[methodology/03-decide-agents.md]]", "[[methodology/03a-decide-agent-vault-interaction.md]]", "[[methodology/05-op-guards.md]]", "[[methodology/06-iteration-loop.md]]", "[[methodology/07-council-methodology.md]]", "[[methodology/01a-decide-memory.md]]", "[[templates/operator-interaction-patterns.md.template]]", "[[templates/agent-soul.md.template]]", "[[templates/AGENTS.md.template]]"]
 ---
 
 # Methodology 03b — Decide how the operator interacts with agents
@@ -28,10 +28,10 @@ The operator (you) decides:
 - **How do you launch a session?** (the launcher pattern)
 - **How do you approve agent work?** (the approver pattern)
 - **How do you govern the agent's behavior?** (the governor pattern)
-- **How do you curate the agent's skills, SOULs, strike rules?** (the curator pattern)
+- **How do you curate the agent's skills, SOULs, operational guards?** (the curator pattern)
 - **What do you do when the agent fails?** (the fallback pattern)
 
-Without an interaction design, the answers are implicit. The operator starts sessions ad-hoc, approves inconsistently, governs by strike-rule accidents, curates by drift, and falls back without recovery. The agent behaves inconsistently across sessions.
+Without an interaction design, the answers are implicit. The operator starts sessions ad-hoc, approves inconsistently, governs by operational-guard accidents, curates by drift, and falls back without recovery. The agent behaves inconsistently across sessions.
 
 ### The 5 failure modes
 
@@ -39,7 +39,7 @@ An operator-agent interaction system fails in 5 predictable ways:
 
 1. **Operator flood.** The agent surfaces every decision as operator-action. The operator context fills with asks. The operator can't decide; they rubber-stamp everything.
 2. **Operator starvation.** The agent never asks for help; it makes decisions that the operator should review. The operator misses irreversible actions.
-3. **Operator drift.** The operator's preferences change but the agent doesn't know. The agent follows old strike rules. The operator corrects repeatedly.
+3. **Operator drift.** The operator's preferences change but the agent doesn't know. The agent follows old operational guards. The operator corrects repeatedly.
 4. **Operator override.** The operator manually does what the agent should do. The agent becomes a notification system.
 5. **Operator abandonment.** The operator disappears; the agent keeps working. Without operator governance, the system drifts.
 
@@ -91,24 +91,24 @@ Alice recommends a 5-role interaction model. Each role is a **distinct way the o
 
 ### Role 3: Governor
 
-**What:** the operator sets strike rules, audits agent behavior, and revises the system when it drifts.
+**What:** the operator sets operational guards, audits agent behavior, and revises the system when it drifts.
 
 **When:**
 - A failure pattern emerges (3+ of the same shape)
 - An agent behaves outside its soul
-- A strike rule needs revision
+- A operational guard needs revision
 
 **Pattern:**
 1. Operator observes the failure
-2. Operator drafts a strike rule
+2. Operator drafts a operational guard
 3. Operator files the rule in the rules tier
 4. Agent loads the rule on next session
 5. Operator audits the agent's compliance
 
 **Discipline:**
-- The operator is the only one who writes strike rules (the agent proposes; the operator writes)
-- Strike rules are reviewed quarterly (or sooner if patterns shift)
-- Strike rules are archived when the pattern stops recurring
+- The operator is the only one who writes operational guards (the agent proposes; the operator writes)
+- Operational guards are reviewed quarterly (or sooner if patterns shift)
+- Operational guards are archived when the pattern stops recurring
 
 ### Role 4: Curator
 
@@ -336,7 +336,7 @@ You're doing X. The right behavior is Y. Reason: Z.
 ### The feedback anti-patterns
 
 - **Vague correction.** "Be better." is not actionable.
-- **Recurring correction.** The operator corrects the same thing 3+ times; that's a missing strike rule or SOUL revision.
+- **Recurring correction.** The operator corrects the same thing 3+ times; that's a missing operational guard or SOUL revision.
 - **No memory update.** The operator corrects; the agent forgets by next session.
 
 ---
@@ -549,7 +549,7 @@ No. Approval is a tool; over-deferral slows the system. Approve when the proposa
 
 ### Anti-pattern 5: "The agent narrates tool calls."
 
-No. The agent does the action; chat confirms. Per `methodology/05-strike-rules.md` strike rule example.
+No. The agent does the action; chat confirms. Per `methodology/05-op-guards.md` operational guard example.
 
 ### Anti-pattern 6: "The operator context fills."
 
@@ -603,7 +603,7 @@ The friend reads the methodology, then designs their own operator-agent interact
 
 - `methodology/03-decide-agents.md` — agent design (WHO) is a sibling doc
 - `methodology/03a-decide-agent-vault-interaction.md` — agent-vault interaction (WHAT AGENT DOES TO VAULT) is a sibling doc
-- `methodology/05-strike-rules.md` — strike rules are operator-governance
+- `methodology/05-op-guards.md` — operational guards are operator-governance
 - `methodology/06-iteration-loop.md` — loops surface to operator; the surface-to-respond cadence
 - `methodology/07-council-methodology.md` — council verdicts are operator-reviewable
 - `methodology/01a-decide-memory.md` — Tier 6 (operator preferences) is the operator-as-feedback-giver's surface
@@ -632,7 +632,7 @@ This doc touches:
 - `methodology/03-decide-agents.md` — sibling doc (WHO)
 - `methodology/03a-decide-agent-vault-interaction.md` — sibling doc (WHAT AGENT DOES TO VAULT)
 - `methodology/04c-decide-master-ticket.md` — the master ticket is the orchestrator's tool for capturing operator-originated work; the operator-bypass anti-pattern is what happens when the operator skips both (Part 2.5)
-- `methodology/05-strike-rules.md` — strike rules are operator-governance
+- `methodology/05-op-guards.md` — operational guards are operator-governance
 - `methodology/06-iteration-loop.md` — loops surface to operator; surface-to-act chain assumes orchestrator-authored surfaces, not operator-authored tickets (Part 2.5)
 - `methodology/07-council-methodology.md` — council verdicts are operator-reviewable
 - `methodology/01a-decide-memory.md` — Tier 6 (operator preferences) is the operator-as-feedback-giver's surface

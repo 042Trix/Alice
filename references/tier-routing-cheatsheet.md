@@ -43,7 +43,7 @@ For each item, ask:
 | X post that's a reference | 1 (literature) | External source, not your idea |
 | Skill-brief draft | 2 (atomic) | Your own idea, in progress |
 | Skill (shipped) | 2 (atomic) | Your own idea, final form |
-| Strike rule | 2 (atomic, in `rules/`) | Constraint derived from failures |
+| Operational guard | 2 (atomic, in `rules/`) | Constraint derived from failures |
 | Council output | 2 (atomic, in your cross-agent verdicts directory — e.g., `cross-agent/`, `council/`, etc.) | Multi-perspective review |
 | Operator-action ticket | 2 (atomic, in `kanban/`) | Decision the operator makes |
 | FTS5 index | 3 (indexes) | Map of the vault, computed |
@@ -83,7 +83,7 @@ The line between them: **if you're making a decision, it's atomic. If you're cit
 | Filed when failure pattern observed 3+ times | Filed when you have a new idea |
 | Promoted to operator-context | Promoted to operator-decision |
 
-Strike rules are a **subclass of atomic** with a strict format and a strict trigger. The atomic tier is broader. The rule folder name (`<atomic-tier>/rules/`) is a method-not-instance placeholder; pick the name that fits your chosen atomic tier (e.g., `2-atomic/rules/` per methodology `01-decide-vault-tier.md`).
+Operational guards are a **subclass of atomic** with a strict format and a strict trigger. The atomic tier is broader. The rule folder name (`<atomic-tier>/rules/`) is a method-not-instance placeholder; pick the name that fits your chosen atomic tier (e.g., `2-atomic/rules/` per methodology `01-decide-vault-tier.md`).
 
 ## See also
 

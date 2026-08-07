@@ -27,7 +27,7 @@ Treat these notes as **a starting structure, not a prescribed destination.** App
 
 **Typical decision:** 7-tier memory system (cold-start, procedural, identity, episodic, long-form, operator preferences, system). See `methodology/01a-decide-memory.md` for the full design methodology.
 
-**Why 7 tiers:** the solo founder has enough memory complexity to need a unified taxonomy. Without it, AGENTS.md (the cold-start file every agent reads on launch) bloat, stale SOULs (each agent's identity and operating rules), and conflicting strike rules accumulate silently.
+**Why 7 tiers:** the solo founder has enough memory complexity to need a unified taxonomy. Without it, AGENTS.md (the cold-start file every agent reads on launch) bloat, stale SOULs (each agent's identity and operating rules), and conflicting operational guards accumulate silently.
 
 **What they skip:** embeddings and semantic-search indices (the solo founder doesn't have enough literature to need them).
 
@@ -200,9 +200,9 @@ See `methodology/03c-decide-agent-communication-channels.md` for the full design
 
 **What they add:** a **"x-ingestion"** cron if they're ingesting X posts systematically. Daily or weekly cadence.
 
-## 05-strike-rules
+## 05-op-guards
 
-**Typical decision:** 5-7 strike rules, mostly operator-specific.
+**Typical decision:** 5-7 operational guards, mostly operator-specific.
 
 **The 5-7 standard rules:**
 1. **No-narrated-action** — agent does the action, doesn't narrate it
@@ -239,7 +239,7 @@ See `methodology/03c-decide-agent-communication-channels.md` for the full design
 
 **Typical decision:** 4 seats (Strategist, Engineer, Operator, Skeptic). Run councils for:
 - Skill-brief validation
-- Major scope changes (new focus vertical, new strike rule)
+- Major scope changes (new focus vertical, new operational guard)
 - Failure pattern reviews (3+ incidents of the same shape)
 
 **Why 4 seats:** the minimum viable. 5-6 is fine if the operator has a specific need; 7+ is over-deliberation.
@@ -270,7 +270,7 @@ See `methodology/03c-decide-agent-communication-channels.md` for the full design
 
 **What they typically filter:** most X posts fail the filter (low signal-to-noise). The filter is tuned to the operator's context.
 
-**What they typically route:** most filtered posts are archived. The few that survive are routed to skill-brief, strike-rule, atomic, or operator-action.
+**What they typically route:** most filtered posts are archived. The few that survive are routed to skill-brief, op-guard, atomic, or operator-action.
 
 ---
 

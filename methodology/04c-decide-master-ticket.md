@@ -571,7 +571,7 @@ For each new master, confirm:
 - `methodology/04a-decide-work-graph.md` — defines parent/child links, dependency edges, graph invariants, and the normal 4-state lifecycle used by master children.
 - `methodology/04b-decide-board-routing.md` — defines work-product routing when a master stays on the originating board and children span other boards.
 - `methodology/03b-decide-operator-agent-interaction.md` — defines the operator-facing status, approval, and escalation surfaces used by the master and its done-gate.
-- `references/kanban-lite-disciplines.md` — supplies the minimal state, board, and 3-strike-system context on which the master pattern builds.
+- `references/kanban-lite-disciplines.md` — supplies the minimal state, board, and 3-element-system context on which the master pattern builds.
 - `references/tool-mapping-guide.md` — owns per-tool CLI invocations and implementation mappings; this methodology owns when and why.
 - `~/.hermes/skills/kanban-discipline/references/master-ticket-pattern-2026-07-26.md` — tool-specific worked example, edge cases, and ongoing health check.
 - `~/.hermes/skills/kanban-discipline/references/master-ticket-pattern--operator-standing-rule--2026-07-26.md` — source standing rule, mandatory structure, done-gates, and verification query.

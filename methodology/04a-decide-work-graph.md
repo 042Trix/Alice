@@ -8,7 +8,7 @@ status: draft
 source: alice-framework
 tags: [kind:methodology, kind:work-graph, kind:node-types, project:alice]
 confidence: 0.0
-links: ["[[methodology/04-decide-crons.md]]", "[[methodology/05-strike-rules.md]]", "[[methodology/07-council-methodology.md]]", "[[methodology/M-decide-spec-first-flow.md]]", "[[worked-examples/01-solo-founder-skeleton/AGENTS.md]]"]
+links: ["[[methodology/04-decide-crons.md]]", "[[methodology/05-op-guards.md]]", "[[methodology/07-council-methodology.md]]", "[[methodology/M-decide-spec-first-flow.md]]", "[[worked-examples/01-solo-founder-skeleton/AGENTS.md]]"]
 ---
 
 # Methodology 04a — Decide your work graph
@@ -381,7 +381,7 @@ The operator LGTMs the spec (Human node). Only after the LGTM does a decompositi
 
 - **NOT for routine review.** "Did the worker produce a passing test" is a Scripts/Code verification. Don't make the operator check.
 - **NOT for delegation chains.** A Human node that says "operator delegates to Maria, who delegates to Dorothy" is not one Human node — it's three Human nodes, each with its own decision.
-- **NOT for "ask the operator to clarify" as a default.** Per `strike-13`, the verifier-gate pattern (`assignee` + `block_kind` + `status`) must be checked before claiming an operator ask. Defaulting Human for every "needs input" is the over-trigger pattern that strikes 1-3 corrected.
+- **NOT for "ask the operator to clarify" as a default.** Per `op-guard-13`, the verifier-gate pattern (`assignee` + `block_kind` + `status`) must be checked before claiming an operator ask. Defaulting Human for every "needs input" is the over-trigger pattern that op-guards 1-3 corrected.
 - **NOT for work that can be scripted.** If the rule "always LGTM on a spec" can be encoded as "spec → reviewer → auto-approve if reviewer passes", it's a Scripts/Code node, not a Human node.
 
 ### Type 2: Scripts/Code (deterministic)
@@ -499,7 +499,7 @@ If a real workload can't be expressed in the 3 types, that's a signal the method
 ### See also
 
 - `methodology/04-decide-crons.md` — crons are Scripts/Code nodes with a schedule; this Part 4 explains why they're classified as Scripts/Code, not as their own type.
-- `methodology/05-strike-rules.md` — strike rules describe operator corrections. The corrections often shift work from one node type to another (e.g., "this should have been a Scripts/Code verification, not an Agent review").
+- `methodology/05-op-guards.md` — operational guards describe operator corrections. The corrections often shift work from one node type to another (e.g., "this should have been a Scripts/Code verification, not an Agent review").
 
 - `methodology/01a-decide-memory.md` — **the kanban event log is episodic memory (Tier 4).** Every transition is a memory event; the audit trail is the union of these events. Work-graph state is reconstructed from episodic memory.
 - `methodology/04b-decide-board-routing.md` — boards are the work-graph substrate; cross-board moves are graph actions.
@@ -620,7 +620,7 @@ The 4-state machine is preserved. The 3-exit-flows rule is the **policy layer on
 
 1. **`done` is not always success.** A task can transition to `done` *with* an escalation comment ("the work shipped but here is what didn't work — open a follow-up"). This is the success-with-caveat exit: the goal was met, but the worker encountered an error-class issue it did not let block the work. The `done` state holds; the comment is the audit trail. Without the comment, the operator cannot tell a clean success from a success-with-caveat.
 
-2. **`blocked` is not always fail.** A task that is `blocked` because a parent is `blocked` is in a fail-class state (recoverable — wait for the parent). A task that is `blocked` because the brief was wrong is in an error-class state (unrecoverable — fix the brief). The `blocked` state itself does not distinguish; the `block_kind` (per `methodology/05-strike-rules.md`) does: `kind=dependency` is fail-class, `kind=needs_input` and `kind=capability` are error-class.
+2. **`blocked` is not always fail.** A task that is `blocked` because a parent is `blocked` is in a fail-class state (recoverable — wait for the parent). A task that is `blocked` because the brief was wrong is in an error-class state (unrecoverable — fix the brief). The `blocked` state itself does not distinguish; the `block_kind` (per `methodology/05-op-guards.md`) does: `kind=dependency` is fail-class, `kind=needs_input` and `kind=capability` are error-class.
 
 ### The classification test (3 questions, in order)
 
@@ -659,19 +659,19 @@ The fix: classify first. Failures that are recoverable do not escalate; the work
 ### Where this Part lives in the larger picture
 
 - **`methodology/04d-decide-flow-spec.md` Fields 5 and 6** — `retry_parameters` and `escalation_process` are the per-flow policies that the 3-exit-flows rule consumes. A flow spec that names "retry on transient timeouts, escalate on schema mismatches" is a flow spec that knows about the fail / error split.
-- **`methodology/05-strike-rules.md`** — strike 15 ("workers must call `kanban_complete` or `kanban_block` before exit") is the protocol-level enforcement of the 3-exit-flows rule: the worker must explicitly classify its exit so the dispatcher knows which transition to take. Without strike 15, workers exit without classifying and the dispatcher has to guess.
+- `methodology/05-op-guards.md` — op-guard 15 ("workers must call `kanban_complete` or `kanban_block` before exit") is the protocol-level enforcement of the 3-exit-flows rule: the worker must explicitly classify its exit so the dispatcher knows which transition to take. Without op-guard 15, workers exit without classifying and the dispatcher has to guess.
 - **`methodology/06-iteration-loop.md`** — the loop's detect step scans for tasks that exited without a clear classification; the loop's act step files the follow-up (retry, fix-brief, escalate) that the worker should have filed.
 
 ### See also
 
 - `methodology/04d-decide-flow-spec.md` — Fields 5 and 6 (retry parameters and escalation process) are the policies the 3 exit flows consume.
-- `methodology/05-strike-rules.md` — strike 15 enforces explicit exit classification at the worker-protocol level.
+- `methodology/05-op-guards.md` — op-guard 15 enforces explicit exit classification at the worker-protocol level.
 - `methodology/06-iteration-loop.md` — the iteration loop catches exits that were not properly classified.
 - `methodology/04a Part 1` (this doc) — the 4-state model; this Part is the policy layer on top of it.
 
 ## What's next
 
-- `methodology/05-strike-rules.md` — the strike rule "workers must perform a terminal transition (complete or block) before exit" depends on the work-graph state machine
+- `methodology/05-op-guards.md` — the constraint that "workers must perform a terminal transition (complete or block) before exit" depends on the work-graph state machine
 - `methodology/06-iteration-loop.md` — the loop's detect step scans the work graph for stuck items
 - `references/kanban-lite-disciplines.md` — the canonical implementation
 - `references/tool-mapping-guide.md` — how to implement the work graph in your tool

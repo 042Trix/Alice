@@ -45,8 +45,8 @@ Read `methodology/04c-decide-master-ticket.md`. **Operator-originated multi-step
 ### 4d. Decide the per-flow spec (the 6-field flow spec) (5 min)
 Read `methodology/04d-decide-flow-spec.md`. **Every flow ships with the same six fields: goal, inputs, outputs, success criteria, retry parameters, escalation.** The doc defines each field, names the per-field anti-patterns, and shows a worked example. A flow without all six fields is a flow that requires operator judgment at every step.
 
-### 5. Decide which strike rules to write (3 min)
-Read `methodology/05-strike-rules.md`. **Strike rules come from observed failures, three of the same shape.** Each rule is one paragraph. Use `templates/strike-rule.md.template`.
+### 5. Decide which operational guards to write (3 min)
+Read `methodology/05-op-guards.md`. **Operational guards come from observed failures, three of the same shape.** Each rule is one paragraph. Use `templates/op-guard.md.template`.
 
 ### 6. Iteration loop (3 min)
 Read `methodology/06-iteration-loop.md`. The detect → surface → act protocol is the engine. Without it, crons generate noise and skills generate no-ops.
@@ -89,7 +89,7 @@ Read `methodology/09-inbox-from-external-sources.md`. The X-ingestion pipeline i
                           ↓
 4d. Flow spec         →  the per-flow contract (goal/inputs/outputs/success/retry/escalation)
                           ↓
-5. Strike rules       →  the constraints (what the agent must NOT do)
+5. Operational guards       →  the constraints (what the agent must NOT do)
                           ↓
 6. Iteration loop     →  the engine (detect → surface → act)
                           ↓
@@ -100,7 +100,7 @@ Read `methodology/09-inbox-from-external-sources.md`. The X-ingestion pipeline i
 9. Inbox from external → X posts, articles, podcasts (special case)
 ```
 
-Each layer depends on the layers below it. Don't build a council (7) before you have an iteration loop (6). Don't write strike rules (5) before you've observed the failure pattern.
+Each layer depends on the layers below it. Don't build a council (7) before you have an iteration loop (6). Don't write operational guards (5) before you've observed the failure pattern.
 
 ## The 3-bucket feedback rule
 

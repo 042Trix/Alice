@@ -103,7 +103,7 @@ See `worked-examples/01-solo-founder-skeleton/methodology-notes/03-agents.md` wh
 ## What's next
 
 - `methodology/04-decide-crons.md` — crons are scheduled tasks, not agents. Different decision.
-- `methodology/05-strike-rules.md` — the constraints that prevent agents from overreaching.
+- `methodology/05-op-guards.md` — the constraints that prevent agents from overreaching.
 - `methodology/06-iteration-loop.md` — the engine that drives agent dispatch.
 
 ## Part 12: Agent typology glossary (orchestrator, downstream agent, spawned sub-agent, default profile)
@@ -236,11 +236,180 @@ See `worked-examples/01-solo-founder-skeleton/methodology-notes/03-agents.md` wh
 - `methodology/03c-decide-agent-communication-channels.md` — even after a new agent is scaffolded via Path A or Path B, it still talks to the operator only through the orchestrator, and to other agents only via ticket comments. New agents do not get their own DM channels; the 3-channel discipline applies immediately.
 - `methodology/04a-decide-work-graph.md` — the work graph is the substrate the planner watches in Path A. Without the work graph, the planner cannot detect a 5+ weekly role pattern; Path A is unavailable. Path B does not require the work graph.
 - `methodology/04b-decide-board-routing.md` — the routing rules for *what* board a ticket files on. The new agent's first workboard tickets follow 04b; only the new agent's SOUL goes on the AR board per Path B's routing note above.
-- `methodology/05-strike-rules.md` — strike rules constrain the planner from over-scaffolding (Path A's failure mode is "planner creates 8 agents that all do the same thing"; the "default" pattern in this doc is the counter). The operator's Path B requests are bounded by strike-1 (no per-ticket evidence → no auto-close) and strike-3 (no three-strike rule → durable fix on 3rd correction).
+- `methodology/05-op-guards.md` — operational guards constrain the planner from over-scaffolding (Path A's failure mode is "planner creates 8 agents that all do the same thing"; the "default" pattern in this doc is the counter). The operator's Path B requests are bounded by op-guard-1 (no per-ticket evidence → no auto-close) and op-guard-3 (no three-operational guard → durable fix on 3rd correction).
 
 ## Anti-patterns to watch for
 
 1. **"I have 8 agents and they all do the same thing."** → Consolidate. Probably you have 1 agent role and 7 over-scaffolds.
 2. **"I have 0 agents and the operator is doing everything."** → Add `default`. Then add named agents as patterns emerge.
 3. **"I'll add a 'smart' agent to do whatever I want."** → No. "Smart" is not a role. Define what they do, not how smart they are.
-4. **"The agent should be a copy of me."** → No. You're the operator. The agent has a role. The role is not "be the operator."
+3. **"The agent should be a copy of me."** → No. You're the operator. The agent has a role. The role is not "be the operator."
+
+---
+
+## Part 14: Minimum-viable agent roster (the 5 roles)
+
+This part names the **functional roles** Alice's methodology considers the minimum-viable agent roster for any operator running Alice in earnest. **Roles are methodology-level descriptions, not operator-instance profile recommendations.** Different operators will name their own profiles differently — what matters is that each role's function is present in the system. If you find yourself missing one of these roles and cannot combine it with another without breaking the work, that's the signal that you need to scaffold a profile for it.
+
+> **Method-not-instance reminder:** this part describes **roles** (what the work is) and not **instances** (which profile names you should pick). The roles are the method; your profile names are your instance. Use the names you like; keep the functions present.
+
+### The 5 roles at a glance
+
+| Role | One-line function | Canonical methodology file |
+|---|---|---|
+| **Orchestrator** | The operator-facing main agent that runs the request → plan → dispatch → verify loop | `methodology/03-decide-agents.md` (this file), `methodology/06-iteration-loop.md` |
+| **Business Analyst (BA)** | Captures operator-asks, drafts ticket specs, asks clarifying questions before work begins | `methodology/04d-decide-flow-spec.md`, `methodology/04d-decide-flow-derivation.md` |
+| **Planner** | Watches the dispatch stream for recurring role patterns; scaffolds new agent profiles when a role recurs and meets the scaffold criteria | `methodology/04a-decide-work-graph.md`, `methodology/03-decide-agents.md` Part 13 (Path A) |
+| **Verifier** | Checks completed work against acceptance criteria; flags rework; gate-keep before downstream consumption | `methodology/06-iteration-loop.md`, `methodology/05-op-guards.md` |
+| **Council** | Multi-perspective deliberation for high-stakes decisions that span domains or have irreversible consequences | `methodology/07-council-methodology.md` |
+
+### Orchestrator
+
+**What the role does.** The orchestrator is the operator-facing main agent. It receives the operator's request, plans the work, dispatches the right agents or profiles, monitors progress, surfaces decisions back to the operator, and confirms completion. The orchestrator does NOT execute the work itself (the downstream agents do that) — it routes and tracks. The orchestrator is the single agent that holds the operator's full chat history and has access to all operator-side channels (DM, in-chat surfaces).
+
+**When to instantiate.** Always. There is no Alice implementation without an orchestrator role. Even a solo operator running Alice in its smallest form has at least one orchestrator profile.
+
+**When it can be combined.** For very small systems, the orchestrator can be combined with the verifier (the orchestrator checks its own work before reporting back) — but this combination is fragile and only suitable for one-offs or very early validation. Combining orchestrator with planner or BA is acceptable for a tiny solo operator; combining orchestrator with council defeats the purpose of independent deliberation.
+
+**Canonical deeper file.** `methodology/06-iteration-loop.md` (the dispatch / verify / surface loop); `methodology/03-decide-agents.md` Part 12 (orchestrator as one of the 4 agent types).
+
+### Business Analyst (BA)
+
+**What the role does.** The BA captures an operator-ask and turns it into a spec or ticket body that downstream agents can act on. The BA's job is to ask clarifying questions early (so the spec is right before work begins), draft the spec from the operator's words, and gate-keep spec quality. The BA does NOT execute the spec; the BA hands the spec to the orchestrator or directly to a downstream agent for execution.
+
+**When to instantiate.** When the operator's asks have any ambiguity or could be interpreted multiple ways. If the operator's asks are always single-sentence with one obvious interpretation, the BA role can be combined with the orchestrator. If the operator's asks are multi-step or have stakeholders with conflicting requirements, instantiate the BA.
+
+**When it can be combined.** The BA is commonly combined with the orchestrator on small systems ("the orchestrator does its own BA pass before dispatching"). Splitting BA from orchestrator is worth the cost when the operator's volume is high enough that asking clarifying questions slows the loop, or when the BA's output is consumed by multiple orchestrators.
+
+**Canonical deeper file.** `methodology/04d-decide-flow-spec.md` (spec writing), `methodology/04d-decide-flow-derivation.md` (deriving a ticket spec from an operator flow).
+
+### Planner
+
+**What the role does.** The planner watches the dispatch stream for recurring role patterns. When the planner detects a pattern that meets all four scaffold criteria (recurs 5+ times/week, has a defined domain, has different skills than existing agents, has a different memory footprint), the planner scaffolds a new agent profile. The planner is also the canonical "role-watcher agent" from Part 13 (Path A) — it has the authority to create new agent profiles autonomously. The planner does NOT execute the work being dispatched; the planner shapes the system that executes the work.
+
+**When to instantiate.** When you have at least one orchestrator AND you want the system to scale without the operator bottlenecking on every new role detection. If you are a solo operator running 5-10 tasks/week and naming agents manually, you may not need a planner yet — but you will hit the wall when task volume doubles.
+
+**When it can be combined.** The planner can be combined with the orchestrator on small systems ("the orchestrator does its own pattern detection weekly"), but this combination breaks down at higher volume. Combining planner with verifier defeats the role separation (the planner should not be checking its own scaffolding decisions); combining planner with council is fine for periodic "should we scaffold a new role?" reviews.
+
+**Canonical deeper file.** `methodology/03-decide-agents.md` Part 13 (Path A — the role-watcher agent); `methodology/04a-decide-work-graph.md` (the work graph substrate the planner watches).
+
+### Verifier
+
+**What the role does.** The verifier checks completed work against the ticket's acceptance criteria (or, in Alice's terms, the spec's "Stop condition" and "Verifier-gated" sections). The verifier is the last gate before downstream consumption — its pass-or-fail verdict determines whether the work ships, gets sent back for rework, or surfaces to the operator for a decision. The verifier does NOT execute the work; the verifier checks it.
+
+**When to instantiate.** Almost always. Even small Alice implementations benefit from a verifier role because it catches drift and rework loops before they cost more than they save. If you find yourself re-doing work that "looked done" but wasn't, you need a verifier.
+
+**When it can be combined.** The verifier is the role most commonly combined with the orchestrator on the smallest systems ("the orchestrator self-verifies before completing"). Splitting verifier from orchestrator is worth the cost the moment you have any volume, because the orchestrator's self-verification bias is the dominant failure mode for solo operators. Combining verifier with planner is acceptable for periodic "did our scaffolding work?" checks.
+
+**Canonical deeper file.** `methodology/06-iteration-loop.md` (the verify step in the dispatch loop); `methodology/05-op-guards.md` (verifier-as-gate pattern for operational-guard enforcement).
+
+### Council
+
+**What the role does.** The council is a multi-seat deliberation on a single question or proposal. Each seat has a perspective (canonical Alice: strategist, engineer, operator, skeptic; plus optional product). The seats deliberate independently and produce a verdict that the orchestrator then acts on. The council is NOT a vote; the council is structured disagreement that surfaces agreements and disagreements, then the orchestrator (or operator) decides.
+
+**When to instantiate.** Only at high-stakes decision points: irreversible changes, cross-domain decisions, observed failure patterns that need structured review, or major scope expansions. A solo operator who runs Alice for one project may never need a council; a multi-operator team making platform decisions needs one monthly. Convening a council for every decision is over-deliberating; convening one never is reckless.
+
+**When it can be combined.** The council is the LEAST combinable role — combining council with any single-agent role defeats the purpose of multi-perspective deliberation. The closest acceptable combination is a "lightweight council" where the same agent runs 2-3 perspectives in separate sessions (and this is explicitly noted as a degraded mode, not a substitute). For real deliberation, the council must be multiple agents with independent contexts.
+
+**Canonical deeper file.** `methodology/07-council-methodology.md` (full council methodology, including the 4-seat minimum, the 3-step process, and the "when NOT to convene" criteria).
+
+### The starting point (smallest viable roster)
+
+Operators with smaller systems may start with **just orchestrator + verifier** and add the others as needed. Alice's methodology names the roles; the operator's tool provides the mechanism.
+
+A reasonable expansion path as the system grows:
+
+1. **Solo, low-volume (5-10 tasks/week).** Orchestrator + verifier (combined). Add BA when operator-asks start to have ambiguity.
+2. **Solo, medium-volume (10-30 tasks/week).** Orchestrator + BA + verifier, all potentially combinable into 1-2 profiles if volume stays predictable.
+3. **Multi-domain or multi-project.** Orchestrator + BA + planner + verifier as separate profiles. Council convened quarterly or per major scope expansion.
+4. **Multi-operator or platform-scale.** All 5 roles as separate profiles. Council is a standing capability (one of the 5, not a one-off).
+
+### How the roster interacts with the rest of the methodology
+
+- **vs. Part 12 (agent typology).** The 5 roles are functional descriptions; Part 12's 4 agent types (orchestrator, downstream agent, spawned sub-agent, default profile) are implementation mechanisms. A single role can be implemented by any of the 4 agent types. The roster names **what work** needs doing; Part 12 names **how that work runs**.
+- **vs. Part 13 (two-path creation).** Roles in the roster are scaffolded via Path A (planner detects the pattern and scaffolds) or Path B (operator requests via the agent-resources board). The roster is the **what**; Path A/B is the **how**.
+- **vs. the 4-step scaffold process.** The roster is the starting point, not the destination. The 4-step process (Observe → Pattern → Scaffold → Validate) still governs each new role's emergence. The roster is your hypothesis; the system may grow beyond the 5 if a new pattern emerges, or contract below the 5 if you combine roles safely.
+
+### Anti-patterns to watch for
+
+1. **"I must instantiate all 5 profiles or my system is incomplete."** → No. The roster is a starting point and a checklist for "is the function present?" — not a forced minimum instance count. A solo operator with a combined orchestrator-verifier profile has both functions present; the instance count is 1, not 2.
+2. **"I have 8 profiles and they all do the same thing."** → You over-scaffolded. Map each profile to one of the 5 roles; if the mapping is unclear or 2 profiles map to the same role, consolidate.
+3. **"My planner and orchestrator are the same profile and it's fine."** → Probably not, at scale. Once the planner is creating new profiles, the orchestrator executing work, and both reporting back to the operator, the contexts diverge and the role combination will start producing bias. Split them.
+4. **"I never convene a council."** → Either your system is very small (fine) or you are making irreversible decisions without structured review (not fine). Track which decisions you make without a council; if any of them turned out wrong and were hard to reverse, you needed a council.
+5. **"I convene a council every week."** → Over-deliberating. Councils are for high-stakes decisions, not cadence. Most weeks should not have a council.
+
+---
+
+## Part 15: Maintenance
+
+An agent roster is structural — the four scaffold conditions (5+ weekly role recurrence, defined domain, different skills, distinct memory footprint) are what justify each profile's existence. Stale roles are tolerable; scaffolded roles that no longer earn their keep are not. Without an explicit maintenance cadence, the roster grows: profile count creeps up, SOULs go out of date, two profiles end up with overlapping triggers, and the operator ends up with a "default" pattern that is supposed to be the catch-all but is actually one of six overloaded roles. This section gives the methodology a self-audit loop.
+
+The maintenance loop is operator-led, runs on a fixed cadence, and has explicit drift signals that trigger action. It is not a passive review; it is a check that produces a verdict per subsection and a named corrective action when a verdict is `revise`.
+
+### 15.1 Audit cadence
+
+Audit the agent roster every **90 days**. The cadence is structural rather than project-driven: a single quarterly sweep over the active profiles (per `methodology/03c-decide-agent-communication-channels.md`'s agent-roster concept) catches drift before it accumulates past one quarter of work. The audit is a read pass — it does not modify any profile; it produces a list of drift items (per 15.3) and an action queue (per 15.4).
+
+A 90-day cadence is chosen because:
+
+- Shorter intervals (e.g., 30 days) produce noise — most roles are stable across a single quarter.
+- Longer intervals (e.g., 180 days) let two quarters of drift accumulate before anyone notices.
+- The cadence aligns with the quarterly vault and skill maintenance cadences elsewhere in Alice's methodology.
+
+**Audit-sooner triggers:**
+
+- A worker `kanban_block`s on a profile that lacks a clear SOUL definition.
+- Two profiles receive the same dispatch within a 30-day window (overlap signal).
+- The operator catches themselves wishing they could combine two profiles into one.
+- A council review or retro names agent over-scaffolding as a contributing cause.
+
+### 15.2 Quality threshold
+
+An agent profile passes the 90-day audit when **every link in the profile's contract holds**:
+
+- The profile has a SOUL.md on disk (per `templates/agent-soul.md.template`), and the SOUL is **≥ 100 lines** — short SOULs describe roles that have not been validated; long SOULs describe roles that have drifted into encyclopedias.
+- The SOUL's **Boundaries** section names what the agent does NOT do. A profile with no boundaries has no role.
+- The SOUL's **Tools** and **Skills** sections are non-empty AND list specific tools / skills, not generic placeholders ("use the right tool").
+- The SOUL specifies **trigger conditions** — explicit phrases or dispatch signals that mean "load this profile." A profile without triggers is loaded for everything or for nothing.
+- The profile is **invoked at least weekly** in the dispatch stream. A profile that has not been claimed in 7+ days is dormant; treat dormant profiles as drift candidates (see 15.3) before treating them as retired (see 15.5).
+- The profile's `last_reviewed` frontmatter field (or equivalent) is **≤ 90 days stale**. A SOUL that has not been touched in a quarter has not been validated.
+
+If any link is missing, the profile has a hole — record it under 15.3 and act on it under 15.4.
+
+### 15.3 Drift signals
+
+The audit hunts for four classes of drift in the agent roster:
+
+1. **Stale SOUL.** A SOUL.md whose `last_reviewed` (or `updated`) field is 90+ days stale. The profile is alive on paper; the role description has not been re-validated against actual dispatch behaviour.
+2. **Under-invoked profile.** A profile invoked < 1×/week in the rolling 30-day window. The profile exists; the work does not justify it. The signal is not automatically retirement — it is a maintenance item (per 15.4) that may resolve into retirement (per 15.5) only after the 30-day consecutive-zero-invocations threshold.
+3. **Overlapping triggers.** Two or more profiles are loaded for the same dispatch signal — i.e., the dispatcher's router cannot pick one. The SOULs have drifted to claim the same role; consolidate via the overlap-detection algorithm in `methodology/02-decide-skills.md §3`.
+4. **SOUL bloat.** A SOUL.md has grown past 500 lines without a corresponding role-narrowing. The role description has accumulated exceptions and edge cases; rewrite to the core role and let the exceptions live in skills or in the orchestrator's judgment.
+
+A drift signal is not a bug — it is a maintenance item. The audit logs each one with its profile id, the drift class, and the date the drift was first observed.
+
+### 15.4 Fix actions
+
+When drift is detected during the 90-day audit, apply the matching fix:
+
+- **Stale SOUL.** Re-run the **4-step scaffold process** (Observe → Pattern → Scaffold → Validate; see "The 4-step process" earlier in this doc) for the affected profile. If the role still recurs with a stable domain, refresh the SOUL with the audit's findings and bump `last_reviewed`. If the role no longer recurs, transition the profile to the retirement queue (15.5).
+- **Under-invoked profile.** Distinguish dormancy from abandonment. A profile dormant for 7-29 days is **on hold** — record the dormancy, do not retire. A profile dormant for 30+ consecutive days is a **retirement candidate** (15.5). Before retiring, check the dispatch log: is the work landing on `default` instead? If yes, the profile is dormant because it lost its role; retire it. If no, the profile is dormant because nothing matched its triggers; tighten the SOUL's trigger conditions or merge with a sibling profile.
+- **Overlapping triggers.** Apply the overlap-detection algorithm from `methodology/02-decide-skills.md §3` — generate candidate pairs, compare SOUL sections, then merge (one profile absorbs the other's domain) or supersede (the older profile's role is retired in favour of the newer). The agent roster inherits the same overlap policy as skills.
+- **SOUL bloat.** Extract the exceptions into skills (the profile owns the role, the skills own the edge cases) or into the orchestrator's routing logic. The SOUL returns to the **≥ 100 lines, ≤ 500 lines** band.
+
+**When multiple profiles overlap with `default`** (operator files 5+ tasks/week on `default` that look like the same role), the fix action is to **scaffold a new profile** following the 4-step process — do not let `default` accumulate a hidden role. The audit is the right time to act on accumulated drift. Do not wait for a verifier or an operator to flag it — drift accumulates quietly and a missed quarter becomes a roster that no longer matches the work.
+
+### 15.5 Retirement conditions
+
+Retire a profile (archive the SOUL.md, remove the profile from the active roster, and stop dispatching to it) when **either** of the following holds:
+
+- **Zero invocations for 30 consecutive days.** The profile has not been claimed by the dispatcher for a full month. The role no longer recurs in the dispatch stream; the profile is dead weight. Archive with a one-line reason in the body ("Archived 2026-XX-XX: 30 days dormant, no work matched the trigger conditions") so future readers can find the successor.
+- **Explicit merge decision.** The operator or a council verdict decides that this profile's role is now covered by another profile. The merge target takes over; the source profile is archived with a pointer to the successor ("Merged into `planner` on 2026-XX-XX; see archived SOUL for the role history").
+
+**What "retire" means in practice.** The SOUL.md moves from `status: active` to `status: archived`. The profile is removed from the dispatcher's roster. New work that would have routed to this profile routes to `default` or to the merged-into profile. The retirement is reversible — un-archive the SOUL and add the profile back to the roster if the role re-emerges.
+
+**What retirement is NOT.** Retirement is not deletion of the SOUL.md — the file stays on disk as a historical reference. Retirement is not a stealth simplification — the operator (or the planner, per Part 13 Path A) must approve the proposal before the profile's status changes. Retirement is not a one-time decision — if the merged-into profile also fails, the operator can revert by un-archiving this profile.
+
+**The default is to fix, not retire.** Drift in a profile is usually a symptom of a SOUL that has not been re-validated (stale) or a role that has shifted (overlap). Most maintenance passes end with a verdict of `revise`, not `retire`. The retirement conditions above are a guardrail against a profile that no longer earns its role, not an excuse to skip the 4-step scaffold process.
+
+---
+

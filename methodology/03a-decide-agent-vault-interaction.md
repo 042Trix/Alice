@@ -8,7 +8,7 @@ status: draft
 source: alice-framework
 tags: [kind:methodology, kind:agent-vault, kind:scoped-import, project:alice]
 confidence: 0.0
-links: ["[[methodology/01-decide-vault-tier.md]]", "[[methodology/01a-decide-memory.md]]", "[[methodology/01b-decide-vault-content.md]]", "[[methodology/02-decide-skills.md]]", "[[methodology/03-decide-agents.md]]", "[[methodology/05-strike-rules.md]]", "[[templates/agent-vault-permissions.md.template]]", "[[templates/agent-soul.md.template]]"]
+links: ["[[methodology/01-decide-vault-tier.md]]", "[[methodology/01a-decide-memory.md]]", "[[methodology/01b-decide-vault-content.md]]", "[[methodology/02-decide-skills.md]]", "[[methodology/03-decide-agents.md]]", "[[methodology/05-op-guards.md]]", "[[templates/agent-vault-permissions.md.template]]", "[[templates/agent-soul.md.template]]"]
 ---
 
 # Methodology 03a — Decide how agents interact with the vault
@@ -570,6 +570,79 @@ The friend reads the methodology, then designs their own interaction patterns fo
 
 ---
 
+## Maintenance
+
+> This section is the audit surface for **agent-vault interaction patterns** (read-only, propose, edit, scaffold, archive). It mirrors the canonical 5-subsection shape from `methodology/_templates/maintenance-scaffold.md.template` so a friend reading any maintenance section in `methodology/` sees the same rhythm: when to audit, what counts as healthy, what drift looks like, what to do when drift is found, and when the section itself should be retired. The cadence and quality bar are methodology defaults; map each to your tool before adopting.
+
+### 1. Audit cadence
+
+Audit **agent-vault interaction patterns** on a **fixed cadence** — every **90 days**. Agent-vault patterns are stable: the 5 interaction levels (read-only, propose, edit, scaffold, archive), the read-then-write discipline, the per-pattern tool-call budgets, and the context budget all change slowly. The cadence is a calendar event, not "when I remember." Off-cycle audits fire when a signal in §3 trips before the next scheduled review.
+
+Record each audit with: date, auditor (operator or named reviewer profile), the per-agent interaction levels under review, verdict per check in §2, corrective action if any, next-audit date. Store the audit record on the relevant comment thread, master ticket, or the methodology's changelog so the trail survives across sessions.
+
+### 2. Quality threshold
+
+Agent-vault interaction patterns pass the maintenance check when **all** of the following hold:
+
+- **Each agent has a documented interaction level.** For every agent in the system, the AGENTS.md / SOUL.md names which of the 5 patterns (read-only, propose, edit, scaffold, archive) the agent uses for each tier. An agent with no documented pattern is unaccountable.
+- **The per-agent tool-call budget is recent.** The tool-call budgets in §Part 4 reflect the last 90 days of observed usage — not defaults copied from the methodology. A budget that has not been reviewed against actual session logs is a stale budget.
+- **The agent context budget is enforced.** The 4 load strategies (cold-start ≤20K, topic ≤50K, note ≤30K, query ≤10K; cumulative ≤100K on-demand per session) are enforced by the platform, not by agent self-report. A budget that the agent can silently exceed is no budget.
+- **The per-pattern guardrails are intact.** The archivist evidence-based rule (§Part 8) and the scaffolder approved-pattern rule (§Part 7) are observable in recent agent behavior, not just documented in the methodology.
+- **Drift signals from §3 have a recorded disposition.** Every drift signal raised since the last audit has either been resolved (with a corrective action) or is in flight on a maintenance ticket with an owner. No orphan signals.
+
+The thresholds are review gates, not formatting games. Marking a check "passes" because the agent "looks healthy" fails the underlying test. The check is whether the documented condition is observable in the system today, not whether the operator believes it is.
+
+### 3. Drift signals
+
+Drift is observable. Surface at least one of the following before the next scheduled audit:
+
+- **An agent is using a pattern it should not.** A read-only agent is editing notes; a propose-only agent is committing changes without operator review; an archivist is making judgment-based moves without evidence. The pattern assignment in the AGENTS.md / SOUL.md has drifted from the observed behavior.
+- **The context budget is regularly exceeded.** Recent agent sessions routinely exceed the 100K cumulative on-demand load cap, or routinely exceed the 20K cold-start cap. The budget is not protecting the context window as designed.
+- **The agent is repeatedly loading too many notes.** An agent's `--summary` lists 30+ notes read for a single task, or walks the wikilink graph past 1 hop without a ticket-justified reason. The scoped context import rule (§Part 13) has failed in practice.
+- **The tool-call budget is consistently hit or consistently ignored.** Agents either blow the per-pattern budget on every session (budget is too small or the work is unstructured) or use <50% on every session (budget is too large; tighten). Either signal means the budget is not calibrated to the work.
+- **The per-pattern guardrail fires without a record.** A scaffold was created outside an approved scaffold pattern with no `propose` ticket; an archive happened without a `status=stale`, `age>30d-no-active-links`, or `duplicate-confirmed` reason. Guardrails are firing and being bypassed.
+
+A drift signal does not always mean the rule is wrong. Sometimes the rule is right and the writer is wrong; sometimes the platform cannot enforce it; occasionally the rule is obsolete and the signal is the prompt to revise. The audit names the signal and proposes a disposition; the owner confirms.
+
+### 4. Fix actions
+
+When drift is detected, the canonical response is:
+
+1. **File a maintenance ticket** on the operator's kanban board (default board: `hermes`). Name the drift signal, the offending agent(s), the recent session(s) where the signal appeared, and the suspected cause.
+2. **The methodology owner reviews** the per-agent interaction levels, the per-pattern tool-call budgets, the platform enforcement of the context budget, and the corrective actions from prior audits. The owner does not unilaterally rewrite the methodology; the owner proposes.
+3. **The owner re-issues the per-agent pattern assignment or the budget.** Two outcomes are valid: (a) the rule was right and the agent or writer was wrong — fix the agent's SOUL.md / AGENTS.md or the writer's process, then re-audit; (b) the rule is obsolete — open a methodology-revision ticket, then re-apply after the new rule lands.
+4. **Run the recent-knowledge-state check** for any agent that has been exceeding the context budget: the operator reviews the last 10 sessions, counts the loaded notes per session, and identifies whether the loads were ticket-justified. An unjustified load count is the scoped-import violation that the budget was supposed to prevent.
+5. **Audit the agent's recent task history** for any agent using a pattern it should not: the operator pulls the last 10 sessions, checks the audit lines against the documented pattern assignment, and names the first session where the drift began. The audit names drift, not blame.
+6. **The disposition is recorded** on the ticket: cause, corrective action, next review date. A drift signal with no recorded disposition is unresolved.
+
+Do not auto-fix drift by editing the agent's SOUL.md to match observed behavior. A condition that fails is a routing failure or a tooling failure; the fix is to address the underlying cause, not to rewrite the pattern assignment to match the drift.
+
+### 5. Retirement conditions
+
+Retire the maintenance section (or the agent itself) when **at least one** of the following is observable for 90 consecutive days:
+
+- **An agent consistently exceeds the context budget.** Every session for three months runs over the 100K cumulative on-demand cap or the 20K cold-start cap, even after the budget has been tightened and the recent-knowledge-state check has been run. The agent's domain is too broad for the per-session context budget to be a workable constraint; the agent's scope must shrink or the agent must be retired.
+- **An agent uses no interaction patterns.** The agent's audit lines for 90 consecutive days show no reads, no proposes, no edits, no scaffolds, no archives. The agent is not a useful agent — it has no vault footprint, no work product, and no measurable contribution to the system.
+- **The methodology is no longer in use.** No new agent has been assigned an interaction level from this methodology in three months; the operator has shifted to a different interaction model (e.g., a fully read-only research agent set, or a fully propose-only draft pipeline) and the 5-pattern matrix no longer describes the system.
+- **The methodology is consistently skipped.** New agents are onboarded with their interaction level set by intuition, not by this methodology, and the maintenance check is not invoked. The section has become documentation theater.
+- **A simpler methodology has replaced it.** A different section in `methodology/` covers agent-vault interactions with lower overhead; the older section is dead weight.
+
+The retirement sequence:
+
+1. Propose retiring the agent (or merging the methodology with the adjacent section that covers the same ground). Name the surviving agent or methodology.
+2. Move all in-flight tickets, audit records, and references from the retired agent or methodology to the surviving target, preserving references and adding a `migrated_from:` field so the move is auditable.
+3. Update every MOC, catalog entry, agent assignment, and cross-reference that pointed at the retired entity.
+4. Keep the section or agent profile present as an empty placeholder for one full audit cycle (90 days) so any late-arriving references surface. Remove the placeholder only after the cycle completes with no inbound references.
+5. Record the retirement in the methodology changelog: date, surviving target, contents moved, references updated, owner.
+
+### Maintenance parity check
+
+This section defines a friend-portable method, not a claim that every platform supplies automated pattern-assignment audits, context-budget enforcement, or guardrail-firing logs. Before adopting it, map each function — per-agent pattern audit, budget enforcement review, drift surfacing, corrective routing, retirement archival — to mechanisms available in your own tool. The 90-day cadence is a methodology default (agent-vault patterns are stable); adjust when measured drift rate, instance volume, or operator-stated risk provides better evidence, but record the exception so the audit trail remains intact.
+
+> **Method-not-instance reminder.** Alice documents the method, not the specific tool or operator. Replace per-agent specifics with the names of the friend's own agents; do not paste instance-specific paths, commands, or platform names into the section body.
+
+---
+
 ## See also
 
 - `methodology/03b-decide-operator-agent-interaction.md` — the agent-vault doc covers the 5 patterns (read-only, propose, edit, scaffold, archive). The operator-agent doc covers the **operator's perspective** on each pattern: approve for Pattern 2 (Propose), review for Pattern 4 (Scaffold), capture for Pattern 5 (Archive). The two docs are siblings.
@@ -581,7 +654,7 @@ The friend reads the methodology, then designs their own interaction patterns fo
 - `methodology/01a-decide-memory.md` — the memory doc covers tier budgets; this doc covers tool-call budgets
 - `methodology/01b-decide-vault-content.md` — the content doc covers lifecycle stages; this doc covers the agent's role per stage
 - `methodology/03-decide-agents.md` — the agent design doc covers identity; this doc covers action
-- `methodology/05-strike-rules.md` — strike rules like "no direct mutation" depend on the interaction pattern
+- `methodology/05-op-guards.md` — operational guards like "no direct mutation" depend on the interaction pattern
 - `templates/agent-vault-permissions.md.template` — the fillable form for an agent's per-tier permissions
 - `templates/agent-soul.md.template` — the SOUL has a Tools section; expand with per-tier permissions
 
@@ -608,7 +681,7 @@ This doc touches:
 - `methodology/01b-decide-vault-content.md` — content doc covers lifecycle stages; this doc covers the agent's role per stage
 - `methodology/02-decide-skills.md` — skills are loaded on trigger conditions, not "all in case"; the scoped context import rule (Part 13) is the principle that the skill-trigger discipline enforces
 - `methodology/03-decide-agents.md` — agent design covers identity; this doc covers action
-- `methodology/05-strike-rules.md` — strike rules like "no direct mutation" depend on the interaction pattern
+- `methodology/05-op-guards.md` — operational guards like "no direct mutation" depend on the interaction pattern
 - `templates/agent-vault-permissions.md.template` — the fillable form for an agent's per-tier permissions
 - `templates/agent-soul.md.template` — the SOUL has a Tools section; expand with per-tier permissions
 ## What's next (Part 13: scoped context import)

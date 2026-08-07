@@ -151,9 +151,73 @@ See `worked-examples/01-solo-founder-skeleton/methodology-notes/04-crons.md` whe
 - `methodology/04a-decide-work-graph.md` — the work graph is the substrate; its canonical node order inserts an independent verifier gate between phases. **Cascading-crons** that dispatch child work or query sub-graphs require: (1) a sub-graph query (recursive traversal of `parent_id` + `blocks`), (2) a transactional dispatch (file all children, then transition parent), (3) an audit line per cascade, and (4) verifier evidence when the cascade produces a reviewable work product. Without these, the cascade is non-atomic and the operator can't reconstruct the work graph. **The polling-engine loop is the heartbeat that watches this work graph for `ready` transitions** (see the polling-engine exemption above).
 - `methodology/04b-decide-board-routing.md` — every ticket file is a routing decision. Crons that file tickets (for example, a stuck-ticket rescue cron or a work-item auto-decompose cron) must respect the keyword-routing table. A cron that files on the wrong board is a routing violation. **Alice documents the method, not specific instances.**
 
+## Maintenance
+
+A cron set is small but impactful. A single broken detection cron can leave the operator blind to a category of system state, and a cron that accumulates without review is technical debt with a schedule. Maintenance is evidence-led and uses a tight 30-day cycle because the cron count is low and the consequences of drift are high.
+
+### 1. Audit cadence
+
+Run a cron audit every **30 days**. The cycle is short because the cron list is small (typically 5-15 entries per operator instance) and each entry is consequential. The audit is a documented procedure, not a free-form review:
+
+1. Inventory the cron list (`hermes cron list` or platform equivalent).
+2. For each cron, record `last_run_at`, `status`, declared `schedule`, and declared `purpose`.
+3. Compare against the 30-day-old audit record; diff what changed.
+4. Produce a maintenance report (see Section 7 below) and route any action items to tickets.
+
+### 2. Quality threshold
+
+A cron is healthy when **all four** are true:
+
+1. **Documented purpose** — the cron has a one-line `purpose` field (or equivalent) that names what the cron detects and why.
+2. **Reasonable schedule** — the cadence matches the cadence heuristic (Section "Cron-cadence heuristics"), and the 1-min exemption only applies to the polling engine.
+3. **Recent run** — `last_run_at` is within `2 × schedule` (a daily cron must run within 48 hours; a 5-min cron within 10 minutes). If the cron's schedule has natural variation (e.g. weekly Monday 09:00), measure against the next expected run, not the wall clock.
+4. **Clear status** — each cron shows `ok` or `error` cleanly; ambiguous states ("unknown", "stalled", missing field) count as drift and trigger Section 4.
+
+### 3. Drift signals
+
+Each signal is independently actionable. One signal is enough to file a fix ticket; three or more signals in the same audit cycle is a structural problem.
+
+- **Stale last-run.** `last_run_at > 2 × schedule`. A daily cron that hasn't run in 3 days is dead.
+- **Sustained error.** A cron has shown `error` for **7+ consecutive days**. Transient errors are normal; persistent errors are a bug.
+- **Missing log.** No log entry in the audit window. Either the cron never runs or its logger is broken — both are bugs.
+- **Accumulation.** The cron list grew since the last audit without a corresponding retirement. New crons without old-cron retirement is drift toward bloat.
+- **No declared purpose.** A cron with an empty or vague `purpose` field cannot be evaluated against the quality threshold; treat as drift.
+
+### 4. Fix actions
+
+When drift is detected, the fix path depends on the signal. Default-plan + 10-minute window; pick the reversible-cheap fix and ship.
+
+| Signal | First action | If first fails |
+|---|---|---|
+| Stale last-run | Run `hermes cron list` to confirm registration; force a tick via `hermes cron run <id>` to test the script path | File a cron-audit ticket; check dispatcher health |
+| Sustained error | Read the cron's last 5 log lines; identify the error class | Pause the cron, file a fix ticket, link to the error log path |
+| Missing log | Verify the cron is registered and enabled; check for log-rotation interference | File a cron-audit ticket with the cron id and observed behavior |
+| Accumulation | Run the cron audit (Section 1); list candidates for retirement in the report | Schedule a dedicated cron-retirement ticket |
+| No declared purpose | Read the cron's spec; if purpose can be inferred, add it; if not, file a needs_input ticket | Mark the cron as `needs purpose` until resolved |
+
+Avoid the "delete the cron" reflex. Most drift has a recoverable cause. Only retire when Section 5 conditions are met.
+
+### 5. Retirement conditions
+
+Retire a cron when **either** of the following is true:
+
+1. **Sustained error for 30+ days.** The cron has been broken longer than the maintenance cycle and no fix ticket is in flight. Two consecutive audits showing `error` with no active remediation is retirement-eligible.
+2. **Zero operator-action events for 60+ days.** The cron runs, detects state, surfaces observations, but no operator or downstream agent has acted on the output for two full audit cycles. The cron is producing audit-only output with no decision-maker — a write-only loop.
+
+Retirement is not deletion. Follow the deprecation pattern:
+
+1. Pause the cron (`--deliver local` or platform equivalent) for 7 days to confirm no latent consumer.
+2. Record `retired_on`, `reason`, and `replaced_by` (or `none`) in the cron spec.
+3. Move the spec to an archive location and update any inbound links.
+4. Only delete the cron registration after the 7-day observation window.
+
+### Maintenance parity check
+
+This section defines a friend-portable method, not a claim that every platform supplies `hermes cron list`, audit logging, or deprecation archives. Before adopting it, map each function — inventory query, last-run visibility, audit-log access, retirement archive — to mechanisms available in your own tool. The 30-day cycle and the four quality conditions are methodology defaults; adjust them when measured execution cost, risk, or operator-stated cadence provides better evidence, but record the exception so the cron set remains auditable.
+
 ## What's next
 
-- `methodology/05-strike-rules.md` — the constraints that prevent crons from going wrong
+- `methodology/05-op-guards.md` — the constraints that prevent crons from going wrong
 - `methodology/06-iteration-loop.md` — the engine that drives cron + agent coordination
 - `methodology/08-inbox-route.md` — how external inputs become crons / skills / agents
 

@@ -5,6 +5,11 @@ title: "Memory budget — fillable template"
 type: template
 status: draft
 source: alice-framework
+derived_from:
+  project: Alice
+  template: templates/memory-budget.md.template
+  version: 0.1.1
+  customized_on: <YYYY-MM-DD>
 tags: [kind:template, kind:memory-budget, project:alice]
 confidence: 0.0
 links: ["[[methodology/01a-decide-memory.md]]", "[[templates/AGENTS.md.template]]", "[[templates/agent-soul.md.template]]", "[[templates/skill-brief.md.template]]"]
@@ -115,7 +120,7 @@ links: ["[[methodology/01a-decide-memory.md]]", "[[templates/AGENTS.md.template]
 For each tier:
 
 1. **Is this tier bloated?** (Cold-start > 20K? Skills > 30 per session? Operator prefs > 3K?) → trim.
-2. **Is this tier stale?** (SOUL > 1 year without revision? Strike rule > 6 months without incident?) → review or archive.
+2. **Is this tier stale?** (SOUL > 1 year without revision? Operational guard > 6 months without incident?) → review or archive.
 3. **Is this tier conflicting?** (AGENTS.md says X, SOUL says Y?) → reconcile.
 4. **Is this tier being used?** (Skill loaded 0 times in 90 days?) → archive.
 5. **Is this tier the right home?** (Episodic event should be a long-form note?) → migrate.

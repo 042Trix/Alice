@@ -82,7 +82,7 @@ See `methodology/03b-decide-operator-agent-interaction.md` for the full design m
 
 **Why this:** the research analyst has editorial judgment at the center. The operator reviews drafts (the writer proposes, the operator accepts/revises); the operator reviews citations (the verifier proposes, the operator accepts/revises). The approver role is editorial, not just procedural.
 
-**What they skip:** the governor role for strike-rule drafting (the research analyst uses council verdicts, not strike rules).
+**What they skip:** the governor role for op-guard drafting (the research analyst uses council verdicts, not operational guards).
 
 **What they add:** a **citation-update protocol** — when a literature note is updated (new version of a paper), the operator gets an operator-action ticket asking whether to update the citing notes. The protocol is: read citing notes → ask operator → if approve, agent updates citations.
 
@@ -205,9 +205,9 @@ See `methodology/03c-decide-agent-communication-channels.md` for the full design
 
 **What they add:** the **"embedding regen"** cron. Embeddings need periodic regeneration as literature-tier content changes.
 
-## 05-strike-rules
+## 05-op-guards
 
-**Typical decision:** 6-9 strike rules, mostly operator-specific.
+**Typical decision:** 6-9 operational guards, mostly operator-specific.
 
 **The 6-9 standard rules:**
 1. **No-narrated-action** — agent does the action, doesn't narrate it
@@ -246,7 +246,7 @@ See `methodology/03c-decide-agent-communication-channels.md` for the full design
 
 **Typical decision:** 4 seats (Strategist, Engineer, Operator, Skeptic). Run councils for:
 - Skill-brief validation
-- Major scope changes (new research vertical, new strike rule)
+- Major scope changes (new research vertical, new operational guard)
 - Failure pattern reviews (3+ incidents of the same shape)
 - **Editorial decisions** (is this draft ready to ship?)
 
@@ -279,7 +279,7 @@ See `methodology/03c-decide-agent-communication-channels.md` for the full design
 
 **What they typically filter:** most fail the filter. The filter is tuned to the operator's research interests.
 
-**What they typically route:** most filtered items are archived. The few that survive are routed to citation (literature), atomic (idea), skill-brief, strike-rule, or operator-action.
+**What they typically route:** most filtered items are archived. The few that survive are routed to citation (literature), atomic (idea), skill-brief, op-guard, or operator-action.
 
 **What they add:** a **"RSS-into-vault"** cron that captures articles from the operator's RSS subscriptions. Daily cadence, automatic capture; manual summarize + route.
 

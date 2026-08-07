@@ -1,7 +1,7 @@
 ---
 id: alice-methodology-04d-decide-flow-spec
 created: 2026-08-05T15:45:00Z
-updated: 2026-08-05T22:05:20Z
+updated: 2026-08-06T20:20:00Z
 title: "Methodology 04d — Decide the per-flow spec (the 6-field flow spec)"
 type: methodology
 status: draft
@@ -268,6 +268,120 @@ When a flow has children, the spec's `outputs` field names the destination path 
 The spec is not a separate document in `methodology/` — it is an **instance** of this methodology, applied to one flow. The methodology doc (this file) defines the shape; each flow files its own spec inline. The methodology doc does not grow; the instance count grows.
 
 ---
+
+## Maintenance
+
+> Originally deferred by the v0.1.0 council as "the 6-field spec is a *technical artifact*, not a *thing-with-maintenance*." Pulled forward by operator directive on 2026-08-06 ("implement all findings, recommended and deferred"). The spec is what workers, reviewers, and the dispatcher all read — drift in the spec compounds across every flow that uses it.
+
+A flow spec that ships v1 and never gets reviewed becomes a flow spec that quietly stops matching the work it describes. Six fields that seemed exhaustive on day one become three fields that are checked and three that are forgotten. The goal field lengthens as the operator gets comfortable; the retry field becomes a copy of the last flow; the escalation field hardcodes a chat id that no longer exists. **Maintenance is what keeps the contract honest.**
+
+The maintenance loop is operator-led, runs on a fixed cadence, and has explicit drift signals that trigger action. It is not a passive review; it is a check that produces a verdict per subsection and a named corrective action when a verdict is `revise`.
+
+### 1. Audit cadence
+
+Audit every flow spec every **90 days** from the date it was last reviewed. Audits run in a batch — the operator lists all active flows, walks each one through the four checks below, and records one verdict per check. The cadence is a calendar event, not "when I remember."
+
+**When to audit sooner than 90 days:**
+
+- The flow fails on dispatch because the worker could not satisfy one of the six fields.
+- The operator corrects a worker output that traced back to a missing or stale field.
+- A new tool, agent, or routing convention changes which fields the dispatcher can satisfy.
+- A council review or retro names a flow spec as a contributing cause of a failure.
+
+An audit-on-failure is **added**, not substituted — the 90-day cadence still runs for flows that have not been audited in over 90 days.
+
+**Record each audit with:** date, auditor (operator or named reviewer profile), flow id, verdict per check, corrective action if any, and next-audit date (default +90 days). Store the audit record in the flow's comment thread or in the flow's master ticket if one exists.
+
+### 2. Quality threshold
+
+A flow spec passes the maintenance check when **all six fields are present, filled in (not empty), and the goal field is one sentence.** The threshold is binary per field; the spec is acceptable when every field passes its own check.
+
+**Per-field pass conditions:**
+
+| Field | Pass condition |
+|---|---|
+| Goal | Exactly one sentence. Names the artifact or state, not the activity. No embedded success criteria. |
+| Inputs | At least one item. Each item names the source (path, ticket, or external). `required`/`optional` tags are present. No unbounded inputs ("anything in the vault"). |
+| Outputs | At least one item. Each item names the destination (path, ticket transition, message target, or external). No activity-only outputs ("review the spec"). |
+| Success criteria | At least one measurable criterion. Each criterion is a yes/no question or a numeric threshold. No restating of the goal. |
+| Retry parameters | Explicit retry policy. Per node-type or explicit "no retry" with `count=0, escalation=on_failure`. Names failure codes that retry vs escalate. |
+| Escalation process | Names the target (chat id, ticket, webhook, or council seat). Names the message template. Names the timeout. |
+
+**Goal sentence length.** A goal that exceeds 50 words is automatically `revise` regardless of content. Split it into a goal and a success criterion, or into two flows. The "one sentence" rule is enforceable; "one paragraph" is not.
+
+**Acceptance:** every flow in the operator's vault has a 6-field spec on the originating ticket or master ticket, every field is filled in, and the goal is one sentence.
+
+### 3. Drift signals
+
+Drift is the difference between the spec on disk and the spec the dispatcher would write today. The audit catches drift on schedule; the signals catch drift between audits. **A signal is a prompt to audit, not a verdict** — the operator still walks the four checks before deciding what to fix.
+
+**Strong signals (audit immediately):**
+
+- **≥ 2 flows** in the operator's vault have an empty field (goal is "TBD", inputs are blank, etc.).
+- **≥ 1 flow** has a goal field longer than 50 words (one paragraph or more).
+- The operator is **creating new flows without using the 6-field spec** — i.e., filing tickets with a goal and a body but no inputs / outputs / success / retry / escalation.
+- A worker `kanban_block`s on "I don't know what to produce" and the trace shows one of the six fields was empty or missing.
+- The dispatcher's per-flow reject rate exceeds 10% over a rolling 30-day window.
+
+**Weak signals (audit at next scheduled review):**
+
+- A flow's audit record is more than 90 days stale.
+- A field has been copy-pasted between flows without re-checking (the retry field on flow B is identical to flow A's, even though the node types differ).
+- The operator cannot read the spec back to themselves in under 30 seconds.
+
+**How signals are detected:**
+
+- Strong signals: surfaced by the dispatcher's per-tick reject log, by `kanban_block` reasons that name a missing field, and by a one-shot audit script that scans the operator's vault for the patterns above. The audit script lives at `tools/flow-spec-drift-scan.py` (if present) or is run manually.
+- Weak signals: surfaced by the audit-cadence calendar event and by the operator's manual review.
+
+When a strong signal fires, **retro the failed flow first**, then audit the spec itself. The retro names which field was missing and how the failure cascaded; the audit decides whether the spec is structurally wrong or the operator forgot to fill it in.
+
+### 4. Fix actions
+
+When drift is detected, the corrective action is named in the audit record. The action is small, scoped, and reversible. A maintenance pass that produces a "we'll think about it later" verdict is a maintenance pass that did not fix the drift.
+
+**Per-verdict actions:**
+
+| Verdict | Action |
+|---|---|
+| All checks pass | Record audit date and next audit date (+90 days). No other action. |
+| Goal is too long | Split the flow. Either re-write the goal as one sentence and move the rest to success criteria, or split into two flows with separate tickets. |
+| A field is empty | Fill the field. If the field cannot be filled (e.g., escalation target is unknown), the flow is not ready to dispatch — block the originating ticket until the field is filled. |
+| Goal restates the trigger | Re-write the goal to name the outcome. The trigger belongs in the iteration-loop doc; the goal belongs in the flow spec. |
+| Outputs are activities, not artifacts | Re-write the outputs list. Each output names a destination path or ticket transition, not a verb. |
+| Success criteria restate the goal | Move the criteria to the success-criteria field and re-write the goal to name only the outcome. |
+| Retry parameters are blanket ("retry 3 times") | Re-write per node-type. Different nodes fail differently; the retry policy is a map, not a single number. |
+| Escalation target is "the operator" | Re-write with a specific chat id, ticket, webhook, or council seat. Unbounded "the operator" is the same as no escalation. |
+| Escalation has no timeout | Add a timeout. Default 24h for operator-bound escalations, 1h for automated escalations. |
+| Multiple flows overlap | Apply the overlap-detection algorithm from `methodology/02-decide-skills.md §3` — generate candidate pairs, compare, then merge or supersede. The flow spec inherits the same overlap policy as skills. |
+
+**When the spec itself is being skipped** (operator files flows without a 6-field spec), the fix action is to **audit the operator's flow-creation pipeline**, not to retro the individual flows. The retro names where the pipeline broke: the brief template does not list the six fields; the intake check does not reject flows missing fields; the operator is bypassing the pipeline because it is faster. Fix the pipeline; the flows follow.
+
+**Audit-on-failure retro.** When a flow fails because one of the six fields was missing or wrong, file a kanban ticket tagged `flow-spec-failure` with: the flow id, the missing/wrong field, the failure cascade (what the worker did, what the reviewer rejected, what the operator had to redo), and the corrective action. The retro is the durable record; the audit is the verdict.
+
+### 5. Retirement conditions
+
+The 6-field spec is a contract that the operator, the worker, and the reviewer all read. If the contract is consistently skipped, the contract itself is too heavy. Maintenance includes the option to **retire** the spec — not just deprecate individual flows, but to propose that the spec itself is wrong.
+
+**Conditions that warrant a retirement proposal:**
+
+- The spec is consistently skipped — ≥ 30% of new flows in a 90-day window are filed without a complete 6-field spec.
+- Workers consistently re-invent the same fields — the spec is so verbose that operators skip it, and the workers fill in the same fields anyway, suggesting the fields are obvious.
+- A council review concludes the spec is over-engineered for the operator's typical flow shape — most flows are single-agent and the escalation / retry fields are always "not applicable."
+- A simpler spec (3-field or 4-field) has been prototyped and produces flows of equivalent quality.
+
+**Retirement is not deletion.** A retirement proposal is a ticket that:
+
+1. Names the spec being retired (`methodology/04d-decide-flow-spec.md`).
+2. Cites the evidence — the audit records, the failure rate, the council verdict, or the prototype results.
+3. Proposes the replacement — a simpler spec, a different contract, or no spec at all (operator-only judgment).
+4. Names the migration path — how existing flows are updated to the new contract (or grandfathered in).
+
+**What "retire" means in practice.** The doc moves from `status: active` to `status: deprecated`. Existing flows that follow the 6-field spec continue to work; new flows may use the replacement contract or the operator's judgment. The audit cadence for the 6-field spec continues for existing flows until they are migrated; the replacement contract inherits the maintenance policy from its own methodology doc.
+
+**What retirement is NOT.** Retirement is not deletion of the methodology doc — the file stays on disk as a historical reference. Retirement is not a stealth simplification — the operator must approve the proposal before the spec's status changes. Retirement is not a one-time decision — if the replacement contract also fails, the operator can revert by un-deprecating the 6-field spec and re-applying it.
+
+**The default is to fix, not retire.** Drift in the spec is usually a symptom of an under-specified pipeline (template missing a field, intake check missing a field, audit cadence forgotten). Most maintenance passes end with a verdict of `revise`, not `retire`. The retirement conditions above are a guardrail against a spec that is structurally wrong, not an excuse to skip the 4-condition maintenance test.
 
 ## See also
 

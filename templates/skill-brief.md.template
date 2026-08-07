@@ -5,6 +5,11 @@ title: "Skill brief — fillable template"
 type: template
 status: draft
 source: alice-framework
+derived_from:
+  project: Alice
+  template: templates/skill-brief.md.template
+  version: 0.1.1
+  customized_on: <YYYY-MM-DD>
 tags: [kind:template, kind:skill-brief, project:alice]
 confidence: 0.0
 links: []
@@ -88,8 +93,15 @@ If the monthly cost is more than the work is worth, the skill is too expensive. 
 - [ ] Cost is estimated
 - [ ] SOP exists (if not, write the SOP first and run it 3+ times)
 
+### Maintenance readiness
+
+- [ ] Last-used date is recorded (set on first invocation)
+- [ ] Trigger conditions are specific (no overlap)
+- [ ] Procedure is bounded (≤ 100 lines)
+- [ ] Size budget met (`SKILL.md` ≤ 200 lines and ≤ 5 references)
+
 ## See also
 
 - `methodology/01a-decide-memory.md` — **skills are procedural memory (Tier 2).** Each skill is the agent's procedural memory; the skill set is loaded on trigger conditions. Use `templates/memory-budget.md.template` for the per-agent budget.
 
-Once all 8 boxes are checked, the brief is ready to be promoted to a skill.
+Once all 8 Approval boxes are checked, the brief is ready to be promoted to a skill. Confirm the trigger, procedure, and size maintenance checks before promotion; record the last-used date on the first invocation.

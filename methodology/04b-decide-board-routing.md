@@ -1,13 +1,14 @@
 ---
 id: alice-methodology-04b-decide-board-routing
 created: 2026-08-04T12:30:00Z
+updated: 2026-08-07T11:15:00Z
 title: "Methodology 04b — Decide your work-type routing system (board-routing)"
 type: methodology
 status: draft
 source: alice-framework
 tags: [kind:methodology, kind:board-routing, project:alice]
 confidence: 0.0
-links: ["[[methodology/01-decide-vault-tier.md]]", "[[methodology/04a-decide-work-graph.md]]", "[[methodology/05-strike-rules.md]]", "[[references/board-catalog.md.template]]", "[[references/kanban-lite-disciplines.md]]"]
+links: ["[[methodology/01-decide-vault-tier.md]]", "[[methodology/04a-decide-work-graph.md]]", "[[methodology/05-op-guards.md]]", "[[references/board-catalog.md.template]]", "[[references/kanban-lite-disciplines.md]]"]
 ---
 
 # Methodology 04b — Decide your work-type routing system (board-routing)
@@ -321,6 +322,92 @@ The default board is a **board**, not the inbox. The inbox is the routing layer;
 
 ---
 
+## Part 11: Maintenance
+
+Board-routing is a low-frequency, high-blast-radius decision. The operator designs the boards once, then files against them for months — which is exactly why drift here is easy to miss. A routing table designed for four boards keeps returning plausible-looking answers after the operator has grown to seven; the mis-routes are individually cheap to fix and collectively invisible. Unlike vault tiers (which drift visibly, as notes pile into the wrong directory) or crons (which drift loudly, as a schedule stops firing), routing drift surfaces only as a slow rise in re-filed tickets.
+
+This section is the audit surface for the routing system. It mirrors the canonical 5-subsection shape used across `methodology/` so a friend reading any maintenance section sees the same rhythm: when to audit, what counts as healthy, what drift looks like, what to do when drift is found, and when a board should be retired.
+
+### 11.1 Audit cadence
+
+Audit the board-routing system every **90 days**.
+
+The cadence is deliberately slow. Board-routing decisions are infrequent — the operator adds a board every few months, not every week — so a 30-day cadence produces mostly no-op audits and trains the operator to skip them. Ninety days is long enough that something has usually changed, and short enough that drift is still one quarter deep rather than two.
+
+The audit is a **read pass**. It does not re-file tickets, merge boards, or edit the routing table; it produces a list of drift items (per 11.3) and an action queue (per 11.4). Acting on the queue is a separate, deliberate step.
+
+Record each audit with: date, auditor, the board list at audit time, verdict per check in 11.2, corrective actions queued, and the next-audit date (default +90 days). Store the record wherever the operator's routing decisions already live — the board-catalog, a maintenance ticket, or the methodology changelog — so the trail survives across sessions.
+
+**Audit sooner than 90 days when:**
+
+- A new board is created (the routing table gained a row — confirm it does not conflict with an existing one).
+- A board is retired or merged (the routing table lost a row — confirm nothing now falls through to the default board that shouldn't).
+- The operator's work mix changes materially (a new project, a new domain, a new recurring work type).
+
+An off-cycle audit is **added**, not substituted — the 90-day clock keeps running.
+
+### 11.2 Quality threshold
+
+The board-routing system passes the audit when **all three** hold:
+
+- **The 5-question test is recent.** The test in Part 2 has been applied — not merely read — within the last **6 months**. A routing test that has not been run against a real filing decision in half a year is documentation, not a working test. If the operator cannot name a ticket the test was applied to, the check fails.
+- **The keyword-routing table is current with the operator's actual boards.** Every board in the operator's tool has a row in the table, and every row in the table names a board that still exists. A row pointing at a retired board, or a live board with no row, is a stale table.
+- **Every board has a clear domain.** Each board's "use for" / "do not use for" is written down and would let a second reader route a ticket the same way the operator would. A board whose domain can only be explained in conversation does not have a documented domain.
+
+Each check is `pass` or `revise`. There is no partial credit: a table that covers six of seven boards is stale, not "mostly current." Partial credit is how routing drift hides.
+
+### 11.3 Drift signals
+
+Drift is observable. Any **one** of the following is enough to queue a fix (per 11.4):
+
+- **≥ 3 tickets in 30 days were mis-routed and had to be re-filed.** This is the primary signal. Individual mis-routes are noise — the operator was moving fast, the keyword was ambiguous. Three in a month is a pattern: the table no longer matches the work. Count re-files, not regrets; a ticket that stayed where it was filed did not drift.
+- **≥ 2 boards have overlapping domains.** Two boards that both plausibly accept the same ticket force a judgment call on every filing. The overlap, not the judgment, is the defect — it will be resolved inconsistently, and the resulting split history is unrecoverable without a cross-board move.
+- **The operator is routing tickets manually.** The operator reads each ticket and decides its board from memory rather than from the table. This is the quietest signal and the most serious: the routing system has been replaced by operator attention, which does not survive a busy week, a delegated filing, or an agent doing the filing instead.
+
+A drift signal does not always mean the design is wrong. Sometimes the boards are right and the keywords are stale; sometimes the operator's work genuinely moved and the board list should follow. The audit names the signal and proposes a disposition; the operator confirms.
+
+### 11.4 Fix actions
+
+When drift is detected, the corrective action depends on the signal:
+
+| Drift signal | Fix action |
+|---|---|
+| ≥ 3 mis-routed tickets in 30 days | Re-run the 5-question test (Part 2) against the mis-routed tickets |
+| ≥ 2 boards with overlapping domains | Merge the boards, or rename them so the domain boundary is unambiguous |
+| Operator routing manually | Re-run the 5-question test, then refresh the keyword-routing table from the operator's real filings |
+
+**When drift is detected, run the 5-question test again.** The test is the diagnostic, not just the design tool. Walk each mis-routed ticket through the five questions and note which question the operator answered differently at filing time than the table implies. That question names the defect: a divergence on question 3 means the board list is wrong; a divergence on question 2 means the keyword is too generic.
+
+**When overlap is detected, merge or rename the boards.** Two boards with overlapping domains is a design error, not a filing error, and no amount of keyword tuning fixes it. Merge when one board's domain is a subset of the other's; rename when the domains are genuinely distinct but the names do not communicate the boundary. Prefer merging — per Part 5, the fix for proliferation is to remove boards, not add them.
+
+Do not fix drift by editing the routing table until the audit reads green. A mis-route is a routing failure or a design failure; rewriting the keyword to match observed behavior hides the cause and guarantees the same audit fails again next quarter.
+
+Record the disposition: signal, cause, action taken, next review date. A drift signal with no recorded disposition is unresolved.
+
+### 11.5 Retirement conditions
+
+Retire a board when **either** of the following holds:
+
+- **The board has had 0 tickets for 90 consecutive days.** One full audit cycle with no filings means the routing never fires. The board is either over-deployed (created for work that never materialized) or its work has silently migrated elsewhere. Both are retirement conditions.
+- **The board is fully superseded by a shared board.** Another board — often the default board, or a broader board created later — now accepts everything this board was created for. Two boards for one domain is the overlap signal from 11.3, resolved by retirement rather than by merge.
+
+Retirement is not deletion. The sequence:
+
+1. Name the surviving board (the default board, or the board that absorbed the domain).
+2. Move any open tickets to the surviving board using the cross-board move pattern (Part 4), audit line included. Closed tickets stay where they are — history is not rewritten.
+3. Remove the retired board's row from the keyword-routing table and fold its keywords into the surviving board's row, dropping any that would now conflict.
+4. Update the board-catalog entry, the cross-board contracts, and any agent or cron that filed to the retired board.
+5. Keep the board present but empty for one full audit cycle (90 days) so late-arriving references surface. Archive it only after that cycle completes with no inbound filings.
+6. Record the retirement: date, surviving board, tickets moved, references updated.
+
+**Do not retire the default board.** The default board is the safety net for one-off and unknown-domain tickets (Part 10); it is expected to be quiet in some quarters and is exempt from the zero-tickets condition. A routing system with no default board has nowhere to put "I don't know where this goes."
+
+### Maintenance parity check
+
+This section defines a friend-portable method, not a claim that every platform supplies board-level ticket counts, re-file tracking, or archived-board placeholders. Before adopting it, map each function — audit query, mis-route counting, cross-board move, retirement archival — to mechanisms available in your own tool. The 90-day cadence, the 6-month test-recency bar, and the ≥ 3 / ≥ 2 thresholds are methodology defaults; adjust them when measured re-file rate, board count, or ticket volume provides better evidence, but record the exception so the audit trail stays intact.
+
+---
+
 ## Worked example (skeleton)
 
 The 2 worked examples (solo-founder, research-analyst) show the methodology applied to a specific instance. The examples are skeletons, not snapshots.
@@ -336,7 +423,7 @@ The friend reads the methodology, then designs their own board-routing system fo
 
 ## What's next
 
-- `methodology/05-strike-rules.md` — the strike rule "agents must check routing before filing" depends on the board-routing methodology
+- `methodology/05-op-guards.md` — the operational guard "agents must check routing before filing" depends on the board-routing methodology
 - `methodology/06-iteration-loop.md` — the loop's detect step can scan the routing system for stuck tickets
 - `references/board-catalog.md.template` — the fillable form for documenting each board
 
@@ -356,7 +443,7 @@ This doc touches:
 
 - `methodology/01-decide-vault-tier.md` — board-routing is parallel to vault-tier routing but for the ticket domain
 - `methodology/04a-decide-work-graph.md` — boards are the work-graph substrate; cross-board moves are graph actions
-- `methodology/05-strike-rules.md` — strike rules for board-routing (e.g., "agents must check routing before filing")
+- `methodology/05-op-guards.md` — operational guards for board-routing (e.g., "agents must check routing before filing")
 - `methodology/06-iteration-loop.md` — the loop's detect step can scan the routing system for stuck tickets
 - `references/kanban-lite-disciplines.md` — already mentions boards, should reference this doc
 - `templates/inbox-route.md.template` — ticket-routing is a special case of inbox routing

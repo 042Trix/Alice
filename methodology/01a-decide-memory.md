@@ -7,7 +7,7 @@ status: draft
 source: alice-framework
 tags: [kind:methodology, kind:memory, project:alice]
 confidence: 0.0
-links: ["[[methodology/01-decide-vault-tier.md]]", "[[methodology/02-decide-skills.md]]", "[[methodology/03-decide-agents.md]]", "[[methodology/04-decide-crons.md]]", "[[methodology/04a-decide-work-graph.md]]", "[[methodology/04b-decide-board-routing.md]]", "[[methodology/05-strike-rules.md]]", "[[methodology/06-iteration-loop.md]]", "[[methodology/07-council-methodology.md]]", "[[methodology/08-inbox-route.md]]", "[[templates/memory-budget.md.template]]"]
+links: ["[[methodology/01-decide-vault-tier.md]]", "[[methodology/02-decide-skills.md]]", "[[methodology/03-decide-agents.md]]", "[[methodology/04-decide-crons.md]]", "[[methodology/04a-decide-work-graph.md]]", "[[methodology/04b-decide-board-routing.md]]", "[[methodology/05-op-guards.md]]", "[[methodology/06-iteration-loop.md]]", "[[methodology/07-council-methodology.md]]", "[[methodology/08-inbox-route.md]]", "[[templates/memory-budget.md.template]]"]
 ---
 
 # Methodology 01a — Decide your memory tiers
@@ -158,7 +158,7 @@ Alice recommends a 7-tier memory system. Each tier has a specific purpose, a spe
 
 **When to add:** when the operator states a preference, corrects a recurring mistake, or surfaces a stable environment fact.
 
-**When to remove:** when the preference is no longer operative, or when it's been moved to a strike rule (Tier 8 hybrid).
+**When to remove:** when the preference is no longer operative, or when it's been moved to a operational guard (Tier 8 hybrid).
 
 ### Tier 7: System memory (seen-state, indexes)
 
@@ -194,14 +194,14 @@ Every agent has a **per-session memory budget**. The budget is the sum of:
 | Operator preferences | ≤2-3K characters (read on launch) |
 | System | unlimited in storage; size constraint is query/index |
 
-**Exceeding the memory budget is a strike-rule violation.** The agent must offload to a smaller tier or split the memory footprint across more tiers.
+**Exceeding the memory budget is a op-guard violation.** The agent must offload to a smaller tier or split the memory footprint across more tiers.
 
 ### The 5-question memory audit
 
 Run the 5 questions on each tier quarterly (or when the agent is feeling slow):
 
 1. **Is this tier bloated?** (Cold-start > 20K? Skills > 30 per session? Operator prefs > 3K?) → trim.
-2. **Is this tier stale?** (SOUL > 1 year without revision? Strike rule > 6 months without incident?) → review or archive.
+2. **Is this tier stale?** (SOUL > 1 year without revision? Operational guard > 6 months without incident?) → review or archive.
 3. **Is this tier conflicting?** (AGENTS.md says X, SOUL says Y?) → reconcile.
 4. **Is this tier being used?** (Skill loaded 0 times in 90 days?) → archive.
 5. **Is this tier the right home?** (Episodic event should be a long-form note?) → migrate.
@@ -399,7 +399,7 @@ The memory tier system is **not static.** It changes when:
 2. **An existing tier is over-used** (cold-start > 20K) → trim or move to a different tier
 3. **An existing tier is under-used** (skill loaded 0 times in 90 days) → archive
 4. **A tier's owner changes** (the operator gives the agent more autonomy) → re-assign ownership
-5. **A new failure pattern emerges** (stale memory, conflicting memory) → add a strike rule
+5. **A new failure pattern emerges** (stale memory, conflicting memory) → add an operational guard
 
 The operator revises the system **when the system is the bottleneck, not before.** A system that works for 6 months doesn't need a revision.
 
@@ -451,7 +451,7 @@ If all 5 answers are "I don't know," the default is **memory** — write it to a
 - **The operator's project list.** What they are building, what their current priorities are, what they own. This is **stable state**, not a history.
 - **The operator's preferences.** Output tone, formatting conventions, the tools they prefer, the paths they prefer. These belong in Tier 6.
 - **The system's current architecture.** What agents exist, what boards exist, what skills are loaded, what the current memory budget is. This is the operating manual — Tier 1.
-- **Operating rules.** Strike rules, channel discipline, the standing operating rules. These are durable constraints, not historical events. They belong in Tier 1 or in a strike-rule file the agent loads on demand.
+- **Operating rules.** Operational guards, channel discipline, the standing operating rules. These are durable constraints, not historical events. They belong in Tier 1 or in a op-guard file the agent loads on demand.
 - **Environment facts.** Host paths, tool versions, current date/time (within a session — not across sessions). Within session: context. Across session: memory.
 - **Vault layout.** What tiers exist, what naming convention is used. Stable; belongs in Tier 1 cold-start or a freshly-loaded skill.
 
@@ -492,11 +492,80 @@ The practical takeaway: when deciding where a new fact belongs, do not ask "whic
 - `methodology/04-decide-crons.md` — cron's seen-state is system memory (Tier 7)
 - `methodology/04a-decide-work-graph.md` — kanban events are episodic memory (Tier 4)
 - `methodology/04b-decide-board-routing.md` — board-catalog is long-form memory (Tier 5)
-- `methodology/05-strike-rules.md` — strike rules are rule-based memory (Tier 1, loaded cold-start)
+- `methodology/05-op-guards.md` — operational guards are rule-based memory (Tier 1, loaded cold-start)
 - `methodology/06-iteration-loop.md` — loop audit lines are episodic memory (Tier 4)
 - `methodology/07-council-methodology.md` — council verdicts are episodic memory (Tier 4)
 - `methodology/08-inbox-route.md` — inbox items are pre-routing memory (mixed: 0-INBOX is system memory, routing decisions are episodic)
 - `templates/memory-budget.md.template` — the fillable per-agent budget; allocate cold-start rows carefully, since context lives there
+
+---
+
+## Maintenance
+
+Designing the seven tiers completes the build phase; it does not end the lifecycle. A memory system with the right tiers but no audit, drift detection, or retirement rule degrades into a cold-start file that nobody reads or a skill directory that no one trims. The maintenance cycle below mirrors `methodology/_templates/maintenance-scaffold.md.template` so a friend reading any maintenance section in `methodology/` sees the same rhythm. The cadence and quality bar are methodology defaults; map each to your tool before adopting (see `references/tool-mapping-guide.md`).
+
+Memory is the agent's persistent layer, so drift here propagates everywhere: a stale skill becomes a wrong procedure; a bloated cold-start bloats every session; conflicting operator preferences produce contradictory corrections. The audit is the only routine that catches this before it surfaces as a user-visible regression.
+
+### 1. Audit cadence
+
+Run the memory audit on a **fixed 90-day cadence** (memory is the substrate; drift compounds silently across quarters). The cadence is a calendar event, not "when I remember." Off-cycle audits fire when a drift signal below trips before the next scheduled review.
+
+Record each audit with: date, auditor (operator or named reviewer profile), per-tier verdict, corrective action if any, next-audit date. Store the audit record on the relevant comment thread, the per-tier changelog, or the methodology's changelog so the trail survives across sessions. The per-tier verdict is the 5-condition checklist in §2 below; do not collapse it to an overall "looks good."
+
+### 2. Quality threshold
+
+The memory system passes the maintenance check when **all** of the following hold:
+
+- **Tier 1 (cold-start) ≤ 20K characters.** The AGENTS.md is read on every launch; a cold-start above 20K bloats every session and is the most common drift.
+- **Tier 2 (procedural) ≤ 30 skills loaded per session.** The skill budget is per-session; exceeding it forces cold-start budget to grow or skills to be skipped, both are maintenance failures.
+- **Tier 4 (episodic) has an active seen-state rotation.** Audit lines, kanban events, and council verdicts rotate or archive on a documented schedule (≥ 1 year, ≤ 3 years); without a rotation policy, episodic memory grows unbounded and dilutes signal.
+- **Tier 6 (operator preferences) has a lifetime policy.** Stated preferences are durable until superseded or moved to a op-guard; preferences without a lifetime rule either grow unbounded or persist after the operator's context has changed.
+- **Every tier has exactly one owner.** Multiple owners on a tier produce conflicting writes; the ownership table in Part 4 must hold at the audit.
+
+The thresholds are review gates, not formatting games. Collapsing two tiers to satisfy a count, or adding a sixth skill budget band to look rigorous, both fail the underlying test.
+
+### 3. Drift signals
+
+Drift is observable. Surface at least one of the following before the next scheduled audit:
+
+- **Tier 2 skills loaded per session > 30.** The cold-start budget is being filled; the skill set has grown faster than the trigger discipline. Symptom: a skill that used to load no longer appears in the active session.
+- **Tier 4 seen-state is stale.** The cron's seen-state, the kanban index, or the FTS5 manifest has not been regenerated on its declared schedule. Symptom: the cron reports no new items when new items exist, or the operator's `kanban show` lags reality by hours.
+- **Tier 6 has conflicting preferences.** Two corrections land within 90 days that contradict an earlier-stated preference, and no reconciliation note exists. Symptom: the agent behaves inconsistently with respect to the same input across sessions.
+- **Tier 1 cold-start > 20K characters.** The AGENTS.md has grown past the budget; sections are being added instead of being promoted to skills or vault notes.
+- **A tier's owner is unclear.** Two writers are appending to the same tier with different conventions. Symptom: an audit line in Tier 4 contradicts a council verdict, or two operators edit the SOUL with no review gate.
+
+A drift signal does not always mean the rule is wrong. Sometimes the rule is right and the writer is wrong; sometimes the tool cannot enforce it; occasionally the rule is obsolete and the signal is the prompt to revise. The audit names the signal and proposes a disposition; the owner confirms.
+
+### 4. Fix actions
+
+When drift is detected, the canonical response is:
+
+1. **File a maintenance ticket** on the operator's kanban board (default board: `hermes`). Name the drift signal, the tier involved, the offending instances (if known), and the suspected cause.
+2. **The memory owner reviews** the per-tier audit record, the budget table, and the corrective actions from prior audits. The owner does not unilaterally rewrite the methodology; the owner proposes.
+3. **Run the skill maintenance cycle** for Tier 2 drift (per `methodology/02-decide-skills.md` §Skill maintenance): trim, deprecate, or archive skills that exceed the per-session budget. Archive stale seen-state for Tier 4 drift (move to the long-form archive tier, do not delete). Reconcile conflicting preferences for Tier 6 drift (note the supersession, archive the older preference, update `MEMORY.md` / `user.md`).
+4. **The disposition is recorded** on the ticket: cause, corrective action, next review date. A drift signal with no recorded disposition is unresolved.
+
+Do not auto-fix drift by editing the budget table to make the audit green. A condition that fails is a tier-health failure or a tooling failure; the fix is to address the underlying cause, not to rewrite the threshold to match observed behavior.
+
+### 5. Retirement conditions
+
+Retire the maintenance section (or a specific tier it audits) when **at least one** of the following is observable for 90 consecutive days:
+
+- **The tier has zero entries.** Nothing has been written, queried, or rotated in the tier for three months. The tier is over-deployed (the use case never fired) or the underlying need has disappeared.
+- **The tier is consistently skipped.** Operators and agents route around the tier; the methodology's "when to add" trigger fires but the tier is never populated. The section has become documentation theater.
+- **The operator's tool provides a different mechanism.** File-based memory has migrated to a database (or to embeddings, or to a hosted index). The tier's `Storage` row in Part 2 no longer reflects the actual implementation, and the audit cannot enforce what the tool no longer exposes.
+
+The retirement sequence:
+
+1. Propose merging the tier with an adjacent tier or deprecating it entirely. Name the surviving tier or note that no surviving mechanism is needed.
+2. Move all in-flight entries to the surviving tier (or to the new mechanism), preserving frontmatter and adding a `migrated_from:` field so the move is auditable.
+3. Update every MOC, catalog entry, agent assignment, AGENTS.md reference, and skill trigger that pointed at the retired tier.
+4. Keep the section present as an empty placeholder for one full audit cycle (90 days) so any late-arriving references surface. Remove the placeholder only after the cycle completes with no inbound references.
+5. Record the retirement in the methodology changelog: date, surviving tier, contents moved, references updated, owner.
+
+### Maintenance parity check
+
+This section defines a friend-portable method, not a claim that every platform supplies automated budget scans, seen-state rotation, or ownership detection. Before adopting it, map each function — routine audit, drift surfacing, corrective routing, retirement archival — to mechanisms available in your own tool. The 90-day cadence is a methodology default; adjust it when measured drift rate, instance volume, or operator-stated risk provides better evidence, but record the exception so the audit trail remains intact.
 
 ---
 
@@ -514,7 +583,7 @@ The friend reads the methodology, then designs their own memory tier system for 
 - `methodology/03-decide-agents.md` — agent SOUL is identity memory; expand the "memory footprint" bullet
 - `methodology/04a-decide-work-graph.md` — kanban event log is episodic memory
 - `methodology/04b-decide-board-routing.md` — board-catalog is long-form memory
-- `methodology/05-strike-rules.md` — strike rules are rule-based memory
+- `methodology/05-op-guards.md` — operational guards are rule-based memory
 - `methodology/06-iteration-loop.md` — the loop's audit-line is episodic memory
 - `methodology/07-council-methodology.md` — council verdicts are episodic memory
 - `methodology/08-inbox-route.md` — inbox items are pre-routing memory
@@ -543,7 +612,7 @@ This doc touches every other methodology doc. The memory tier is the substrate t
 - `methodology/04-decide-crons.md` — cron's seen-state is system memory
 - `methodology/04a-decide-work-graph.md` — kanban event log is episodic memory
 - `methodology/04b-decide-board-routing.md` — board-catalog is one tier
-- `methodology/05-strike-rules.md` — strike rules are rule-based memory
+- `methodology/05-op-guards.md` — operational guards are rule-based memory
 - `methodology/06-iteration-loop.md` — audit lines are episodic memory
 - `methodology/07-council-methodology.md` — council verdicts are episodic memory
 - `methodology/08-inbox-route.md` — inbox items are pre-routing memory

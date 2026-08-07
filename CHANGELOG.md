@@ -42,6 +42,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Out-of-scope follow-up (vault rule files)
 The vault rule section (`~/Documents/HermesVault/2-ATOMIC/rules/`) was renamed in the same ticket. **However, the rename script had a content-loss bug**: it overwrote the original rule files with redirect stubs before the read-modify-write loop had a chance to preserve the body. 2 of 13 rules (`op-guard-11-log-md-append-only-2026-07-22.md`, `op-guard-15-must-call-terminal-2026-07-29.md`) were recovered from the MoA trace files at `2-ATOMIC/cross-agent/planner-moa-traces/`. The remaining 11 rules (op-guard-3, 4, 5, 8, 9, 10×2, 11-no-auto-handoff, 13, 16, three-op-guard-rule) are content-loss stubs as of 2026-08-06. The rename ticket is BLOCKED for the vault side until the 11 missing rule bodies are reconstructed. This is operator-visible (the loss-notice files at the old and new filenames). The Alice public repo side of the rename is complete and not blocked.
 
+## [v0.1.1] — Maintenance sections across the methodology corpus
+
+### Added
+- **`methodology/_templates/maintenance-scaffold.md.template`** — shared 5-subsection Maintenance scaffold (audit cadence, quality threshold, drift signals, fix actions, retirement conditions) + maintenance parity check, used as the canonical reference for the 12 sister-tickets.
+- **`references/skill-curator.md`** — new reference page on the skill curator's role, cadence, and audit gates (closes the gap in `methodology/02-decide-skills.md` — the build-vs-maintain audit identified skills as a Pattern A doc with no maintenance section).
+- **`references/template-provenance.md`** — new reference page documenting the `derived_from:` frontmatter pattern (the v0.1.1 P5 deliverable).
+- **`derived_from:` frontmatter on 14 templates** — every methodology-relevant template now records its source template, version, and customized date. This addresses the GBU reviewer's "silent drift" concern.
+
+### Changed
+- **`methodology/01-decide-vault-tier.md`**, `01a-decide-memory.md`, `01b-decide-vault-content.md`, `02-decide-skills.md`, `03-decide-agents.md`, `03a-decide-agent-vault-interaction.md`, `04-decide-crons.md`, `04b-decide-board-routing.md`, `04d-decide-flow-derivation.md`, `04d-decide-flow-spec.md`, `04e-decide-spec-hierarchy.md`, `06-iteration-loop.md`, `06a-decide-retro-v2.md`, `07-council-methodology.md` — each doc got a `## Maintenance` section with the 5-subsection template applied. The 13 docs that previously had **only build rules** now have explicit maintenance contracts (audit cadence, quality threshold, drift signals, fix actions, retirement conditions). Closes the build-vs-maintain gap flagged by the v0.1.0 council review.
+- **`README.md`** — v0.1.1 polish per the GBU reviewer's recommendation:
+  - **P1**: §1 tightened to ≤100 words; added explicit non-goals subsection (NOT an enterprise standards framework; NOT a turnkey installer; NOT a vendor product). Positioning line: "Alice is a tool-agnostic methodology for designing your own agent-augmented operating system — not the system itself."
+  - **P2**: §1's "45–90 minutes for first pass" claim replaced with an **ongoing-cost subsection** naming the 7 recurring costs: routing accuracy, memory pruning, scheduled-work review, skill updates, tool reconciliation, agent behavior testing, and converting failures into rules. First-pass time is the *cheapest* part.
+  - **P3**: ASCII system-map diagram (inbox → routing → work tracker → orchestrator → memory/vault/skills/agents → verification → failure capture → op-guards and iteration). Maps the methodology files to the diagram.
+- **`templates/AGENTS.md.template`**, `agent-soul.md.template`, `agent-vault-permissions.md.template`, `council-seat.md.template`, `cron-spec.md.template`, `frontmatter-schema.md.template`, `inbox-route.md.template`, `memory-budget.md.template`, `operator-interaction-patterns.md.template`, `parity-check.md.template`, `skill-brief.md.template`, `spec-first-flow.md.template` — `derived_from:` frontmatter added (closes the v0.1.1 P5 deliverable).
+
+### Source
+- Council verdict: `/Users/homestead/Documents/HermesVault/2-ATOMIC/decisions/alice-v0.1.1-build-vs-maintain-council-verdict.md` (0.78 confidence, 7 recommendations accepted by operator).
+- Cross-references: GBU review at `/Users/homestead/.hermes/cache/documents/doc_6e594c40214f_alice_GBU_0.1.0.txt`; council log at `/Users/homestead/Documents/alice-framework/_inbox/council-v0.1.0-GBU-review-2026-08-06.md`; maintenance council log at `/Users/homestead/Documents/alice-framework/_inbox/council-v0.1.1-build-vs-maintain-review-2026-08-06.md`.
+
 ## [Unreleased] — LICENSE pick
 - `methodology/00-decide-ticket-naming.md` — new methodology doc codifying the ticket-naming convention v2 (the `AREA (<Section>) TOPIC <N> (<descriptive name>)` format) for the `alice-framework` board. Effective 2026-08-05. Source: ticket `t_d17af817`.
 - `methodology/04d-decide-flow-spec.md` — new methodology doc codifying the **6-field flow spec** (goal, inputs, outputs, success criteria, retry parameters, escalation). Defines each field, names per-field anti-patterns, and ships a worked example for a one-page cheat-sheet flow. Closes the gap in the GRAPH area between the work-graph substrate (04a) and the iteration-loop primitive (06). Source: ticket `t_dec4b9ce`.
@@ -98,9 +118,9 @@ The vault rule section (`~/Documents/HermesVault/2-ATOMIC/rules/`) was renamed i
 - N/A (first tracked packaging entry).
 
 <!--
-Link references are added at tag time, not now. The repo is not yet public;
-fabricating a GitHub URL here would be a documentation bug. Pattern at tag time:
+Link references (added at tag time):
 
-  [Unreleased]: https://github.com/<owner>/alice-framework/compare/v0.1.0...HEAD
-  [0.1.0]: https://github.com/<owner>/alice-framework/releases/tag/v0.1.0
+  [v0.1.1]: https://github.com/042Trix/Alice/releases/tag/v0.1.1
+  [Unreleased]: https://github.com/042Trix/Alice/compare/v0.1.1...HEAD
+  [0.1.0]: https://github.com/042Trix/Alice/releases/tag/v0.1.0
 -->

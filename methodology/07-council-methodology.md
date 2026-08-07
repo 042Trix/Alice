@@ -40,7 +40,7 @@ You can have more seats (5-6 is fine), but 4 is the minimum. Fewer than 4 is **d
 1. Frame  →  2. Deliberate  →  3. Verdict
 ```
 
-**1. Frame.** Define the question precisely. "Should we build X?" is too broad. "Given the failure pattern of [Y] observed 3+ times in [Z] context, should we build [X] as a skill, write a strike rule, or change the agent's soul?" is precise.
+**1. Frame.** Define the question precisely. "Should we build X?" is too broad. "Given the failure pattern of [Y] observed 3+ times in [Z] context, should we build [X] as a skill, write an operational guard, or change the agent's soul?" is precise.
 
 **2. Deliberate.** Each seat produces a position (1-2 paragraphs). The seats don't talk to each other. The orchestrator (operator or a designated chair) reads all positions and surfaces agreements and disagreements.
 
@@ -56,14 +56,14 @@ The verdict is logged to a single markdown file. The file name is `YYYY-MM-DD_co
 
 - **For one-off decisions.** "Should I run cron X at midnight or 1am?" is a one-off, not a council question.
 - **For skill-brief validation.** The skill-brief is the spec; the council reviews the spec, not the spec-approval.
-- **For trivial rules.** Strike rules come from observed failures, not from council deliberation.
+- **For trivial rules.** Operational guards come from observed failures, not from council deliberation.
 - **For personal preferences.** "Should the DM header say 'X' or 'Y'?" is operator preference, not a council question.
 
 ## Council cadence
 
 Don't run councils for every decision. Run them:
 - **Once per skill-brief**, before promoting to a skill (validate the spec)
-- **Once per major system change** (e.g., new focus vertical, new strike rule)
+- **Once per major system change** (e.g., new focus vertical, new operational guard)
 - **Once per failure pattern** that doesn't fit existing methodology
 - **Never** for one-off decisions or operator preferences
 
@@ -131,6 +131,53 @@ The file is the **single source of truth** for the council decision. Don't sprea
 ## Worked example (skeleton)
 
 See `worked-examples/01-solo-founder-skeleton/methodology-notes/07-council.md` when v0.0 ships for an anonymized example.
+
+## Maintenance
+
+The council is heavyweight. Over time it drifts: convening too often (rubber-stamping), too rarely (decisions made without deliberation), or producing verdicts that nobody routes. This section is the audit surface that catches the drift.
+
+### 1. Audit cadence
+
+Every **6 months**. A twice-yearly check is enough; align it with the operator's quarterly review or half-year boundary.
+
+### 2. Quality threshold
+
+The council pattern is **healthy** when all hold:
+
+- **Seat count** — **3-5 seats** (not 1, not 7; 4 canonical, 5 acceptable as tiebreaker)
+- **Documented question** — every council has a precise question on the record
+- **Recorded output** — every council produces a markdown log on disk (`YYYY-MM-DD_council-<topic>.md`); unrecorded = conversations, not councils
+- **Operator review** — operator reviews the log within 7 days
+
+### 3. Drift signals
+
+The pattern is **drifting** when any of these appear:
+
+- **Convening too often** — daily/weekly; sessions feel like rubber-stamping; verdicts converge on BUILD without real disagreement
+- **Convening too rarely** — council-worthy decisions are made by a single agent or operator alone
+- **Verdicts not routed** — orchestrator files child tickets pre-emptively, before the verdict lands; verdicts become post-hoc ratification
+
+### 4. Fix actions
+
+When drift is detected:
+
+1. File a `council-effectiveness-review` ticket — assignee is the **council profile itself**
+2. Review reads the last 6 months of council logs and counts which drift signals fired
+3. **The fix is a methodology patch, not a council verdict.** Drift in the *council mechanism* is fixed by editing this file; drift in a *single decision* is fixed by re-running that council
+
+### 5. Retirement conditions
+
+Retire when **any** hold:
+
+- **No councils in 60 days** — and operator + default are making decisions comfortably without deliberation
+- **A better deliberation mechanism exists** — operator has adopted a structured retrospective, smaller advisory panel, etc.
+- **Operator explicitly retires it** — council retirement is an operator call, not a council verdict
+
+Retirement ≠ deletion. Stop convening new councils, archive existing logs as historical record, document the retirement in this methodology's changelog.
+
+### Maintenance parity check
+
+This section defines a friend-portable method, not a claim that every platform supplies council-log archival, seat-count enforcement, or operator-review queues. Before adopting it, map each function — seat inventory, question documentation, log archival, operator-review routing — to mechanisms available in your own tool. The 6-month cycle and the four quality conditions are methodology defaults; adjust them when measured council activity, drift rate, or operator-stated cadence provides better evidence, but record the exception so the council methodology remains auditable.
 
 ## See also
 

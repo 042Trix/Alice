@@ -32,9 +32,60 @@ After the first artifact, the work continues. The recurring costs that dominate 
 - **Skill updating.** Refreshing skill content when underlying tools or assumptions change.
 - **Tool reconciliation.** Re-mapping Alice's abstract terms to changes in your tool's mechanisms.
 - **Agent-behavior testing.** Spot-checking that downstream agents follow the rules and templates you wrote.
-- **Strike-rule conversion and deduplication.** Turning repeated failures into durable rules and merging or retiring rules that overlap.
+- **Op-guard conversion and deduplication.** Turning repeated failures into durable rules and merging or retiring rules that overlap.
 
 The 45–90 minute figure covers only the first artifact. The ongoing-cost items above are what determine whether Alice remains useful after week one.
+
+### How the pieces fit together
+
+The diagram below is the system Alice is describing. Each box names one decision an operator must make; the table below the diagram points each box to the canonical methodology file that walks the trade-offs. The shape is fixed; the specific skills, agents, boards, and rules you instantiate at each box are yours to choose.
+
+```
+                       Inputs (X, articles, podcasts, conversations)
+                                   │
+                                   ▼
+                       Inbox and routing
+                                   │
+                                   ▼
+                       Work tracker
+                                   │
+                                   ▼
+                       Orchestrator
+                       ┌──────────┼──────────┬──────────┐
+                       │          │          │          │
+                       ▼          ▼          ▼          ▼
+                      memory   knowledge   skills   downstream
+                               vault                 agents
+                                   │
+                                   ▼
+                       Verification
+                                   │
+                                   ▼
+                       Failure capture
+                                   │
+                                   ▼
+                       Operational guards and iteration
+```
+
+| Box | Canonical methodology file |
+| --- | --- |
+| Inputs | `methodology/09-inbox-from-external-sources.md` |
+| Inbox and routing | `methodology/08-inbox-route.md` |
+| Work tracker | `methodology/04a-decide-work-graph.md` |
+| Orchestrator | `methodology/03-decide-agents.md` |
+| memory | `methodology/01a-decide-memory.md` |
+| knowledge vault | `methodology/01-decide-vault-tier.md` |
+| skills | `methodology/02-decide-skills.md` |
+| downstream agents | `methodology/03-decide-agents.md` |
+| Verification | `methodology/04a-decide-work-graph.md` (verifier-gate pattern) |
+| Failure capture | `methodology/06-iteration-loop.md` (detect → surface → act) and `methodology/06a-decide-retro-v2.md` |
+| Operational guards and iteration | `methodology/05-op-guards.md` and `methodology/06-iteration-loop.md` |
+
+The flow reads top-to-bottom: an external observation enters the system, is routed to a tier, becomes a tracked work item, is dispatched to an orchestrator that uses persistent knowledge, follows a procedure, and may spawn downstream agents. The output is verified independently; if it fails, the failure is captured as evidence; recurring failures are converted into operational guards that close the loop. The boxes are not stages in a pipeline that must always execute in order — they are the components a healthy system has, the relationships between them, and the order in which evidence propagates when something goes wrong.
+
+### What Alice cannot verify
+
+Alice is a methodology; methodologies do not verify that an implementation actually follows them. A reviewer who scores Alice 5/10 on testability is observing a real category limit, not a defect to fix inside the method: the verifier is the operator's tooling (the orchestrator, the cron surfaces, the op-guard loop), not Alice. Concretely, Alice does not and cannot check that any individual agent follows the routing rules, that the memory policy actually reduces retrieval errors, that the right skill is selected for a given task, that downstream agents receive the intended context, that scheduled work executes correctly in the operator's environment, or that operational guards prevent the recurrence of the failure they were written to address. These checks live in the operator's runtime, not in the documentation that describes the method.
 
 ## 2. Is Alice for me?
 
@@ -116,11 +167,11 @@ The repository is organized around the distinction between **methodology** and *
 
 ### [`methodology/`](methodology/)
 
-This directory holds the detailed decision processes that the framework is built on. Each file names one system-design decision—vault tiers, memory, skills, agents, scheduled work, work routing, strike rules, iteration, council method, and inbox routing—and walks the trade-offs an operator must make before recording a choice in their own artifact. Read these in the order suggested by [METHODOLOGY.md](METHODOLOGY.md): start with [01-decide-vault-tier.md](methodology/01-decide-vault-tier.md) and [01a-decide-memory.md](methodology/01a-decide-memory.md) to settle where knowledge lives, then [02-decide-skills.md](methodology/02-decide-skills.md), [03-decide-agents.md](methodology/03-decide-agents.md), and [04-decide-crons.md](methodology/04-decide-crons.md) to settle who does recurring work and on what cadence, and finally [05-strike-rules.md](methodology/05-strike-rules.md) and the iteration and inbox files to close the loop.
+This directory holds the detailed decision processes that the framework is built on. Each file names one system-design decision—vault tiers, memory, skills, agents, scheduled work, work routing, operational guards, iteration, council method, and inbox routing—and walks the trade-offs an operator must make before recording a choice in their own artifact. Read these in the order suggested by [METHODOLOGY.md](METHODOLOGY.md): start with [01-decide-vault-tier.md](methodology/01-decide-vault-tier.md) and [01a-decide-memory.md](methodology/01a-decide-memory.md) to settle where knowledge lives, then [02-decide-skills.md](methodology/02-decide-skills.md), [03-decide-agents.md](methodology/03-decide-agents.md), and [04-decide-crons.md](methodology/04-decide-crons.md) to settle who does recurring work and on what cadence, and finally [05-op-guards.md](methodology/05-op-guards.md) and the iteration and inbox files to close the loop.
 
 ### [`templates/`](templates/)
 
-This directory holds fillable operating artifacts—Markdown files with bracketed prompts an operator copies into their own workspace and rewrites for their context. Reach for a template when you have already worked through the relevant methodology decision and are ready to record the resulting choice in a form your orchestrator or downstream agents can read. Each template pairs with one or more methodology files; for example, [templates/AGENTS.md.template](templates/AGENTS.md.template) and [templates/agent-soul.md.template](templates/agent-soul.md.template) instantiate the agent decisions from `methodology/03-decide-agents.md`, while [templates/strike-rule.md.template](templates/strike-rule.md.template) pairs with `methodology/05-strike-rules.md`. Do not edit Alice's templates in place; copy them into your own workspace and rewrite the prompts there.
+This directory holds fillable operating artifacts—Markdown files with bracketed prompts an operator copies into their own workspace and rewrites for their context. Reach for a template when you have already worked through the relevant methodology decision and are ready to record the resulting choice in a form your orchestrator or downstream agents can read. Each template pairs with one or more methodology files; for example, [templates/AGENTS.md.template](templates/AGENTS.md.template) and [templates/agent-soul.md.template](templates/agent-soul.md.template) instantiate the agent decisions from `methodology/03-decide-agents.md`, while [templates/op-guard.md.template](templates/op-guard.md.template) pairs with `methodology/05-op-guards.md`. Do not edit Alice's templates in place; copy them into your own workspace and rewrite the prompts there.
 
 ### [`references/`](references/)
 

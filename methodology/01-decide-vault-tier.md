@@ -89,6 +89,75 @@ Once you have your vault tier design:
 
 The vault tier is the **substrate**. Without it, the agent doesn't know where to write. With it, every methodology decision downstream has a home.
 
+## Maintenance
+
+Designing the tier model completes the build phase; it does not end the lifecycle. A vault with the right tiers but no audit, drift detection, or retirement rule degrades into "everything lives in 2-ATOMIC" within months. The maintenance cycle below mirrors `methodology/02-decide-skills.md` §Skill maintenance in shape so a friend reading both sees the same rhythm.
+
+### 1. Audit cadence
+
+Use two cadences:
+
+- **Routine inventory scan:** weekly or monthly, automated when the platform supports it.
+- **Tier audit:** every 6 months, with a human or designated owner confirming tier definitions, routing rules, and access policy.
+
+The routine scan collects; it does not decide. It may count notes per tier, flag access-rule violations, detect routing bypasses (a final-form note appearing directly in `2-ATOMIC/` with no triage record), and queue tiers due for review. The 6-month audit applies the five checks below and records a disposition per tier. High-risk tiers (e.g. an append-only atomic tier in a regulated context) may use a shorter cadence; record the override and the reason.
+
+### 2. Quality threshold
+
+A healthy vault tier model satisfies all of:
+
+- **Tier count ≥ 4.** Four is the floor (inbox / literature / atomic / archive, with indexes optional). Three collapses literature into atomic and erodes the source-vs-derivative distinction. Two is "active" and "everything else." One is a folder, not a tier model.
+- **Access rule is explicit per tier.** Each tier names whether it is append-only, edit-freely, regenerate-only, or move-only. A tier with no documented rule has no rule.
+- **No tier is empty for 90+ consecutive days.** An empty tier is either over-deployed (collapse it) or under-routed (fix the routing).
+- **Migration path between tiers is documented.** Every move a note can make (e.g. `0-INBOX/` → `2-ATOMIC/`, `2-ATOMIC/` → `4-ARCHIVE/`) has a named trigger and a destination rule.
+- **No side-channel writes.** Every note lands in the tier designated for the tool writing it.
+
+The thresholds are review gates, not formatting games. Collapsing two tiers to satisfy the floor, or adding a sixth to look rigorous, both fail the underlying test.
+
+### 3. Drift signals
+
+Drift is observable. Surface at least one of the following before the next 6-month audit:
+
+- **Notes "falling through" tiers.** A note appears in `2-ATOMIC/` with no prior `0-INBOX/` or `1-LITERATURE/` presence and no migration record. The most common drift signal — the routing rule was skipped because the writer found the destination more convenient than the inbox.
+- **Tier empty for 30+ days.** The directory still exists but receives no writes. Either routing broke or the tier is obsolete.
+- **Agent bypasses tier routing.** A final-form note written directly to the destination tier without going through the inbox, or an atomic note moved to archive without a deprecation record.
+- **Edit on an append-only tier.** A note in `0-INBOX/` or `1-LITERATURE/` was rewritten after first write. The access rule has failed.
+
+A drift signal does not always mean the rule is wrong. Sometimes the rule is right and the writer is wrong; sometimes the tool cannot enforce it; occasionally the rule is obsolete and the signal is the prompt to revise. The audit names the signal and proposes a disposition; the owner confirms.
+
+### 4. Fix actions
+
+When drift is detected, the canonical response is:
+
+1. **File a `vault-route-audit` ticket** on the operator's kanban board. Name the drift signal, the tier(s) involved, the offending notes (if known), and the suspected cause.
+2. **The vault curator reviews** the tier definitions, the access rules, and the routing triggers. The curator does not unilaterally rewrite the methodology; the curator proposes.
+3. **The curator re-issues the tier definitions or the routing rule.** Two outcomes are valid: (a) the rule was right and the writer was wrong — fix the writer and re-route the offending notes; (b) the rule is obsolete — open a methodology-revision ticket, then re-route after the new rule lands.
+4. **The disposition is recorded** on the ticket: cause, corrective action, next review date. A drift signal with no recorded disposition is unresolved.
+
+Do not auto-fix drift by rewriting notes in place. A note that landed in the wrong tier is a routing failure; the fix is to move it to the right tier with an audit line, not to edit it where it sits.
+
+### 5. Retirement conditions
+
+Retire a tier when at least one of the following is observable for 90 consecutive days:
+
+- **Zero writes to the tier.** Nothing has been filed, captured, or moved into it for three months. The tier is over-deployed (routing never fires) or obsolete.
+- **Zero reads from the tier.** No agent, MOC, or audit script has read it in three months. Dead memory.
+- **Routing can be folded into an adjacent tier without rule conflict.** The retired tier's access rule is a strict subset of a remaining tier's rule, and contents can move as a single batch.
+
+The retirement sequence:
+
+1. Propose merging the tier with an adjacent tier that shares the access rule. Name the surviving tier.
+2. Move all notes to the surviving tier, preserving frontmatter and adding a `migrated_from:` field so the move is auditable.
+3. Update every MOC, catalog entry, routing rule, and agent assignment that referenced the retired tier.
+4. Keep the directory present as an empty placeholder for one full audit cycle (6 months) so any late-arriving references surface. Remove the placeholder only after the cycle completes with no inbound references.
+5. Record the retirement in the methodology changelog: date, surviving tier, contents moved, references updated, owner.
+
+A vault model whittled down to a single tier has failed. The tier model exists to separate access rules; one tier means one access rule for everything, which means the design has collapsed. If you reach one tier, restart from the 5 questions above — do not keep a one-tier system.
+
+### Maintenance parity check
+
+This section defines a friend-portable method, not a claim that every platform supplies automated tier scans, append-only enforcement, or migration audit fields. Before adopting it, map each function—routine scan, append-only enforcement, migration audit, and retirement archival—to mechanisms available in your own tool. The 6-month cycle is a methodology default; adjust it when measured drift rate, note volume, or risk provides better evidence, but record the exception so the audit trail remains intact.
+
 ## Anti-patterns to watch for
 
 1. **"I'll just keep everything in one folder for now."** → You will lose the access-rule separation within 3 months. The whole point of tiers is the access rule.

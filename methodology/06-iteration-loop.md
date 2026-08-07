@@ -40,11 +40,11 @@ The two framings describe the same loop from different angles. The engine form (
 
 The point of the table is: the engine form is *missing a leg*. The engine says "detect → surface → act, then detect again," which produces a loop that never changes. The operator form says "and also remember what to do differently next time," which produces a loop that **improves**. Adding the feedback element to the engine is the durability piece — the engine's three legs become four: `Detect → Surface → Act → Feedback`.
 
-This is the **engine** that drives crons, agents, and strike rules. Without it, the system is static — no detection, no notification, no action. Without the feedback element, the system is static in a second way: it never improves.
+This is the **engine** that drives crons, agents, and operational guards. Without it, the system is static — no detection, no notification, no action. Without the feedback element, the system is static in a second way: it never improves.
 
 ## Why this is the most important methodology doc
 
-Every other methodology doc describes **what** (skills, agents, crons, strike rules). This doc describes **how** they interact. The iteration loop is the protocol that lets a detection lead to an action, and an action lead to a new detection.
+Every other methodology doc describes **what** (skills, agents, crons, operational guards). This doc describes **how** they interact. The iteration loop is the protocol that lets a detection lead to an action, and an action lead to a new detection.
 
 If you only have time to read one methodology doc, read this one. The others are inputs; this is the engine.
 
@@ -223,16 +223,16 @@ If you find yourself wanting different scopes, **the loop is doing two things.**
 
 6. **"The loop should run forever."** → No. Loops have TTL. After N failures, escalate to operator. After N successes of doing nothing, consider whether the loop is still needed.
 
-## The 5-strike-system pattern
+## The 5-loop-archetype pattern
 
 A common failure mode is that the system has many loops, each one doing a small thing, and the loops themselves are not coordinated. The result is noise: many loops surfacing, no clear pattern.
 
-The fix is the **5-strike-system pattern**:
+The fix is the **5-loop-archetype pattern**:
 1. The system has 1-2 heartbeat loops (cheap, no surface)
 2. The system has 2-3 monitor loops (cheap, surface on findings)
 3. The system has 0-1 auto-recover loops (rare, surface on action)
 4. The system has 1-2 trigger loops (medium, surface always)
-5. The system has 0 strike-rule-enforcement loops (strike rules are passive; the agent reads them)
+5. The system has 0 operational-guard-enforcement loops (operational guards are passive; the agent reads them)
 
 If your system has more than 10 loops, you're over-looping. Consolidate.
 
@@ -338,6 +338,60 @@ Both are the feedback element. The graph retro is not a separate mechanism; it i
 That is what makes the system *self-improving* end-to-end, not just per-loop.
 
 **The full protocol for the graph retro — the 3 fields (what worked / what didn't / what to change), the 1-day-open human-feedback window, the auto-apply step, and the worked example — lives in `methodology/06a-decide-retro.md`.** This 06 doc covers the *principle* (feedback element, opt-in, durable surface); the 06a doc covers the *protocol* (the state machine, the operator amendment window, the follow-up-ticket routing).
+
+## Maintenance
+
+> The iteration loop is the engine. An engine needs maintenance — not on every run, but on a regular cadence. This section defines the loop-class audit: a periodic check that the engine is still doing what it claims to do, and the rules for retiring it when it isn't.
+
+### 1. Audit cadence
+
+**Every 30 days.** The loop is the engine; check it monthly. A loop that has been "running fine" for 6 months is suspect — the world changed, the loop didn't. The 30-day cadence is a class-level audit, not a per-loop audit: every active loop class (heartbeat, monitor, auto-recover, trigger) is checked as a group. The check is cheap: a single grep + a count of recent cron firings per leg. The check fires a doc-writer or operator ticket if drift is detected; silent otherwise.
+
+### 2. Quality threshold
+
+The loop is healthy when **all 4 legs are running** and the loop **closes** end-to-end:
+
+1. **Detect** — has recent cron firings or trigger events (at least 1 in the last 7 days for monitor/auto-recover/trigger; at least 1 in the last 24h for heartbeat).
+2. **Surface** — produced an output artifact in the last audit window (DM, kanban ticket, audit line, or bridge file).
+3. **Act** — has at least one record of taking action (auto-recover, ticket filed, worker dispatched, escalation sent) when the detect found something.
+4. **Feedback** — has produced at least one durable-surface update (skill patch, flow patch, graph node update, or methodology amendment) since the loop's last major change.
+
+The loop closes when `detect → surface → act → feedback → next detect` is traceable in the audit log. A healthy loop has all four legs exercised in the last audit window, and at least one complete trace from a recent `detect` event to the next `detect` event (with surface/act/feedback in between).
+
+### 3. Drift signals
+
+The loop is drifting when:
+
+- **One leg has no recent activity.** No `action` events in 7 days for a monitor loop, no `surface` artifacts for a heartbeat in 24h (acceptable — heartbeat's surface is silent — but verify the log line is still being written), no `feedback` events in 30 days for any class 2-4 loop. The leg is "running" but doing nothing.
+- **Feedback is not actioned.** The loop produced a feedback update (skill patch, methodology amendment) but a follow-up inspection shows the next loop runs did not use the updated artifact. The feedback landed but the loop didn't consume it.
+- **Detect-heavy, act-light.** The loop is firing frequently and surfacing frequently, but the act leg is consistently "file a ticket" without resolution. The loop is generating noise, not work. The act leg is misconfigured (too aggressive — surfacing without a real recovery path) or the detect is too broad (finding things that don't need acting on).
+- **The loop is duplicated by another loop.** Two loops (e.g., a system-level loop and an agent-level loop) are detecting the same condition and acting on it independently. One of them is dead weight; consolidate.
+- **The operator has a manual process that supersedes the loop.** The operator is doing the loop's work by hand because the loop's output is not useful. The loop is in the way; retire it.
+
+### 4. Fix actions
+
+When drift is detected:
+
+1. **Missing leg.** Identify which leg is silent. Run the corresponding cron's health check (per `methodology/04-decide-crons.md` — `hermes cron list`, `hermes cron run <id>`, inspect the most recent firing). If the cron is registered but not firing, re-register or re-enable. If the cron is firing but the leg is silent in the output, the leg is broken at the script level — file a coder ticket.
+2. **Feedback not actioned.** Inspect the most recent feedback update. Was the artifact on disk? Did the next loop read it? If the feedback landed on disk and the loop didn't consume it, the loop's `action` step is hard-coded to read the prior artifact, not the feedback-updated one. File a coder ticket to wire the loop to read the updated artifact.
+3. **Detect-heavy, act-light.** Reduce the detect scope (narrow the predicate), or add an act-leg recovery path that doesn't require operator intervention. If neither is possible, retire the loop — see below.
+4. **Loop duplication.** Identify the two loops. Pick the one with the cleaner scope. Archive the other. File a ticket documenting the consolidation so the audit trail preserves the rationale.
+5. **Operator supersedes.** Confirm with the operator that the manual process is the new normal. File a ticket to archive the loop with `metadata.disposition=abandoned_per_decision` and a reference to the operator's confirmation comment.
+
+### 5. Retirement conditions
+
+A loop is retired when:
+
+1. **The loop is duplicated by another loop** (e.g., a system-level loop and an agent-level loop doing the same thing). The redundant loop is archived; the surviving loop absorbs the scope. The audit trail records the consolidation.
+2. **The operator has a manual process that doesn't need the loop.** The operator is doing the loop's work by hand and the loop's output is noise. The loop is archived with `metadata.disposition=abandoned_per_decision` referencing the operator's confirmation.
+3. **The loop has been silent for 90+ days.** No detect firings, no surface artifacts, no act events, no feedback. The loop is dead but still registered. Archive it; if a need recurs, a new loop can be designed from scratch with the lessons learned (which is the feedback element at meta scope).
+4. **The loop's evidence consistently shows it is not useful.** The loop runs, surfaces, acts — but the operator ignores the surface and the act has no follow-through. The loop is consuming cycles without producing value. Archive with `metadata.disposition=abandoned_per_decision` and a reference to the audit evidence.
+
+Retirement is not failure. It is the loop's `stop rule` firing at class scope. A retired loop is the feedback element applied to the loop fleet: the audit line says "this loop class is no longer needed; here is the evidence." The next time someone designs a loop in this class, they read the retirement audit line and either re-instantiate with a different shape or pick a different class entirely.
+
+### Maintenance parity check
+
+This section defines a friend-portable method, not a claim that every platform supplies cron-firing telemetry, audit-log capture, or disposition review queues. Before adopting it, map each function — class-level audit, drift surfacing, fix-action routing, retirement archival — to mechanisms available in your own tool. The 30-day cycle is a methodology default; adjust it when measured loop activity, drift rate, or operator-stated risk provides better evidence, but record the exception so the loop set remains auditable.
 
 ## See also (updated)
 

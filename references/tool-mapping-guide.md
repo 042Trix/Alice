@@ -26,7 +26,7 @@ The table shows the canonical path for each concept in the column's tool. The sa
 | **Agent profile** | `~/.hermes/profiles/<name>/` | `.claude/agents/<name>/` | `~/.codex/agents/<name>/` | `~/.opencode/agents/<name>/` |
 | **Cron** | `~/.hermes/cron/jobs.json` (hermes cron add) | system-level cron + wrapper | system-level cron + wrapper | system-level cron + wrapper |
 || **Kanban / tickets** | `~/.hermes/kanban/boards/<board>/kanban.db` (see [Board creation](#board-creation)) | linear issues (see [Board creation](#board-creation)) | linear issues (see [Board creation](#board-creation)) | linear issues (see [Board creation](#board-creation)) |
-| **Strike rule** | `<atomic-tier>/rules/strike-N-name.md` | `<atomic-tier>/rules/strike-N-name.md` | `<atomic-tier>/rules/strike-N-name.md` | `<atomic-tier>/rules/strike-N-name.md` |
+| **Operational guard** | `<atomic-tier>/rules/op-guard-N-name.md` | `<atomic-tier>/rules/op-guard-N-name.md` | `<atomic-tier>/rules/op-guard-N-name.md` | `<atomic-tier>/rules/op-guard-N-name.md` |
 | **Council output** | `<atomic-tier>/cross-agent/YYYY-MM-DD_council-<topic>.md` | `<atomic-tier>/cross-agent/YYYY-MM-DD_council-<topic>.md` | `<atomic-tier>/cross-agent/YYYY-MM-DD_council-<topic>.md` | `<atomic-tier>/cross-agent/YYYY-MM-DD_council-<topic>.md` |
 | **Audit log** | `<vault-root>/log.md` | per-workspace `log.md` | per-workspace `log.md` | per-workspace `log.md` |
 

@@ -5,6 +5,11 @@ title: "Council seat — fillable template"
 type: template
 status: draft
 source: alice-framework
+derived_from:
+  project: Alice
+  template: templates/council-seat.md.template
+  version: 0.1.1
+  customized_on: <YYYY-MM-DD>
 tags: [kind:template, kind:council-seat, project:alice]
 confidence: 0.0
 links: []

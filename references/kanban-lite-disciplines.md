@@ -82,7 +82,7 @@ Moving tickets is fine for transitions (Build → Work for review). **Constant m
 
 A kanban in your head is a single point of failure. **Write it down.** A markdown list is fine. A spreadsheet is fine. A real kanban tool is fine. Just don't keep it in your head.
 
-## The 3-strike-system for kanban
+## The 3-element-system for kanban
 
 A small fleet doesn't need a complex kanban. You need 3 things:
 

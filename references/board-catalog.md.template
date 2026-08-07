@@ -5,6 +5,11 @@ title: "Board catalog — fillable template"
 type: template
 status: draft
 source: alice-framework
+derived_from:
+  project: Alice
+  template: references/board-catalog.md.template
+  version: 0.1.1
+  customized_on: <YYYY-MM-DD>
 tags: [kind:template, kind:board-catalog, project:alice]
 confidence: 0.0
 links: ["[[methodology/04b-decide-board-routing.md]]", "[[methodology/04a-decide-work-graph.md]]"]

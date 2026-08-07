@@ -24,7 +24,7 @@ You can't route 1000 X posts a day by hand. You need an **ingestion pipeline** t
 
 **3. Summarize.** For items that pass the filter, summarize to 1-3 sentences. The summary is what gets routed. The full content stays in the inbox tier (or gets archived if not worth keeping).
 
-**4. Route.** Apply the 5-question routing decision tree. The summary goes to the target tier (atomic / literature / skill-brief / strike-rule / etc.); the full content goes to the appropriate sub-tier (or archive).
+**4. Route.** Apply the 5-question routing decision tree. The summary goes to the target tier (atomic / literature / skill-brief / operational-guard / etc.); the full content goes to the appropriate sub-tier (or archive).
 
 ## X post capture (the most common external source)
 
@@ -64,7 +64,7 @@ If the answer to all 5 is "no" or "uncertain," archive.
 
 ## X-post "adds" — when the X post brings a new pattern
 
-If the X post introduces a **new pattern** (a new skill, a new strike rule, a new methodology, a new tool), the post itself goes to:
+If the X post introduces a **new pattern** (a new skill, a new operational guard, a new methodology, a new tool), the post itself goes to:
 - **atomic tier** if it's a methodology / rule / decision
 - **literature tier** if it's a reference (e.g., a paper cited in a tweet)
 - **inbox → archived** if the post is consumed (no need to keep the full tweet)

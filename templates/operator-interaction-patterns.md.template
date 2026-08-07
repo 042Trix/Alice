@@ -5,6 +5,11 @@ title: "Operator interaction patterns — fillable template"
 type: template
 status: draft
 source: alice-framework
+derived_from:
+  project: Alice
+  template: templates/operator-interaction-patterns.md.template
+  version: 0.1.1
+  customized_on: <YYYY-MM-DD>
 tags: [kind:template, kind:operator-interaction, project:alice]
 confidence: 0.0
 links: ["[[methodology/03b-decide-operator-agent-interaction.md]]", "[[methodology/03-decide-agents.md]]", "[[methodology/03a-decide-agent-vault-interaction.md]]", "[[templates/agent-soul.md.template]]"]
@@ -32,7 +37,7 @@ The 5 roles from `methodology/03b-decide-operator-agent-interaction.md`:
 |---|---|---|
 | Launcher | [yes/no] | every cold-start session |
 | Approver | [yes/no] | for Pattern 2/4 proposals |
-| Governor | [yes/no] | writes strike rules, runs audits |
+| Governor | [yes/no] | writes operational guards, runs audits |
 | Curator | [yes/no] | writes skill-briefs, SOULs, templates |
 | Fallback | [yes/no] | manual override when agent fails |
 
