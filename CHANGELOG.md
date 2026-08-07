@@ -1,7 +1,7 @@
 ---
 id: alice-changelog
 created: 2026-08-04T15:30:00Z
-updated: 2026-08-05T20:30:00Z
+updated: 2026-08-06T18:30:00Z
 title: "Alice — Changelog"
 type: framework-changelog
 status: draft
@@ -19,11 +19,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Note on this `0.1.0` entry:** This is the **changelog stub**, not a release announcement. The entry below names what exists in the repo at the time of writing, and it will be revised at tag time to reflect the final packaging artifacts. The first public release ships only after every box in the OSS prep plan's release-readiness checklist is checkable. See `2-ATOMIC/concepts/alice-oss-prep-plan-2026-08-04.md`.
 
+## [v0.1.1] — naming: "Strike rule" → "Operational Guard"
+### Changed
+- `methodology/05-strike-rules.md` → renamed to `methodology/05-op-guards.md`. Whole body rewritten: "strike rule" → "operational guard" throughout. Lifecycle properties (expiration / deduplication / supersession / severity) updated to use the new term. Worked example updated (Rule R → Guard G, Rule S → Guard H). Cross-references in See-also section updated.
+- `templates/strike-rule.md.template` → renamed to `templates/op-guard.md.template`. Frontmatter id `alice-template-strike-rule` → `alice-template-op-guard`. Body uses "operational guard" throughout.
+- `references/glossary.md` — Operational guard replaces Strike rule in the canonical-term table. New "Aliases and deprecated forms" entry: "Strike rule | Deprecated (soft-rename) | Operational guard | Renamed in v0.1.1 (2026-08-06). The new term is self-explanatory; 'strike' read as labor/military/baseball to outsiders. Old filenames still exist as redirect stubs for backward compatibility." The "Rule" ambiguous-shorthand entry now points to "Operational guard" instead of "Strike rule."
+- 18 source files updated across `methodology/`, `references/`, `templates/`, `worked-examples/`, and `README.md` / `METHODOLOGY.md` to use the new term. Counting: 299 lexical substitutions across 50 files (including the gitignored `_inbox/` and `_polish-archive/` directories, which were re-harmonized for consistency even though they are not part of the public release).
+- Two adjacent patterns renamed to disambiguate from the rename:
+  - `references/kanban-lite-disciplines.md` "The 3-strike-system for kanban" → "The 3-element-system for kanban" (the section describes 3 system elements, not 3 strike rules).
+  - `methodology/06-iteration-loop.md` "The 5-strike-system pattern" → "The 5-loop-archetype pattern" (the section describes 5 loop archetypes, not 5 strike rules).
+- Filename references in frontmatter `links:` arrays updated from `methodology/05-strike-rules.md` to `methodology/05-op-guards.md` (8 files).
+- `rule-N` / `Strike-N` / `op-guard-N` references in prose updated to `op-guard-N` (rule numbers preserved). E.g. "strike-13" → "op-guard-13", "Strike-15" → "op-guard-15", "strikes 1-3 corrected" → "op-guards 1-3 corrected". The rule numbers themselves did not change.
+
+### Out of scope (kept)
+- `methodology/06b-decide-blocked-ticket-recovery.md` is still under `_inbox/` (not yet promoted to `methodology/`); the script touched it for consistency but it is not part of the public methodology corpus.
+- Resilience to reviewer-defined terminologies: nothing in the doc contradicts the operator's standing rule that "rule numbers don't change." Only the prefix and the noun rename.
+
+### Source
+- Ticket `t_fcc34797` (rename scope). Operator direction: "Let's rename to 'Operational Guards'." (2026-08-06.)
+- Cross-reference: `2-ATOMIC/cross-agent/2026-08-06_council-alice-v0-1-1-improvement-plan.md` (Improvement plan that first proposed the rename).
+
+### Out-of-scope follow-up (vault rule files)
+The vault rule section (`~/Documents/HermesVault/2-ATOMIC/rules/`) was renamed in the same ticket. **However, the rename script had a content-loss bug**: it overwrote the original rule files with redirect stubs before the read-modify-write loop had a chance to preserve the body. 2 of 13 rules (`op-guard-11-log-md-append-only-2026-07-22.md`, `op-guard-15-must-call-terminal-2026-07-29.md`) were recovered from the MoA trace files at `2-ATOMIC/cross-agent/planner-moa-traces/`. The remaining 11 rules (op-guard-3, 4, 5, 8, 9, 10×2, 11-no-auto-handoff, 13, 16, three-op-guard-rule) are content-loss stubs as of 2026-08-06. The rename ticket is BLOCKED for the vault side until the 11 missing rule bodies are reconstructed. This is operator-visible (the loss-notice files at the old and new filenames). The Alice public repo side of the rename is complete and not blocked.
+
 ## [Unreleased] — LICENSE pick
 - `methodology/00-decide-ticket-naming.md` — new methodology doc codifying the ticket-naming convention v2 (the `AREA (<Section>) TOPIC <N> (<descriptive name>)` format) for the `alice-framework` board. Effective 2026-08-05. Source: ticket `t_d17af817`.
 - `methodology/04d-decide-flow-spec.md` — new methodology doc codifying the **6-field flow spec** (goal, inputs, outputs, success criteria, retry parameters, escalation). Defines each field, names per-field anti-patterns, and ships a worked example for a one-page cheat-sheet flow. Closes the gap in the GRAPH area between the work-graph substrate (04a) and the iteration-loop primitive (06). Source: ticket `t_dec4b9ce`.
 - `methodology/06a-decide-retro.md` — new methodology doc codifying the **post-execution retro + 1-day-open human-feedback pattern** for every graph execution. Defines the 3 reflection fields (what worked / what didn't / what to change), the 24h hard-timeout window, the auto-apply step (follow-up ticket routing), and a worked example (v0.2 release). Sibling to `methodology/06-iteration-loop.md`; closes the gap in the GRAPH area where the feedback element points at a protocol that didn't yet exist. Source: ticket `t_a57e2b9f`.
-- `methodology/06-iteration-loop.md` — added a forward-link in the "How this maps to GRAPH / retro + feedback" section pointing readers at `methodology/06a-decide-retro.md` for the full retro protocol; added `06a-decide-retro.md` to the See-also list. No primitive changes. Source: ticket `t_a57e2b9f` (paired wiki-update per strike-5).
+- `methodology/06-iteration-loop.md` — added a forward-link in the "How this maps to GRAPH / retro + feedback" section pointing readers at `methodology/06a-decide-retro.md` for the full retro protocol; added `06a-decide-retro.md` to the See-also list. No primitive changes. Source: ticket `t_a57e2b9f` (paired wiki-update per op-guard-5).
 
 - Hermes infrastructure parity-3/3 (ticket `t_c029a0bd`) — ships the **retro-1d-window** enforcement: every `0-INBOX/retro-<graph-id>-<date>.md` carries frontmatter `created: <iso>` + `closed: null`; a 24h tick (cheap secondary check wired into `jarvis_stuck_board_monitor.chat_preflight`) auto-archives the file to `.archived-retro-*.md`. If the body contains `<!-- comment: ... -->`, the retro closes with operator feedback folded in; otherwise the no-feedback marker is appended. Implementation: `~/.hermes/tools/retro_one_day_window.py` (CLI + importable module); test suite `~/.hermes/tests/test_retro_one_day_window.py` (17 cases: 4 mandatory acceptance criteria + 13 belt-and-suspenders — young/closed/no-frontmatter/missing-created/dot-prefix/non-retro-name/idempotency/reversibility/case-insensitive/batch/dry-run/frontmatter-preservation/audit-line/JSON). Closes the parity gap for `t_a57e2b9f` (GRAPH / retro + feedback): the methodology doc `06a-decide-retro.md` is now backed by working operator code, not aspirational design. Sister to `t_480d925b` (post_graph_retro.py, the producer) and `t_896a3972` (cron registration, the trigger).
 
@@ -43,9 +66,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Public-technical-writing polish pass across the 46-file corpus. See OSS prep plan Card H.
 - Signed tag `v0.1.0`; GitHub release page; `compare/` link references. See OSS prep plan release-readiness checklist.
 
-## [Unreleased] — blocked-ticket recovery procedure (paired wiki-update per strike-5)
-- `methodology/06b-decide-blocked-ticket-recovery.md` — new methodology doc codifying the **blocked-ticket recovery procedure** for the chat-side agent (jarvis) on the `alice-framework` and `agent-resources` boards. Defines: 4 trigger conditions (blocked >1h, running-stub >4h, running-stale-heartbeat >2h, running-no-completion >1h), 4-step investigation procedure (check file system, check process, check toolset limits, decide rescue action), 4 rescue actions in priority order (re-scope, close as filed-in-error, file kill-stuck-process follow-up, document in audit log), and cadence (30-min check). Codifies the operator's 2026-08-05 direction ("we aren't proactively responding to blocked tasks again") as a standing rule. Also documents why this is a methodology (not a strike rule) and the 3-failure promotion criteria. Source: ticket `t_78ffd7e5`.
-- `templates/AGENTS.md.template` — added **Section 7a (Blocked-ticket recovery procedure)** with the 4 trigger conditions, 30-min cadence, 4-priority rescue actions, and the audit-log schema. The new section is a navigation summary; the canonical reference is `methodology/06b-decide-blocked-ticket-recovery.md`. Paired wiki-update per strike-5. Source: ticket `t_78ffd7e5`. Template still under 20,000-char limit (well under; ~8.2 KB).
+## [Unreleased] — blocked-ticket recovery procedure (paired wiki-update per op-guard-5)
+- `methodology/06b-decide-blocked-ticket-recovery.md` — new methodology doc codifying the **blocked-ticket recovery procedure** for the chat-side agent (jarvis) on the `alice-framework` and `agent-resources` boards. Defines: 4 trigger conditions (blocked >1h, running-stub >4h, running-stale-heartbeat >2h, running-no-completion >1h), 4-step investigation procedure (check file system, check process, check toolset limits, decide rescue action), 4 rescue actions in priority order (re-scope, close as filed-in-error, file kill-stuck-process follow-up, document in audit log), and cadence (30-min check). Codifies the operator's 2026-08-05 direction ("we aren't proactively responding to blocked tasks again") as a standing rule. Also documents why this is a methodology (not an operational guard) and the 3-failure promotion criteria. Source: ticket `t_78ffd7e5`.
+- `templates/AGENTS.md.template` — added **Section 7a (Blocked-ticket recovery procedure)** with the 4 trigger conditions, 30-min cadence, 4-priority rescue actions, and the audit-log schema. The new section is a navigation summary; the canonical reference is `methodology/06b-decide-blocked-ticket-recovery.md`. Paired wiki-update per op-guard-5. Source: ticket `t_78ffd7e5`. Template still under 20,000-char limit (well under; ~8.2 KB).
 
 ## [0.1.0] - 2026-08-04
 
