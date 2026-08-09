@@ -89,6 +89,8 @@ Alice is a methodology; methodologies do not verify that an implementation actua
 
 ## 2. Is Alice for me?
 
+A 3-layer navigation aid (HARNESS / LOOP / GRAPH) is also available at `methodology/00-decide-ticket-naming.md` — useful for newcomers tracking the 2026-mid-year public discourse on layered agent systems, but **Alice's canonical schema is the AREA taxonomy** (decision-ordered, in `METHODOLOGY.md` and the `methodology/` directory). The diagram is a reading-onramp, not a replacement for the AREA decision-order.
+
 Alice may fit if you:
 
 - already use an agent with persistent context or file access;

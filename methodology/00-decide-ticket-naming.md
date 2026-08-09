@@ -1,13 +1,15 @@
 ---
 id: alice-methodology-00-decide-ticket-naming
 created: 2026-08-05T14:30:00Z
-updated: 2026-08-05T15:30:00Z
+updated: 2026-08-08T15:55:00Z
 title: "Methodology 00 — Decide ticket naming"
 type: methodology
 status: draft
 source: alice-framework
-tags: [kind:methodology, kind:naming, kind:ticket, project:alice]
+tags: [kind:methodology, kind:naming, kind:ticket, kind:universal-discipline, project:alice]
 confidence: 0.0
+amended_by: ["[[ticket:t_94c0c7cf]]"]
+version: 0.4.0
 links: ["[[methodology/04c-decide-master-ticket.md]]", "[[methodology/04b-decide-board-routing.md]]", "[[templates/AGENTS.md.template]]", "[[references/board-routing.md]]"]
 ---
 
@@ -36,6 +38,8 @@ Three structural rules:
 
 The colon is the visual cue that separates the topic from the descriptive name. Em-dashes are fine inside the descriptive name (for sub-clauses), but **no em-dash on the topic-name line** — that's reserved for the descriptive clause in v2's vocabulary, and v3 promotes the colon to the canonical separator.
 
+The format applies to every ticket on every board (per Part 3 §Universal title discipline). The two-line shape is the canonical expression; other formats that carry a descriptive topic are also valid (e.g., `[MASTER] / <descriptive-name>` for masters), as long as the operator can identify the work in 2-3 seconds from the list view.
+
 ### Why this format
 
 Three problems the format is designed to solve:
@@ -43,6 +47,32 @@ Three problems the format is designed to solve:
 1. **List view collapses long titles.** Most kanban boards truncate title display around 60–80 characters. A long-form title like "Add the memory-vs-context distinction to the memory methodology doc" gets cut off in the middle of the clause. The two-line AREA + topic + descriptor shape keeps the scannable part visible on line 1.
 2. **A single ticket covers one EXTEND or NEW.** Mixing create-vs-modify in one title makes it impossible to route the work. The descriptive name announces the action ("extend 01a with ...", "new methodology doc ...") so the reader knows what kind of work to expect.
 3. **Topic numbers were a primitive, not a priority.** v2 used `TOPIC <N>` as a grouping index. But the index became its own bookkeeping tax: which number is next? does this ticket belong under H-3 or H-4? Operators reading a list do not benefit from the index because the list is already sorted by AREA + recency. v3 drops the number entirely; AREA + topic-name replaces AREA + TOPIC + parenthetical.
+
+---
+
+## Part 1.5: Navigation aid — the 3-layer stack (HARNESS / LOOP / GRAPH)
+
+> **Navigation aid (2026-mid-year public framing). Alice's canonical schema is the AREA taxonomy.**
+
+The 3-layer stack below is a reading-onramp for newcomers. It is NOT the canonical schema, which remains the AREA taxonomy from Part 1 (decision-ordered: HARNESS → LOOP → GRAPH, with the operational cross-cuts applied per ticket). The diagram tracks the 2026-mid-year public discourse on layered agent systems — see the **5-seat council verdict** for Alice (digest v0.2.0, Section 9 "Individual council / agent responses", Strategist seat) for the citation context (Addy Osmani, Lilian Weng, Peter Steinberger, sarthakai). No live URLs are embedded here; the canonical reference is the council log.
+
+```
+┌─────────────────┐    ┌──────────────────────┐    ┌───────────────────────┐
+│    HARNESS      │    │        LOOP          │    │        GRAPH          │
+│  (per-agent     │ →  │  (build → verify     │ →  │  (fan-out, fan-in,    │
+│   profile)      │    │   → retry)           │    │   sub-agents)         │
+└─────────────────┘    └──────────────────────┘    └───────────────────────┘
+                         ▲       │
+                         └───────┘ (verifier-FAIL re-enters LOOP)
+```
+
+How to read it alongside the AREA taxonomy:
+
+- **HARNESS** is the per-agent configuration (model, tools, profile, system prompt). This is the row that the AREA taxonomy's "who runs this ticket" column references, not a separate axis.
+- **LOOP** is single-agent iteration: build → verify → retry. The retry loop is local; the verifier is the same agent's verifier-gate or a paired verifier profile.
+- **GRAPH** is multi-agent fan-out / fan-in: orchestrator + downstream agents + sub-agents. The dashed feedback arrow from GRAPH back to LOOP represents the case where a graph-level verifier fails and the work re-enters a single-agent LOOP for the next iteration. This is a separate diagram (the verifier-node feedback callout, captured in `methodology/04a-decide-work-graph.md` Part 3.5) — drawn here as a dotted return arrow for orientation only.
+
+For builders, the AREA taxonomy in Part 1 is authoritative — every ticket names its AREA, and the routing / verification / op-guard rules apply per-AREA. The 3-layer diagram is a way in for readers who already know the public 2026-mid-year framing and want to map it onto Alice's canonical schema without reading the full methodology first.
 
 ---
 
@@ -65,9 +95,54 @@ These rules cover line 2. Line 1 (the AREA) is mechanical; line 2 is where the w
 
 ---
 
-## Part 3: Worked examples
+## Part 3: Universal title discipline (every ticket, every board)
 
-### Current HARNESS series (already filed, kept under their old titles — see Part 4)
+The two-line AREA + topic + descriptor format in Part 1 is the canonical shape for `alice-framework` tickets. The **title-discipline contract itself is universal** — it applies to every ticket filed on every board, by every profile.
+
+### The rule
+
+A ticket's title MUST be **descriptive of the topic** in plain language. The title is the operator's first read across a list of peers; with 50+ tickets on a single board, identical titles (or titles that are URL-only, file-path-only, or source-ticket-only) make the work unreadable.
+
+**Three universal rules:**
+
+1. **Title carries the topic.** The title includes the operator-facing topic name (e.g., "x-article-review of rari's 3-layer agent-stack piece", "rename end_session_handoff.py to v0.3.0 with validator") — never the URL, post ID, source ticket ID, or file path alone.
+2. **Body carries the source.** The body has a `## Source` block with the URL, post ID, source ticket, file path, or other reference. The title can include a short slug if it aids scannability (e.g., "rari 3-layer-stack"); the URL does NOT appear in the title.
+3. **List-view survival.** Most kanban UIs truncate titles around 60-80 characters. The descriptive topic must fit in that budget. The full URL + boilerplate does NOT.
+
+### Scope of the rule
+
+This rule applies to:
+
+- All ticket types: master, child, META, follow-up, retro, compliance verifier, code review, ad-hoc.
+- All boards: alice-framework, hermes, agent-resources, default, loop-builder, msaas-finder, requirements, patchwork, lawnsvc.
+- All profiles: jarvis, doc-writer, coder, verifier, planner, council, business-analyst, marketing, msaa-scout, web-research, default.
+
+### Anti-patterns
+
+- `Update ticket X` — title is a source reference, not a topic.
+- `https://y.com/...` — title is a URL, not a topic.
+- `t_xxxx` — title is a ticket ID, not a topic.
+- `~/.hermes/profiles/foo/SOUL.md` — title is a file path, not a topic.
+- `META` — title is a structural prefix, not a topic. (META is the structural type; the descriptive topic goes on line 2.)
+- Identical titles across 50+ tickets in a list view — operator cannot identify which ticket is which.
+
+### Correct patterns
+
+- `[MASTER] x-article-review / rari 3-layer-stack — review + council verdict + retro`
+- `doc-writer: amend methodology/00-decide-ticket-naming.md with universal title discipline`
+- `coder: harden end_session_handoff.py with validator + length budget + env override`
+- `verifier: compliance gate for master-title discipline cluster (5 checks)`
+- `META / session-handoff-protocol-overhaul: 3 infrastructure fixes + Alice M-decide-session-handoff.md`
+
+### Master tickets
+
+Master tickets follow the universal rule (above) with one addition: the `[MASTER]` prefix. See `methodology/04c-decide-master-ticket.md` Part 8 §Master Title Discipline for the master-specific application. Masters MUST include a descriptive request summary; the URL or source reference goes in the body under `## Source`.
+
+---
+
+## Part 4: Worked examples
+
+### Current HARNESS series (already filed, kept under their old titles — see Part 5)
 
 The six HARNESS tickets filed under v2 are out of scope for renaming; they are listed here so the reader sees what the v2 → v3 mapping looks like:
 
@@ -133,12 +208,12 @@ Three observations:
 
 ---
 
-## Part 4: Out of scope
+## Part 5: Out of scope
 
 The convention does not apply to:
 
 - **Existing tickets.** The six HARNESS tickets already filed under v2 (`t_c490ace1`, `t_b50f1546`, `t_d17af817`, plus the three HARNESS tickets filed 2026-08-05 afternoon — see `kanban list --board alice-framework` for the canonical set) keep their old titles. Renaming is per the doc-writer only; the doc-writer does not edit tickets directly during a single doc-writer pass. A rename pass is its own ticket.
-- **Non-alice-framework boards.** This convention applies to the `alice-framework` board specifically. Other boards (e.g. `default`, `hermes`, `patchwork`, `msaa-pipeline`, `lawnsvc`) follow their own naming conventions or none. Cross-board tickets keep their originating board's title; only the title is preserved, the body is rewritten for the new board.
+- **The two-line AREA + topic + descriptor format** (Part 1) applies to the `alice-framework` board specifically. Other boards (e.g. `default`, `hermes`, `patchwork`, `msaa-pipeline`, `lawnsvc`) follow their own naming conventions. The **universal title-discipline contract** (Part 3) — title carries the topic, body carries the source, list-view survival — applies to every board. Cross-board tickets keep their originating board's two-line format (or its equivalent); only the title is preserved, the body is rewritten for the new board.
 - **The ticket body.** The body is the source of truth. The title is a navigation aid. If the title and the body disagree, the body wins and the title is renamed in a follow-up ticket.
 
 ### What the convention does not yet cover
@@ -150,7 +225,7 @@ Two related questions that are out of scope for *this* methodology and reserved 
 
 ---
 
-## Part 5: Relationship to the operator-facing surfaces
+## Part 6: Relationship to the operator-facing surfaces
 
 The convention is enforced in three places:
 
@@ -169,6 +244,7 @@ Redundancy is the point. The ticket body is the source of truth for the *current
 - **v1 (initial, 2026-08-05 morning):** no format; titles like "Card H Fix 1" or "H-1: Extend 01a..." (operator-flagged as confusing — operators cannot tell what's a card, what's a fix, and what's a method-ticket).
 - **v2 (2026-08-05 morning → afternoon, `t_d17af817`):** `AREA (<Section>) TOPIC <N> (<descriptive name — ...>)` introduced. Added the AREA-parens, TOPIC-number, and parenthetical-with-em-dash structure. Solves the "what's a ticket" scan problem but introduces bookkeeping tax (the operator has to track TOPIC numbers per AREA) and a verbose shape that fights list-view truncation. Superseded.
 - **v3 (2026-08-05 afternoon, `t_d727f13f`):** two-line `AREA\n<topic-name>: <descriptive name>`. Dropped the parenthetical section label, dropped the TOPIC number, and dropped the em-dash from the topic-name line. The colon becomes the canonical separator between topic and descriptor; em-dash survives only inside the descriptive name. Topic numbering is implicit in filing order. Operator's direct example, two lines, no em-dash, no topic number.
+- **v4 (2026-08-08, `t_94c0c7cf`, redirect of `t_2a513f60`):** added Part 3 (Universal title discipline) — the rule that every ticket title carries a descriptive topic, the body carries the source identifier, and the title survives 60–80 char list-view truncation. The rule is universal: applies to every ticket type, every board, every profile. Master tickets get a `[MASTER]` prefix on top of the universal rule (cross-ref `04c` Part 8 §Master Title Discipline). The two-line `AREA\n<topic-name>: <descriptive name>` format (Part 1) remains the canonical shape for `alice-framework` tickets. Triggered by operator direction 2026-08-08: "this 'descriptive master task title' should apply to all tickets, not just the x articles." Verified violator: `t_62a99460` (URL-only title).
 
 ---
 

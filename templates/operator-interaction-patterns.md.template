@@ -1,6 +1,7 @@
 ---
 id: alice-template-operator-interaction-patterns
 created: 2026-08-04T12:30:00Z
+updated: 2026-08-08T14:00:00Z
 title: "Operator interaction patterns — fillable template"
 type: template
 status: draft
@@ -12,7 +13,7 @@ derived_from:
   customized_on: <YYYY-MM-DD>
 tags: [kind:template, kind:operator-interaction, project:alice]
 confidence: 0.0
-links: ["[[methodology/03b-decide-operator-agent-interaction.md]]", "[[methodology/03-decide-agents.md]]", "[[methodology/03a-decide-agent-vault-interaction.md]]", "[[templates/agent-soul.md.template]]"]
+links: ["[[methodology/03b-decide-operator-agent-interaction.md]]", "[[methodology/03-decide-agents.md]]", "[[methodology/03a-decide-agent-vault-interaction.md]]", "[[templates/agent-soul.md.template]]", "[[methodology/M-decide-human-digest.md]]", "[[templates/human-digest.md.template]]"]
 ---
 
 # Operator interaction patterns — fillable template
@@ -172,6 +173,87 @@ When the agent fails, the fallback pattern is:
 
 ---
 
+## Operator-facing digest format
+
+When the agent publishes a Retro-A (or any other retro), the system generates a human-readable digest alongside the technical retro record. The operator reads the digest, not the technical retro task. The technical retro remains the audit record; the digest is the operator's reading surface.
+
+The full digest contract is in `methodology/M-decide-human-digest.md`. The fillable form is `templates/human-digest.md.template`. The broader delivery rule (Markdown canonical + PDF rendered + Discord attachment + ticket comment + vault copy) is in the **Operator-review artifact format (PDF rule)** section below; the retro digest is the first of the seven artifact types covered by that rule.
+
+The digest:
+
+- Has the structure from `templates/human-digest.md.template` — a 10-section retro specialization. Sections 1–3 are the actionable top tier (What this is / The headline / Action items), sections 4–5 are the transitional interpretation layer (Council agree-disagree / Detailed findings), sections 6–7 are the operator action surface (Operator decisions / Operator's observations), sections 8–10 are the technical-detail bottom tier (Evidence anchors / Individual council-or-agent responses / Digest metadata). The full contract is in `methodology/M-decide-human-digest.md`.
+- Is plain language in the headline — no jargon, ticket IDs, file paths, run IDs, agent/profile names, or implementation details
+- Carries an Accept / Reject / Defer decision table for each finding (section 6, Operator decisions)
+- **v0.3.0 (2026-08-08, source=t_9450b7e0):** Is self-contained for council content decisions. When the parent master ticket carries council content decisions (Q1..Q5 or analogous) on a separate operator gate, those decisions MUST be embedded inline in the digest's action surface (section 3 "Council content decisions (inline)") + per-seat analysis (section 9 "Council content decisions (per-seat)") — not referenced by pointer only. The operator reads the digest to make a decision; if the digest points to another doc to know what the content questions are, the operator has to leave the digest, which defeats the digest's purpose.
+- Does not auto-accept recommendations; operator silence is not acceptance
+
+The operator's job per digest:
+
+1. Read the headline (3–5 plain-language bullets).
+2. Read the six-axis summary (what the agent found).
+3. For each finding, record Accept / Reject / Defer + reason in the decision table.
+4. Add observations the agent could not know.
+5. Submit the digest to Retro-H.
+
+When the digest and the technical record disagree, the technical record wins; the digest is a translation layer, not a second source of truth.
+
+**Notes:**
+- [Any operator-specific digest conventions]
+- [Any digest priority override — e.g., "headlines first, evidence second"]
+- [Any operator-specific Accept / Reject / Defer reason vocabulary]
+
+---
+
+## Operator-review artifact format (PDF rule)
+
+Retro digests are one case of a broader pattern. **Every artifact that requires the operator's review MUST be in human-readable PDF format** — retro digests, master ticket summaries, audit-line digests, council synthesis, spec proposals, council review summaries, verification reports, approval requests. The full rule is in `methodology/03b-decide-operator-agent-interaction.md` Part 13.
+
+The PDF rule generalizes the digest pattern: the Markdown source is canonical, the PDF is the operator-facing presentation layer, **both formats ship.** Discord renders Markdown inconsistently; PDF preserves structure across macOS Preview, iOS Preview, the Discord inline viewer, and the browser.
+
+### The 5-step delivery protocol
+
+```
+Markdown (canonical)  →  PDF (rendered)  →  Discord attachment  →  ticket comment  →  vault copy
+```
+
+1. **Markdown (canonical).** Write the artifact as Markdown at the canonical workspace path.
+2. **PDF (rendered).** Render the Markdown to PDF (e.g. `~/.hermes/tools/md_to_pdf.py` for Hermes-implementing operators).
+3. **Discord attachment.** Send the PDF as a Discord attachment to the operator's chat channel when the chat is connected.
+4. **Ticket comment.** Post a one-line summary to the originating ticket with a path pointer.
+5. **Vault copy (when persistent).** Store at `~/Documents/<framework>/2-ATOMIC/decisions/<artifact-id>.pdf`.
+
+### The shape contract
+
+Every operator-review artifact follows the canonical 8-section shape from `methodology/03b-decide-operator-agent-interaction.md` Part 13: What this is, The headline, What the agent found, Recommended next steps, Evidence anchors, Operator's observations, Operator decisions, Metadata. The human-digest template (`templates/human-digest.md.template`) is a 10-section retro specialization that splits "What the agent found" into Council agree-disagree + Detailed findings + Individual council-or-agent responses, and splits "Recommended next steps" into Action items + Detailed findings (proposed corrective actions). Retro digests use the digest template directly; council verdicts and master summaries may use the canonical 8 if they do not need per-seat responses.
+
+### The discipline
+
+- **Both formats ship.** Markdown is canonical; PDF is the operator's reading surface.
+- **Render before delivery.** Regenerate the PDF from the Markdown immediately before the Discord attachment step.
+- **Plain language in the headline.** No jargon, ticket IDs, file paths, run IDs, or implementation details in the headline section.
+- **Decision table is mandatory.** Accept / Reject / Defer for each finding. Silence is not consent.
+- **Discord is the operator-facing surface when connected.** If no chat is connected, the artifact still lives at its canonical paths.
+- **Technical record remains canonical.** When the PDF and the technical record disagree, the technical record wins; the PDF is regenerated before delivery.
+
+### Which artifacts trigger the rule
+
+|| Artifact type | Trigger | Markdown path | PDF path |
+|---|---|---|---|---|
+| Retro digest | Retro-A completes | `<workspace>/human-digest.md` | `<workspace>/human-digest.pdf` |
+| Master summary | Operator is asked to review a master before closing | `<workspace>/master-summary.md` | `<workspace>/master-summary.pdf` |
+| Audit-line digest | Cron / loop fires and produces a digest | `<workspace>/audit-digest.md` | `<workspace>/audit-digest.pdf` |
+| Council synthesis | Operator is asked to accept / reject the council's verdict | `_inbox/<article-slug>-council-verdict.md` | `_inbox/<article-slug>-council-verdict.pdf` |
+| Spec proposal | Operator is asked to approve a spec change | `_inbox/<spec-slug>-proposal.md` | `_inbox/<spec-slug>-proposal.pdf` |
+| Verification report | Verifier's output is presented to the operator | `<workspace>/verifier-report.md` | `<workspace>/verifier-report.pdf` |
+| Approval request | Any ticket the operator is asked to approve / reject | `<workspace>/approval-request.md` | `<workspace>/approval-request.pdf` |
+
+**Notes:**
+- [Any operator-specific format conventions — e.g., "use a different PDF path per artifact"]
+- [Any Discord channel conventions — e.g., "always send to the operator's DM, never to a project channel"]
+- [Any operator-specific priority — e.g., "council synthesis is highest priority; verify first"]
+
+---
+
 ## The 5-question operator-agent interaction audit (run quarterly)
 
 1. **Is the operator-action ticket cadence correct?** (Not too sparse, not flooded.) → adjust.
@@ -193,9 +275,11 @@ When the agent fails, the fallback pattern is:
 - [ ] Operator-as-feedback-giver format is documented
 - [ ] Operator-as-curator cycle is documented
 - [ ] Operator-as-fallback pattern is documented
+- [ ] Operator-facing digest format is documented (retro digests per `templates/human-digest.md.template`)
+- [ ] Operator-review artifact format (PDF rule) is documented (all operator-review artifacts as PDF)
 - [ ] The 5-question interaction audit is scheduled quarterly
 
-Once all 10 boxes are checked, the operator interaction patterns are ready.
+Once all 12 boxes are checked, the operator interaction patterns are ready.
 
 ---
 
@@ -211,6 +295,12 @@ Once all 10 boxes are checked, the operator interaction patterns are ready.
 8. **Document the feedback format.** (You're doing X. The right behavior is Y. Reason: Z.)
 9. **Document the curator cycle.** (When do you write skills / SOULs / templates?)
 10. **Document the fallback pattern.** (What do you do when the agent fails?)
-11. **Schedule the quarterly audit.** (Use the 5-question audit.)
+11. **Document the digest format.** (How does the operator consume a Retro-A? See `templates/human-digest.md.template`.)
+12. **Document the PDF rule.** (Every operator-review artifact follows Markdown canonical + PDF rendered + Discord attachment + ticket comment + vault copy. See the **Operator-review artifact format (PDF rule)** section above.)
+13. **Schedule the quarterly audit.** (Use the 5-question audit.)
 
 The operator interaction patterns are **operator-context.** The friend running Alice's methodology designs their own patterns for their own context. They do NOT copy the operator's specific patterns; they apply the method to derive their own.
+
+## Audit-line
+
+`## [2026-08-07T23:45Z] operator-interaction-patterns-human-digest — added Operator-facing digest format section after Operator-as-fallback pattern (cross-references methodology/M-decide-human-digest.md and templates/human-digest.md.template); added Operator-review artifact format (PDF rule) section that generalizes the digest pattern across seven artifact types; updated frontmatter links and Approval checklist (now 12 boxes) and How-the-friend-uses-this steps (now 13). source=t_d47a8be7`

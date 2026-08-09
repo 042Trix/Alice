@@ -1,6 +1,6 @@
 # Alice — methodology (linear walkthrough)
 
-> A linear overview for readers who want the framework at a glance. The 16 decision guides in `methodology/` go deeper; this file is the index.
+> A linear overview for readers who want the framework at a glance. The 17 decision guides in `methodology/` go deeper; this file is the index.
 
 Alice is a tool-agnostic methodology for designing a personal or small-team operating system supported by agents. It organizes the decisions behind persistent knowledge, reusable procedures, agent roles, recurring work, work tracking, and constraints derived from repeated failures. This walkthrough presents those decisions in sequence; the detailed guides and fillable templates provide the next step for each one.
 
@@ -52,7 +52,10 @@ Read `methodology/05-op-guards.md`. **Operational guards come from observed fail
 Read `methodology/06-iteration-loop.md`. The detect → surface → act protocol is the engine. Without it, crons generate noise and skills generate no-ops.
 
 ### 7. Council methodology (2 min)
-Read `methodology/07-council-methodology.md`. 4 seats minimum: Strategist, Engineer, Operator, Skeptic. Use `templates/council-seat.md.template`.
+Read `methodology/07-council-methodology.md`. Council-worthy Alice decisions use at least 4 seats: Strategist, Engineer, Operator, Skeptic. Then read `methodology/M-decide-council-sizing.md` to choose the appropriate 3–5-seat breadth and optional Product/Customer lens for the specific request. Use `templates/council-seat.md.template`.
+
+### 7a. Decide navigation-aid caption convention (2 min)
+Read `methodology/M-decide-navigation-aid-caption.md`. **Any diagram or visual aid labeled as a "navigation aid" must carry a 3-part caption**: (1) name the artifact a navigation aid, (2) state the date or context of the framing, (3) name Alice's canonical schema. The caption is honest about the diagram's role — without it, the diagram over-promises. Use `templates/caption-convention-rule.md.template` to record the caption text when you add a navigation aid; the council log framework-retro template's `caption` field carries the same string when the council proposes a navigation aid as a delta.
 
 ### 8. Inbox routing (2 min)
 Read `methodology/08-inbox-route.md`. Items from your external inbox get classified, deduplicated, and routed by `templates/inbox-route.md.template`.
@@ -94,6 +97,8 @@ Read `methodology/09-inbox-from-external-sources.md`. The X-ingestion pipeline i
 6. Iteration loop     →  the engine (detect → surface → act)
                           ↓
 7. Council methodology → the deliberation (multi-perspective review)
+                          ↓
+7a. Navigation-aid caption → the rendering convention (3-part caption on diagrams)
                           ↓
 8. Inbox route        →  the input filter (how external items become work)
                           ↓

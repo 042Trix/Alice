@@ -1,11 +1,13 @@
 ---
 id: alice-methodology-04a-decide-work-graph
 created: 2026-08-04T12:30:00Z
-updated: 2026-08-05T23:25:00Z
+updated: 2026-08-08T15:00:00Z
 title: "Methodology 04a — Decide your work graph (stateful work + relationships)"
 type: methodology
 status: draft
 source: alice-framework
+version: 0.1.2
+amended_by: ["[[ticket:t_94c0c7cf]]", "[[ticket:t_323ad698]]"]
 tags: [kind:methodology, kind:work-graph, kind:node-types, project:alice]
 confidence: 0.0
 links: ["[[methodology/04-decide-crons.md]]", "[[methodology/05-op-guards.md]]", "[[methodology/07-council-methodology.md]]", "[[methodology/M-decide-spec-first-flow.md]]", "[[worked-examples/01-solo-founder-skeleton/AGENTS.md]]"]
@@ -332,6 +334,16 @@ The gate is therefore a dependency edge, not a suggestion. If a system cannot re
 Without an explicit verifier node, phase transitions become silent or self-reviewed. That creates two forms of drift: an accepted document whose contract was never checked, and an environment update that no independent reviewer compared with the document. The verifier gate preserves the distinction between producing work and accepting work, keeps the operator out of routine review, and leaves a reconstructable evidence trail.
 
 This rule complements, rather than replaces, the state machine and relationship invariants above. The graph still needs explicit states, auditable transitions, acyclic relationships, and valid parent/dependency edges. The verifier order adds the missing **evidence relationship** between sequential phases.
+
+### Verifier-FAIL re-dispatch path
+
+The verifier-gate rule above is paired with a second rule that names the **dashed graph-to-loop feedback arrow** in any work-graph diagram as the **verifier-FAIL re-dispatch path**. When a verifier node records a `Fail` outcome (per Part 6: a fail-class exit — recoverable, brief still valid), the path forward is **not** a fresh graph traversal. The path forward is a **loop retry** that re-dispatches the failed work back into the iteration loop (`methodology/06-iteration-loop.md`), where the loop's detect → surface → act chain picks up the failure and the act leg re-issues the work with the verifier's recorded defect as input.
+
+**The rule:** **graph-level failures re-enter the loop, not the graph.** A verifier-FAIL on a graph node does NOT trigger a fresh graph traversal; it triggers a loop retry. The dashed arrow that returns from a mid-graph node back to the loop block is the canonical visual for this path — the work leaves the graph, the loop processes the failure, and the loop's act leg re-enters the graph on the corrected terms. Without this rule, a verifier-FAIL looks like "the graph is broken; traverse it again from the start," which burns the graph's evidence and re-runs work the verifier just proved defective.
+
+The canonical guard that enforces this at the protocol level is `op-guard-15-must-call-terminal-2026-07-29.md` (the "must call `kanban_complete` or `kanban_block` before exit" rule, surfaced via `methodology/05-op-guards.md` in Alice's umbrella). op-guard-15 guarantees that the worker's exit from a graph node is an explicit terminal transition; the loop's detect leg then reads the exit + the verifier's verdict and dispatches the retry. A worker that exits a graph node without a terminal call is a worker that has not classified its exit, and the loop cannot tell whether to retry the node (verifier-FAIL) or escalate it (verifier-Error per Part 6).
+
+**Reversibility / shelf-life.** This callout names a pattern that has existed in Alice since v0.1.0 — the dashed graph-to-loop return arrow is implicit in every work-graph diagram that uses the iteration loop as its act leg, and the verifier-FAIL → loop-retry path is implicit in every verifier-gate example above. Promoting it from implicit-in-prose to named-in-section is shelf-life-immune; the pattern does not drift as Alice evolves. The verifier gate (above) and the verifier-FAIL re-dispatch path (here) are two halves of the same rule: the gate produces the verdict, the path consumes it.
 
 ---
 

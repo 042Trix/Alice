@@ -1,13 +1,16 @@
 ---
 id: alice-methodology-04c-decide-master-ticket
 created: 2026-08-05T00:00:00Z
-title: "Methodology 04c — Decide when to use a master ticket"
+updated: 2026-08-08T00:00:00Z
+title: "Methodology 04c — Decide when to use a master ticket (v0.1.2: operator-LGTM-done and descriptive master titles)"
 type: methodology
 status: draft
 source: alice-framework
-tags: [kind:methodology, kind:work-graph, kind:master-ticket, project:alice]
+version: 0.1.2
+tags: [kind:methodology, kind:work-graph, kind:master-ticket, kind:done-gate, kind:operator-lgtm, project:alice]
 confidence: 0.0
-links: ["[[methodology/04a-decide-work-graph.md]]", "[[methodology/04b-decide-board-routing.md]]", "[[methodology/03b-decide-operator-agent-interaction.md]]", "[[references/kanban-lite-disciplines.md]]", "[[references/tool-mapping-guide.md]]"]
+amended_by: ["[[ticket:t_248722d8]]", "[[ticket:t_2a513f60]]"]
+links: ["[[methodology/04a-decide-work-graph.md]]", "[[methodology/04b-decide-board-routing.md]]", "[[methodology/00-decide-ticket-naming.md]]", "[[methodology/03b-decide-operator-agent-interaction.md]]", "[[methodology/06a-decide-retro-v2.md]]", "[[references/kanban-lite-disciplines.md]]", "[[references/tool-mapping-guide.md]]"]
 ---
 
 # Methodology 04c — Decide when to use a master ticket
@@ -36,12 +39,13 @@ The master answers five operator questions:
 
 The master is not the work itself. It is the durable container and status surface for the work.
 
-A master ticket has four defining properties:
+A master ticket has five defining properties:
 
 - **Request fidelity:** it preserves the operator's original request verbatim.
 - **Graph ownership:** all normal work tickets connect beneath it through explicit parent/child links.
 - **Progress visibility:** it exposes completed children over total children.
 - **Closure semantics:** it records the condition that permits the whole request to become done.
+- **Title discipline:** the title is descriptive of the topic (per Part 8 §Master Title Discipline); source URLs / identifiers live in the body under a `## Source` line.
 
 ### Master ticket versus ordinary parent ticket
 
@@ -336,6 +340,80 @@ If the master has already closed, decide whether the new request is a correction
 
 ---
 
+## Part 7.5: The done-gate opt-in rule for operator-facing flows (v0.1.1)
+
+**Default is auto-done. Operator-facing flows must explicitly opt into operator-LGTM-done.** This sub-section codifies the lesson from the x-article-review loop on 2026-08-07: the master ticket `t_62a99460` auto-closed prematurely because the master body did not specify the done-gate, so the operator never got to review the 5 council decisions before the master disappeared.
+
+### The rule
+
+A master ticket is **operator-facing** when **any** of the following is true:
+
+1. The flow's final output is a recommendation, judgement, or synthesis that the operator must review (council verdicts, content reviews, article reviews, retro findings, prioritization decisions).
+2. The flow's artifact is the input to a downstream operator decision (e.g., the operator reads the master ticket body to decide whether to spawn implementation tickets).
+3. The flow ends with a per-finding accept/reject/defer step that only the operator can perform.
+4. The flow is multi-board / multi-profile / multi-specialist and the operator needs visibility into the final shape before the request is "done."
+5. The flow's work product is meaningful only if the operator reads it (the operator-facing interaction principles in `methodology/03b-decide-operator-agent-interaction.md` apply).
+
+For any operator-facing master, the body's **Done gate** section MUST say exactly `done-gate: operator-LGTM-done` (or equivalent explicit text — see Part 4 §4 for the body skeleton). The word `auto-done` in the Done gate section is a violation of this rule.
+
+### Why the default is auto-done
+
+Most masters produce machine-checkable deliverables. The auto-done default (Part 6 Option A) avoids leaving completed requests in a stale running state. The default is right for the common case.
+
+The default is wrong for operator-facing flows. Auto-done means the master closes when every required child is done — which is precisely the moment before the operator has had a chance to review the synthesized findings. The operator arrives at the board later, finds the master already closed, and has to manually re-open or work from the children. The lesson is the operator's correction: "auto-close is correct for an auto-done master, but the x-article-review flow is operator-facing — the operator MUST review the findings before the master closes."
+
+### The retro child also gates on the operator
+
+For operator-facing flows, the retro per `methodology/06a-decide-retro-v2.md` MUST be **spawned as a child at Phase 0 (master creation)**, not at phase completion. The retro child carries `kind=needs_input` and `assignee=verifier` and stays blocked until the operator dispositions the retro findings (ACCEPT / REJECT / DEFER per 06a Rule 4).
+
+This is the structural complement of the operator-LGTM-done gate:
+
+- The **master** gates on the operator's LGTM on the synthesized findings.
+- The **retro** gates on the operator's disposition of the retro findings.
+
+Both gates are necessary. Spawning the retro at Phase 0 prevents the master from auto-closing before the retro can fire (the original bug that motivated this rule).
+
+### Worked example — the x-article-review master (v0.1.1)
+
+The x-article-review loop produces a master with 4 phase children + 1 retro child. The body MUST include:
+
+```markdown
+## Done gate
+operator-LGTM-done after all 4 phase children complete AND the operator has reviewed the 5 council decisions (Q1-Q5) AND the retro child has been dispositioned. The master does NOT auto-done.
+```
+
+The orchestrator's flow is:
+
+1. **Phase 0** — open master with `done-gate: operator-LGTM-done` in body; spawn retro child at Phase 0 with `kind=needs_input`, `assignee=verifier`, `parents=[master-ticket-id]`, `title` starting with `[HUMAN ACTION]`.
+2. **Phases 1–4** — phase children run in order; master accumulates findings.
+3. **Phase 5** — call `kanban_block(kind=needs_input, ...)` on the master with the 5-council-decision review request. Do NOT auto-complete.
+4. **Operator reviews** the 5 council decisions, calls `kanban_complete` on the master after LGTM.
+5. **Retro unblocks** — the operator's master LGTM unblocks the retro child; the retro fires per 06a Rule 4.
+6. **Operator dispositions** retro findings (ACCEPT/REJECT/DEFER); retro closes per 06a Part 4.
+
+### What this rule forbids
+
+- Default `done-gate: auto-done` in an operator-facing master body. **Violation.**
+- Spawning the retro child AFTER all phase children complete (the original bug). **Violation.**
+- Calling `kanban_complete` on the master without an explicit operator LGTM review of the synthesized findings. **Violation.**
+- Inferring the done-gate from title prefixes, assignee names, or ticket age. The body text is the contract; the gate is not inferred (per Part 6 §"Encode the gate in the body").
+
+### What this rule does NOT forbid
+
+- Using `done-gate: auto-done` for non-operator-facing flows (cron-driven lint, build pipelines, batch jobs). The default is correct for these.
+- Letting the operator pre-approve the master LGTM at intake (e.g., "I'm filing this and I already know the answer is yes"). This is fine; the gate still fires, the body still says `operator-LGTM-done`, and the operator's review is recorded.
+- Retro children for non-operator-facing masters. The retro v2 spec already restricts retros to master-ticket flows; for non-operator-facing masters the retro may still be useful but does not gate the master.
+
+### Cross-references
+
+- Part 4 §4 — the body skeleton, including the **Done gate** section.
+- Part 6 — the two done-gate options (auto-done vs operator-LGTM-done).
+- `methodology/06a-decide-retro-v2.md` Rule 4 — the retro as a kanban task; the retro's `kind=needs_input` blocks until operator disposition.
+- `methodology/03b-decide-operator-agent-interaction.md` — operator-facing interaction principles; the gate is one instance of the broader pattern.
+- Source: `t_62a99460` (the master ticket that auto-closed prematurely on 2026-08-07) and `t_248722d8` (the v0.1.1 structural fix).
+
+---
+
 ## Part 8: The operator-facing surface
 
 The master exists to make status easy to see.
@@ -359,6 +437,36 @@ For an operator-LGTM gate:
 ```text
 [MASTER] <request summary> — all children done, operator LGTM pending
 ```
+
+### Master Title Discipline
+
+A master's title is the operator's first read across a list of 50+ peers. The title MUST be **descriptive of the topic** in plain language. The URL, identifier, or other source reference goes in the body under a `## Source` line, NOT in the title.
+
+**Three rules:**
+
+1. **Title carries the topic.** The title includes the operator-facing topic name (e.g., "x-article-review of rari's 3-layer agent-stack piece") — never the URL or post ID.
+2. **Body carries the source.** The body has a `## Source` block with the URL, post ID, author, date, type, and any operator-side context. The title can include the author or short slug if it aids scannability (e.g., "x-article-review / rari 3-layer-stack" — 50 such tickets in a row should still be distinguishable in list view by author + topic).
+3. **List-view survival.** Most kanban UIs truncate titles around 60-80 characters. The descriptive topic must fit in that budget. The full URL + boilerplate does NOT.
+
+**Format convention for x-article-review masters (and similar per-source masters):**
+
+```
+[MASTER] x-article-review / <author-short-name> <topic-slug> — <one-line description>
+```
+
+Examples:
+
+```
+[MASTER] x-article-review / rari 3-layer-agent-stack — review + council verdict + retro
+[MASTER] x-article-review / osmani prompt-caching — review + comparison to Alice memory
+[MASTER] x-article-review / weng agentic-loop-patterns — review + 5-seat council
+```
+
+The operator reading 50 of these in list view should be able to identify each by the `<author-short-name> <topic-slug>` pair. Identical "x-article-review" prefixes are fine; the author+topic is the discriminator.
+
+**Anti-pattern:** `[MASTER] x-article-review article 1: https://x.com/0xwhrrari/status/...` — URL in title, no descriptive topic, indistinguishable from article 2 / 3 / 50.
+
+On a board that uses the two-line AREA + topic + descriptor format from `methodology/00-decide-ticket-naming.md`, apply the same scannability discipline to master titles. The `[MASTER]` prefix replaces the AREA line for master tickets; the remaining title carries the topic and descriptive name in a single list-view line. The full source URL or identifier remains in the body under `## Source`.
 
 ### Completion ratio
 
@@ -586,3 +694,50 @@ A master ticket is the operator's durable root for a request that will fan out.
 Open it for operator-originated work whose multi-step, multi-board, or multi-child shape would otherwise fragment status. Assign it to the orchestrator, preserve the original request, link every first-generation child, choose a done-gate explicitly, surface the live completion ratio, and close only when the gate's evidence exists.
 
 The master does not replace planning, routing, verification, or normal ticket discipline. It connects them into one request-shaped work graph.
+
+---
+
+## Part 13: Maintenance and amendment history
+
+This methodology is amended through the same loop-builder mechanism used for amendments to any other canon doc. Each amendment is a ticket on the alice-framework board, the diff lands in this doc + (when applicable) the cross-referenced doc, and the `version` field in the frontmatter is bumped.
+
+### v0.1.1 (2026-08-07) — operator-LGTM-done opt-in rule (Part 7.5)
+
+**Ticket:** `t_248722d8`
+
+**Change:** Added Part 7.5 ("The done-gate opt-in rule for operator-facing flows"). Codifies that **operator-facing masters MUST explicitly opt into `operator-LGTM-done` in the body** — the auto-done default is wrong for operator-facing flows. The retro child MUST be spawned at Phase 0 (master creation), not after phase completion, so the master cannot auto-close before the retro fires.
+
+**Source:** The x-article-review master `t_62a99460` auto-closed prematurely on 2026-08-07 because its body did not specify the done-gate; the operator never reviewed the 5 council decisions before the master disappeared. The retro ticket `t_49af582a` was filed as a workaround. The structural fix is the v0.1.1 amendment.
+
+**Cross-references added:**
+- `methodology/06a-decide-retro-v2.md` (in frontmatter `links:` and Part 7.5 body).
+- Tags `kind:done-gate` and `kind:operator-lgtm` added.
+- Frontmatter `version: 0.1.1`, `updated: 2026-08-07T00:00:00Z`, `amended_by: ["[[ticket:t_248722d8]]"]` added.
+
+**Companion changes (in the same ticket):**
+- `~/.hermes/loops/hermes.yaml` `x-article-review` entry bumped to v0.1.1. Worker prompt now contains Phase 0 (master opens with operator-LGTM-done + retro child spawned) and Phase 5 (master close gated on operator LGTM, retro disposition).
+- `~/.hermes/loops/intents/x-article-review-intent.md` bumped to v0.1.1.
+
+**Concurrent re-upgrade (2026-08-07, t_ba4b9a90):** The loop yaml was concurrently upgraded to v0.2.0 by the F-1..F-8 ACCEPTED findings from the article-1 retro (council synthesis). The v0.2.0 yaml layers on top of the v0.1.1 gate contract: master assignee = jarvis OR planner (orchestrator lane); STRICT sequential parents (not parents=[master] alone for P2-P4); V-1 hard gate; 4-method retrieval ladder; preflight; master body IS the findings doc; post_graph_retro F-6 gate; attribution URL rule. The 04c Part 7.5 rule remains canonical; the v0.2.0 specs are extent refinements. See intent file `notes:` field for the F-1..F-8 specifics.
+
+### v0.1.2 (2026-08-08) — Master Title Discipline (Part 1 and Part 8)
+
+**Ticket:** `t_2a513f60`
+
+**Change:** Added the Master Title Discipline contract. Master titles must identify the topic in plain language and survive list-view truncation; source URLs and identifiers belong in the body under `## Source`. Added the `[MASTER] x-article-review / <author-short-name> <topic-slug> — <one-line description>` convention, examples, anti-pattern, and a cross-reference to `methodology/00-decide-ticket-naming.md`.
+
+**Source:** Operator direction 2026-08-08, prompted by the vague title on `t_62a99460` and the need to distinguish 50+ per-article masters.
+
+### v0.1.0 (2026-08-05) — initial draft
+
+Original methodology. Parts 1–12 cover the conceptual contract: when to open, who owns, body shape, child shape, done-gate, state machine, operator-facing surface, six anti-patterns, verification recipe, worked example, tool-mapping boundary, and revision guidance.
+
+### When to amend this doc
+
+Amend `methodology/04c-decide-master-ticket.md` when:
+
+- A new done-gate option becomes necessary (Part 6 currently enumerates two).
+- A working operator-facing flow that auto-closed prematurely is observed (this is the v0.1.1 trigger; another instance warrants a v0.1.2 with the same rule promoted or refactored).
+- The body skeleton (Part 4) needs a new mandatory section.
+- A cross-board / cross-tool case changes one of the canonical patterns.
+- The 6 anti-patterns (Part 9) grow a seventh (the operator-LGTM-done anti-pattern is a strong candidate for Part 9.7 — the v0.1.1 amendment deferred this to keep the diff focused on the rule itself).

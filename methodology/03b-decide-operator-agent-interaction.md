@@ -1,13 +1,16 @@
 ---
 id: alice-methodology-03b-decide-operator-agent-interaction
 created: 2026-08-04T12:30:00Z
-title: "Methodology 03b — Decide how the operator interacts with agents (5 roles + ticket lifecycle + chat budget)"
+updated: 2026-08-08T16:35:00Z
+title: "Methodology 03b — Decide how the operator interacts with agents (5 roles + ticket lifecycle + chat budget + PDF review format)"
 type: methodology
 status: draft
 source: alice-framework
-tags: [kind:methodology, kind:operator-agent, project:alice]
+version: 0.1.2
+amended_by: ["[[ticket:t_5dc19cae]]", "[[ticket:t_472c75f2]]", "[[ticket:t_34dc1c2b]]"]
+tags: [kind:methodology, kind:operator-agent, kind:operator-review, kind:pdf-format, kind:executive-reporting-aligned, project:alice]
 confidence: 0.0
-links: ["[[methodology/03-decide-agents.md]]", "[[methodology/03a-decide-agent-vault-interaction.md]]", "[[methodology/05-op-guards.md]]", "[[methodology/06-iteration-loop.md]]", "[[methodology/07-council-methodology.md]]", "[[methodology/01a-decide-memory.md]]", "[[templates/operator-interaction-patterns.md.template]]", "[[templates/agent-soul.md.template]]", "[[templates/AGENTS.md.template]]"]
+links: ["[[methodology/03-decide-agents.md]]", "[[methodology/03a-decide-agent-vault-interaction.md]]", "[[methodology/05-op-guards.md]]", "[[methodology/06-iteration-loop.md]]", "[[methodology/07-council-methodology.md]]", "[[methodology/01a-decide-memory.md]]", "[[methodology/M-decide-human-digest.md]]", "[[templates/operator-interaction-patterns.md.template]]", "[[templates/agent-soul.md.template]]", "[[templates/AGENTS.md.template]]", "[[templates/human-digest.md.template]]"]
 ---
 
 # Methodology 03b — Decide how the operator interacts with agents
@@ -529,7 +532,120 @@ When the agent and operator disagree, **the operator wins**. The agent signals d
 
 ---
 
-## Part 13: Interaction anti-patterns
+## Part 13: The operator-review artifact format (PDF rule)
+
+### The rule
+
+**Any artifact that requires the operator's review MUST be in human-readable PDF format.** The Markdown source is preserved on disk for editability and indexing. **Both formats ship.** The PDF is the operator-facing presentation layer; the Markdown is the canonical source of truth and the audit record.
+
+This applies to every artifact that the operator is asked to review, including but not limited to:
+
+- Retro digests (already covered by `methodology/M-decide-human-digest.md` + `templates/human-digest.md.template`)
+- Master ticket summaries (when the operator is asked to review a master before closing)
+- Audit-line digests (when a cron or loop fires and produces a digest for the operator)
+- Council synthesis (when the operator is asked to accept or reject the council's verdict)
+- Spec proposals (when the operator is asked to approve a spec change)
+- Council review summaries (any review where the operator's accept / reject / defer decision is needed)
+- Verification reports (when the verifier's output is presented to the operator)
+- Approval requests (any ticket the operator is asked to approve or reject)
+
+### Why PDF (not Markdown-only)
+
+The PDF is the operator's reading surface. Markdown is fine inside a vault, but the operator's reading surfaces are macOS Preview, iOS Preview, the Discord inline viewer, and the browser. Across those surfaces:
+
+- **PDF renders consistently** — tables, headers, code blocks, and callouts survive in the same shape everywhere.
+- **PDF survives in Discord** — Discord renders Markdown inconsistently; PDF preserves the structure.
+- **PDF is printable** — the operator can mark it up on paper.
+- **PDF is self-contained** — no editor, no toolchain, no missing fonts.
+- **PDF is audit-friendly** — durable artifact, easy to attach and re-attach.
+
+Markdown's job in this pattern is to be the canonical source. The PDF is a *rendering* of the canonical source. The two never disagree because the PDF is regenerated from the Markdown before delivery; the Markdown remains the source of truth and the audit record.
+
+### The 5-step delivery protocol
+
+Every operator-review artifact follows the same delivery chain:
+
+```
+Markdown (canonical)  →  PDF (rendered)  →  Discord attachment  →  ticket comment  →  vault copy
+```
+
+1. **Markdown (canonical).** Write the artifact as Markdown at the canonical workspace path (for editability and indexing). The Markdown is the source of truth.
+2. **PDF (rendered).** Render the Markdown to PDF using the agent's standard Markdown-to-PDF tool (e.g. `~/.hermes/tools/md_to_pdf.py` for Hermes-implementing operators; the tool path varies by implementation). The PDF lives at `<workspace>/human-review.pdf` or at the artifact's canonical PDF path.
+3. **Discord attachment.** Send the PDF as a Discord attachment to the operator's chat channel when the chat is connected. The attachment is the operator-facing surface.
+4. **Ticket comment.** Post a one-line summary to the originating ticket (or master ticket) with a path pointer to the artifact. The comment is the durable back-link.
+5. **Vault copy (when persistent).** When the artifact is meant to outlive the workspace (e.g., a council verdict, a master review), store a copy at `~/Documents/<framework>/2-ATOMIC/decisions/<artifact-id>.pdf` for the durable audit trail.
+
+### The shape contract
+
+The PDF MUST follow the operator-facing shape from `templates/human-digest.md.template` (or its successor):
+
+1. **What this is** — one or two sentences describing the artifact.
+2. **The headline** — 3–5 bullets, plain language, no jargon.
+3. **What the [agent / verifier / council] found** — short paragraphs (or numbered sections) with the substantive findings.
+4. **Recommended next steps** — actionable recommendations, each stating why it matters and what decision is needed.
+5. **Evidence anchors** — a collapsible section pointing to the technical record (file paths, ticket IDs, comment IDs).
+6. **Operator's observations** — blank section for the operator to add observations.
+7. **Operator decisions** — Accept / Reject / Defer decision table.
+8. **Metadata** — timestamp, source ticket, generation method.
+The shape is the operator's reading contract. The Markdown source follows the same shape; the PDF is a rendering, not a different artifact.
+
+### The canonical implementation
+
+The canonical 8-section shape contract above is the operator-review artifact contract. The Hermes-instance implementation that operationalizes this contract is the `executive-reporting` skill at `~/.hermes/skills/productivity/executive-reporting/` (Scribe-owned, doc-writer-authored, shipped 2026-08-08, ticket `t_4699bb4a`). The skill is the canonical implementation; this methodology is the contract.
+
+The skill operationalizes:
+
+- **5 digest types** (council verdict / retro / master summary / audit-line / approval request) — see `references/per-digest-type-shape.md`. The retro specialization (10 sections) is **Type 2**; the canonical 8 sections is the base for Types 1, 3, 4, 5.
+- **The 6 translation rules** — see `references/translation-discipline.md`. The rules are the canonical discipline for all 5 types; the retro-specific application of these rules is in `methodology/M-decide-human-digest.md` Part 3.
+- **The 5-step delivery protocol** (Markdown → PDF → Discord → ticket comment → vault copy) — operationalized as the canonical pattern, paired with the 5-step protocol in this Part 13.
+- **Worked examples** for each shipped type — see `references/worked-examples.md`. The retro worked example is the canonical reference for retro §4 agreement-column vs §9 per-seat alignment (see audit gap 3).
+- **The canonical 8-section fillable form** for non-retro artifacts — `~/.hermes/skills/productivity/executive-reporting/templates/executive-report.md.template`. The retro specialization's fillable form is `templates/human-digest.md.template` (the Alice-canonical retro template).
+
+When a new operator-review artifact is needed, the doc-writer or Scribe loads the `executive-reporting` skill and follows the per-digest-type shape map; the methodology docs (this Part 13 + `M-decide-human-digest.md`) are the contract, the skill is the implementation. The two must not drift; if they do, the spec (this methodology) is canonical and the skill must be patched on the next skill release.
+
+### The discipline
+
+- **Both formats ship.** Markdown is canonical; PDF is the operator's reading surface. Never ship one without the other.
+- **Render before delivery.** The PDF is generated from the Markdown immediately before the Discord attachment step. A stale PDF is a drift risk.
+- **Plain language in the headline.** No jargon, ticket IDs, file paths, run IDs, agent / profile names, or implementation details in the PDF's headline section. Technical references belong in the collapsible **Evidence anchors** section.
+- **Decision table is mandatory.** Every operator-review artifact ends with an Accept / Reject / Defer decision table. Silence is not consent — an operator who does not respond has not accepted.
+- **Discord is the operator-facing surface when connected.** If no chat channel is connected, the artifact still lives at its canonical paths; the delivery step is recorded as not applicable. A failed delivery must not invalidate the artifact.
+- **The technical record remains canonical.** When the PDF and the underlying technical record disagree, the technical record wins and the PDF is regenerated before delivery. The PDF is a translation layer, not a second source of truth.
+
+### Why the rule exists (operator correction 2026-08-07)
+
+The pattern hit the same shape three times:
+
+1. **First correction (2026-08-07 morning):** operator: "Let's make sure that any items that are sent to the operator (me) for review are set like this, human readable format in PDF format." The standing rule was established.
+2. **Second correction (2026-08-07 morning, follow-up):** operator: "Can we do it as a PDF format instead of MD?" PDF was selected over a polished Markdown alternative because PDF preserves structure across the operator's surfaces (Preview, iOS Preview, Discord, browser).
+3. **Third correction (2026-08-07 evening):** retro digests shipped as Markdown-only artifacts; operator flagged that retro digests are *one case* of the operator-review-artifact pattern, and the rule needs to apply to *every* operator-review artifact (master summaries, council synthesis, spec proposals, verification reports, approval requests), not just retros.
+
+The rule codifies the operator's preference for PDF as the universal operator-review format. The retroactive digest template (`templates/human-digest.md.template`) remains the canonical fillable form; the rule generalizes the format requirement from "retro digests" to "all operator-review artifacts."
+
+### The anti-patterns
+
+- **Markdown-only operator-review artifact.** Shipped as `.md` only; the operator opens a Markdown viewer, headers reflow, tables break, code blocks lose formatting. The operator cannot read it on iOS without an editor.
+- **PDF with no Markdown source.** The PDF is generated but the Markdown is not saved. The audit record is gone; the artifact cannot be re-rendered; the verifier cannot inspect the source.
+- **Stale PDF.** The PDF was rendered from a Markdown that has since been edited. The operator reads a PDF that disagrees with the technical record. The fix is regenerate-before-deliver.
+- **PDF-only without a Discord attachment.** The PDF lives on disk but is never delivered. The operator never sees it. The fix is the 5-step delivery protocol above.
+- **Accept-by-silence.** The PDF was delivered; the operator did not respond; the agent proceeded as if the recommendation were accepted. The decision table exists; the operator has not filled it in. Silence is not consent.
+- **Jargon in the headline.** The PDF's headline section uses internal vocabulary — phase names, ticket IDs, run IDs, agent / profile names. The operator cannot read it without the system context. The fix is plain-language discipline.
+
+### Cross-references
+
+- `methodology/M-decide-human-digest.md` — the human-digest methodology, which is the canonical instance of this rule (retro digests). The two-layer record (technical + digest) is the special case of this rule for retros. v0.1.1 flags the same shape contract as the canonical shape for council-verdict PDFs (see below).
+- `templates/human-digest.md.template` — the fillable form for retro digests; its 8 sections are the shape contract for all operator-review artifacts (including council verdicts).
+- `templates/operator-interaction-patterns.md.template` §"Operator-facing digest format" + §"Operator-review artifact format (PDF rule)" — the operator-facing engagement-pattern shape.
+- `methodology/07-council-methodology.md` — council synthesis is an operator-review artifact; this rule applies.
+- `methodology/06a-decide-retro-v2.md` — the retro flow's human-digest step is the canonical instance.
+- `methodology/M-decide-x-article-review-flow.md` Part 7.5 — Phase 4 council verdict is the parallel downstream apply of this rule (the x-article-review loop). The verdict PDF follows the 5-step delivery protocol; the 8-section shape contract is shared with the Retro-A digest. Implementation: `~/.hermes/tools/post_council_verdict_pdf.py`.
+- `~/.hermes/skills/productivity/executive-reporting/` — the Hermes-instance skill that operationalizes this canonical contract (Scribe-owned, doc-writer-authored, shipped 2026-08-08, ticket `t_4699bb4a`). The skill is the canonical implementation; this methodology is the contract. The skill covers all 5 digest types (council verdict / retro / master summary / audit-line / approval request), the 6 translation rules, the canonical 8-section shape contract, the 5-step delivery protocol, and the canonical 8-section fillable form (`templates/executive-report.md.template`). The retro specialization (Type 2) is the canonical instance of this Part 13 rule; see `methodology/M-decide-human-digest.md` + `templates/human-digest.md.template` for the retro-specific 10-section shape.
+
+> **Two downstream applies (as of 2026-08-07, t_e35032aa):** (a) Retro-A digests via `M-decide-human-digest.md` + `post_graph_retro_human_digest.py` (the original instance since 2026-08-07 morning); (b) Phase 4 council verdicts via `M-decide-x-article-review-flow.md` Part 7.5 + `post_council_verdict_pdf.py` (the parallel instance since 2026-08-07 afternoon). The general council flow's PDF rule is the canonical scope: any council that emits a verdict (BUILD / VALIDATE-FIRST) follows the 5-step protocol, not just the x-article-review Phase 4 case. The doc-writer authors the methodology; the council/skill-curator lane applies the spec to the council skill body (per op-guard-16).
+
+---
+
+## Part 14: Interaction anti-patterns
 
 ### Anti-pattern 1: "The agent surfaces every decision."
 
@@ -577,7 +693,7 @@ No. The operator can, but shouldn't. See Part 2.5 above. The orchestrator loses 
 
 ---
 
-## Part 14: When to revise the operator-agent interaction design
+## Part 15: When to revise the operator-agent interaction design
 
 The interaction design is **not static.** Revise when:
 
@@ -639,3 +755,8 @@ This doc touches:
 - `templates/operator-interaction-patterns.md.template` — fillable form for the operator's role distribution
 - `templates/agent-soul.md.template` — SOUL has "Operator priority" dimension
 - `templates/AGENTS.md.template` — AGENTS.md is the operator-as-launcher's seed
+
+## Audit-line
+
+`## [2026-08-07T23:50Z] operator-review-pdf-rule-cross-refs — extended Part 13 cross-references to cite `~/.hermes/skills/autonomous-ai-agents/hermes-council/SKILL.md` and `~/.hermes/loops/intents/x-article-review-intent.md` v0.2.2 as downstream consumers; flagged the two downstream applies (Retro-A digests + Phase 4 council verdicts) and the general council-flow scope. source=t_e35032aa`
+`## [2026-08-08T16:35Z] operator-review-pdf-rule-exec-reporting-aligned — added "The canonical implementation" subsection to Part 13 (the executive-reporting skill at `~/.hermes/skills/productivity/executive-reporting/` is the canonical Hermes-instance implementation of this Part 13 contract; covers 5 digest types, 6 translation rules, 5-step delivery protocol, worked examples, fillable form). Added skill references to Part 13 Cross-references (skill root + per-digest-type-shape + translation-discipline + audit-existing-artifacts references). Updated frontmatter `updated:` to 2026-08-08T16:35Z; added tag `kind:executive-reporting-aligned`. Companion Alice methodology update: `methodology/M-decide-human-digest.md` v0.4.0 + `templates/human-digest.md.template` v0.4.0 (aligned the retro specialization with the skill's Type 2 taxonomy + 6 translation rules). The methodology is the contract; the skill is the implementation. source=t_5dc19cae`
