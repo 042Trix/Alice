@@ -1,13 +1,14 @@
 ---
 id: alice-changelog
 created: 2026-08-04T15:30:00Z
-updated: 2026-08-11T11:05:00Z
+updated: 2026-08-11T23:55:00Z
 title: "Alice — Changelog"
 type: framework-changelog
 status: draft
 source: operator
 tags: [kind:framework, kind:changelog, domain:agent-ops, project:alice]
 links: []
+teaching-example: true
 ---
 
 # Changelog
@@ -17,7 +18,128 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-> **Note on this `0.1.0` entry:** This is the **changelog stub**, not a release announcement. The entry below names what exists in the repo at the time of writing, and it will be revised at tag time to reflect the final packaging artifacts. The first public release ships only after every box in the OSS prep plan's release-readiness checklist is checkable. See `2-ATOMIC/concepts/alice-oss-prep-plan-2026-08-04.md`.
+|> **Note on this `0.1.0` entry:** This is the **changelog stub**, not a release announcement. The entry below names what exists in the repo at the time of writing, and it will be revised at tag time to reflect the final packaging artifacts. The first public release ships only after every box in the OSS prep plan's release-readiness checklist is checkable. See `2-ATOMIC/concepts/alice-oss-prep-plan-2026-08-04.md`.
+
+## [v0.2.0] — 2026-08-11
+
+MINOR release: 5 MINOR features + 1 PATCH tooling batched into a single MINOR release per Path A operator decision (recorded in `kanban:t_a7a26ea4` closed 2026-08-11T16:50Z). Strict semver (0.1.4 → 0.2.0 = MINOR per Semver.org §8, minor digit +1, patch resets to 0) passes the alice-publish Step 0 pre-flight `check_version_discipline.py` (kanban:t_604c0927). The pre-staged placeholder entries for v0.1.5 / v0.1.6 / v0.1.7 / v0.1.8 (filed from the now-closed `kanban:t_11bd706c` 3-option ad-hoc BATCH/SPLIT ticket) are dropped per Path A; their content folds into this consolidated v0.2.0 entry.
+
+### Operator decision rationale
+
+Per operator direction 2026-08-11 (verbatim: *"I don't want to make a 1-off decision. The doc writer should define our rules for semver based on open source repo best practices, and then we apply that standard to our situation."*) + the canonical-rule extension to `~/.hermes/methodology/M-decide-alice-versioning.md` Parts 8-10 (Keep a Changelog 1.1.0 + Semver.org 2.0.0 + Conventional Commits 1.0.0 + GitHub Releases docs), the batch-or-split rule says PATCH + MINOR must be split. **Path A is the operator's documented override for this single release** — strict semver (0.1.4 → 0.2.0 = MINOR) batches the 5 MINOR + 1 PATCH into one MINOR release so the script's pre-flight accepts the publish. The Parts 8-10 rule (filed by the doc-writer post-Path-A) preserves the canonical split rule going forward; Path A is the one-off operator override for the v0.1.4 → v0.2.0 jump.
+
+### Added
+- methodology/M-decide-instance-vs-framework.md (v0.1.0) — framework-vs-instance distinction rule
+- methodology/M-decide-instance-leak-test.md (v0.0.1) — H1-pattern fixture (deliberate ERROR per t_764d71c9)
+- methodology/M-decide-h1-leak.md (v0.0.1) — H1-pattern fixture (deliberate ERROR per t_764d71c9)
+- methodology/M-decide-parity-check.md (v0.1.0) — parity-check rule (single-methodology)
+- methodology/M-decide-spec-first-flow.md (v0.1.0) — 4-phase flow spec
+- methodology/M-decide-v0.1.1-defer-set.md (v0.1.0) — v0.1.1 deferral set
+- methodology/06b-decide-blocked-ticket-recovery.md (v0.1.0) — blocked-ticket recovery procedure
+- references/instance-leak-check-spec.md (v0.1.0) — instance-leak check pattern catalog
+- templates/check_version_discipline.py.template (v0.1.0) — version-discipline pre-flight script
+- templates/instance-leak-check.py.template (v0.1.0) — instance-leak CI script
+- .github/workflows/ci.yml — CI pipeline that runs check_instance_leaks.py + check_version_discipline.py
+- .github/ISSUE_TEMPLATE/bug_report.yml — bug report template
+- .github/ISSUE_TEMPLATE/feature_request.yml — feature request template
+- .github/PULL_REQUEST_TEMPLATE.md — pull request template
+- .github/FUNDING.yml — funding configuration
+
+### Changed
+- methodology/M-decide-x-article-review-flow.md — v0.5.0 → v0.6.0 (master-title shape change per t_d2d0db6a; canonical template `[MASTER] X Article - {topic} - {author}`)
+- methodology/M-decide-x-article-review-flow.md — v0.6.0 → v0.7.0 (retro-position amendment per t_42e0c91c; Retro-A + Retro-H moved to END of flow)
+- methodology/06a-decide-retro-v2.md — v0.1.4 → v0.1.5 (Amendment 5; paired-wiki for retro-position amendment, per t_42e0c91c)
+- methodology/04c-decide-master-ticket.md — v0.1.3 → v0.1.4 (paired-wiki for x-article-review title-shape change, per t_d2d0db6a)
+- methodology/04c-decide-master-ticket.md — v0.1.4 → v0.1.5 (paired-wiki for version-label discipline cite; new Part 8 §Version-label discipline (v0.2.0 forthcoming))
+- methodology/00-decide-ticket-naming.md — v0.4.0 → v0.4.1 (paired-wiki: `links` field adds `[[~/.hermes/methodology/M-decide-alice-versioning.md]]` per op-guard-5; no contract change to 00)
+- methodology/03b-decide-operator-agent-interaction.md — frontmatter version 0.1.2 → 0.1.3 (paired-wiki for version-label discipline cite)
+- methodology/06a-decide-retro-v2.md — v0.1.5 → v0.1.6 (Amendment 6; paired-wiki for v0.2.0 release; the operator-action surface gains version-label cite)
+- references/tool-mapping-guide.md — minor paired-wiki update (M-decide-instance-vs-framework.md link)
+- templates/caption-convention-rule.md.template — minor paired-wiki update
+- templates/human-digest.md.template — minor paired-wiki update
+- CONTRIBUTING.md — instance-leak discipline + check_version_discipline.py install instructions
+- METHODOLOGY.md — §7a navigation-aid-caption deprecation note (the convention is now in 04c, not a standalone methodology)
+- CHANGELOG.md — this entry (4 pre-staged placeholders consolidated per Path A)
+
+### Removed (env-mutation; ships via the audit reorg per t_7aa96032 Part B/C)
+- methodology/M-decide-x-article-review-flow.md → ~/.hermes/methodology/ (instance-side per framework-vs-instance distinction)
+- methodology/M-decide-alice-publish-flow.md → ~/.hermes/methodology/
+- methodology/M-decide-council-sizing.md → ~/.hermes/methodology/
+- methodology/M-decide-human-digest.md → ~/.hermes/methodology/
+- methodology/M-decide-navigation-aid-caption.md → ~/.hermes/methodology/
+- methodology/M-decide-session-handoff.md → ~/.hermes/methodology/
+
+### Promoted (Alice framework, per t_7aa96032 Part C)
+- _inbox/M-decide-spec-first-flow.md → methodology/
+- _inbox/M-decide-parity-check.md → methodology/
+- _inbox/M-decide-v0.1.1-defer-set.md → methodology/
+
+### Detail
+
+#### methodology/M-decide-instance-vs-framework.md (v0.1.0) — framework-vs-instance distinction rule
+- The canonical rule for distinguishing Alice framework content (publish to GitHub) from Hermes-instance operational flows (live in `~/.hermes/`). Codifies Part 2 §Decision tree (Q1: friend-portable? → A. Q2: instance flow? → H. Q3: both? → split. Q4: scratch? → X), Part 3 §Naming convention (numbered 00-09 = Alice framework; M-decide-*.md = either, classified by content), Part 4 §Publishing gate (the instance-leak check before publishing), Part 5 §Done-gate (5 conditions for a doc to be durable-shipped). 11-line decision tree + 9-row concrete examples table. Source: t_7aa96032.
+
+#### methodology/M-decide-h1-leak.md + methodology/M-decide-instance-leak-test.md (v0.0.1) — H1-pattern fixtures (deliberate ERROR per t_764d71c9)
+- Two deliberate instance-leak fixtures required by the regression suite `~/.hermes/tests/test_check_instance_leaks.py`. The H1 pattern (instance kind frontmatter) and the body-leak pattern (instance path references) MUST keep firing ERRORs in production to exercise the same code path as the regression suite. Per t_764d71c9: "the 2 remaining are deliberate H1 fixtures that must keep firing." Files paired with the test suite per op-guard-5.
+
+#### methodology/M-decide-parity-check.md (v0.1.0) — parity-check rule
+- Promoted from `_inbox/M-decide-parity-check.md` per the audit reorg classification (A = Alice — promote to canonical methodology; friend-portable per `M-decide-instance-vs-framework.md`). Single-methodology doc that codifies the parity-check contract for cross-verification between framework canon and instance implementation.
+
+#### methodology/M-decide-spec-first-flow.md (v0.1.0) — 4-phase flow spec
+- Promoted from `_inbox/M-decide-spec-first-flow.md` per the audit reorg classification. Codifies the 4-phase spec-first flow: doc → validate doc → update environment → validate update. Companion to `~/.hermes/loops/loops/SKILL.md` (the loop-template skill). Per op-guard-16 spec-first-flow.
+
+#### methodology/M-decide-v0.1.1-defer-set.md (v0.1.0) — v0.1.1 deferral set
+- Promoted from `_inbox/M-decide-v0.1.1-defer-set.md`. Codifies the 4 deferral decisions from v0.1.1 (companion scaffold, testability improvements, enterprise governance, agent-standards positioning). Used as the canonical reference when a v0.2.0+ operator considers re-positioning Alice as an enterprise standards framework.
+
+#### methodology/06b-decide-blocked-ticket-recovery.md (v0.1.0) — blocked-ticket recovery procedure
+- Promoted from `_inbox/06b-decide-blocked-ticket-recovery.md` per the audit reorg classification (A = Alice — promote to canonical methodology; friend-portable per `M-decide-instance-vs-framework.md`). The standing rule for stuck-ticket handling (trigger conditions, 4-step investigation procedure, 4 rescue actions, cadence + ownership, mapping to future operational guard). Source: t_275f1fbf.
+
+#### references/instance-leak-check-spec.md (v0.1.0) — instance-leak check pattern catalog
+- The instance-leak check specification. Codifies H1-H5 + X1 patterns + U-bucket handling + check output format (text + JSON) + exit codes (0/1/2) + where-the-check-runs (pre-commit + GitHub Actions CI + alice-publish Step 1). The check is tool-agnostic; the pattern catalog is canonical. Source: t_7aa96032.
+
+#### templates/check_version_discipline.py.template (v0.1.0) — version-discipline pre-flight script
+- The tool-agnostic template form of the version-discipline check. Companion to `~/.hermes/tools/check_version_discipline.py` (the instance-side implementation, 13/13 regression green per t_604c0927). Verifies (a) proposed version is exactly last-tag + 1 in the appropriate semver position, (b) bump type matches the actual change type, (c) version is not skipping, (d) MAJOR bumps have operator authorization via `[HUMAN ACTION]` child ticket id in master body. Wired into alice-publish loop Step 0 (BEFORE the existing Step 1 instance-leak gate). Source: t_6bbbe1ed.
+
+#### templates/instance-leak-check.py.template (v0.1.0) — instance-leak CI script
+- The tool-agnostic CI script template. 349-line Python 3.10+ script with Frontmatter parser (no PyYAML dependency), classify_file() applying H1-H5 + X1 patterns, walk_repo() / check_repo() / format_text() / format_json() helpers, main() with exit code logic. 5-case pytest regression suite covering clean repo, M-decide-with-instance-intent, body-with-instance-path, .bak file, profile-name-warning + --strict-warnings flag. Tool-agnostic: any operator copies to instance + customizes the HERMES_PROFILE_NAMES / HERMES_PATH_PATTERNS / TOOL_CLI_PATTERNS constants. Source: t_7aa96032.
+
+#### x-article-review master-title shape change (M-decide-x-article-review-flow.md v0.5.0 → v0.6.0)
+- Per t_d2d0db6a. New canonical template: `[MASTER] X Article - {topic} - {author}`. Domain marker `X Article` at position 2 (immediately after `[MASTER]`), hyphen separators, topic-first then author. The previous shape `[MASTER] x-article-review / <author-slug> <topic-slug> — <description>` is deprecated for this flow. The 80-codepoint budget + the 4-method title-recovery ladder + the rename-application contract + the post-creation assertion are unchanged.
+
+#### x-article-review retro-position amendment (M-decide-x-article-review-flow.md v0.6.0 → v0.7.0)
+- Per t_42e0c91c. Retro-A + Retro-H moved to the END of the flow graph (after council output + corrective actions + ship lane). The prior Phase 0 retro spawn (v0.1.1, t_248722d8) was the original structural fix for "master auto-closes before retro fires" but introduced a NEW defect: when Retro-A reached `done`, the dispatcher's auto-close logic fired `master_auto_done_via_children` and the master auto-closed even with Retro-H still `blocked` (verified case: wast3 article `t_092e629c`). v0.7.0 codifies a new Part 5 §Flow order + a new Part 7.5 done-gate with 8 explicit conditions.
+
+#### 06a-decide-retro-v2.md v0.1.4 → v0.1.5 (Amendment 5, paired-wiki for retro-position)
+- Per t_42e0c91c. Retro-A's parent-edge list now references the post-council fan-in (NOT just `[master]`). The list is `[master, P4, V-4, V-of-V, corrective-children-done, ship-done-when-applicable]` (conditional on whether corrective-action children + ship lane ran). Retro-H's parent edge remains `parents=[retro_a]` only (Amendment 4; unchanged). Rule count history unchanged (still 6 rules); Amendment 5 is a clarification, not a new rule.
+
+#### 04c-decide-master-ticket.md v0.1.3 → v0.1.4 (paired-wiki, no contract change)
+- Per t_d2d0db6a. Part 8 §Master Title Discipline §Format convention sub-section updated to reflect the new x-article-review canonical template `[MASTER] X Article - {topic} - {author}` with worked examples. The flow-agnostic title-rendering discipline (80-codepoint budget + the 4-method ladder + the rename-application contract) is unchanged from v0.1.3 — v0.1.4 is a paired-wiki-only amendment.
+
+#### 04c-decide-master-ticket.md v0.1.4 → v0.1.5 + 03b-decide-operator-agent-interaction.md v0.1.2 → v0.1.3 + 06a-decide-retro-v2.md v0.1.5 → v0.1.6 (paired-wiki for version-label discipline)
+- New `**Version-label discipline (v0.2.0 forthcoming)**` paragraph anchors the orchestrator's version-label lookup to `~/.hermes/methodology/M-decide-alice-versioning.md` Part 2 + Part 4. Paired-wiki-only — no contract change to the underlying docs. Per op-guard-5 paired-wiki integrity.
+
+#### 00-decide-ticket-naming.md v0.4.0 → v0.4.1 (paired-wiki, no contract change)
+- `links` field adds `[[~/.hermes/methodology/M-decide-alice-versioning.md]]` so the ticket-naming convention's index cross-references the new semver doc (paired-wiki per op-guard-5; no contract change to 00).
+
+#### check_version_discipline.py pre-flight rule (gate contract; instance-side ships via coder child ticket)
+- Companion enforcement surface lives in `templates/check_version_discipline.py.template` (Alice-canonical form) + `~/.hermes/tools/check_version_discipline.py` (instance-side implementation, 13/13 regression green). Wired into alice-publish loop Step 0 (BEFORE the existing Step 1 instance-leak gate). Per op-guard-17 alice-first / instance-second / compliance-gate.
+
+#### CONTRIBUTING.md + .github/workflows/ci.yml (audit-reorg tooling)
+- The CONTRIBUTING guide gains an instance-leak discipline section + check_version_discipline.py install instructions. The GitHub Actions workflow runs check_instance_leaks.py + check_version_discipline.py on every PR. Pre-commit hook installation instructions in CONTRIBUTING.md §"Pre-commit hooks".
+
+### Source
+- MINOR motivation: operator direction 2026-08-11 (verbatim: *"0.1.7? We haven't even shipped 0.1.5 or defined anything for 0.1.6. Need some durable logic for how we are handling symantec versioning."*). Source ticket `t_25edf8f7` (a misfiled `[CODER] alice-publish v0.1.7` for tooling/reorg work) closed `filed_in_error` the same day.
+- Canonical-rule origin: operator direction 2026-08-11 (verbatim: *"I don't want to make a 1-off decision. The doc writer should define our rules for semver based on open source repo best practices, and then we apply that standard to our situation."*). The rule is at `~/.hermes/methodology/M-decide-alice-versioning.md` Parts 8-10; this entry is the canonical application of the rule (with Path A operator override) to the v0.1.4 → v0.2.0 ship.
+- Operator override (Path A): recorded in `kanban:t_a7a26ea4` closed 2026-08-11T16:50Z. The override rationale: the script's strict-semver contract (0.1.4 → 0.1.5 = PATCH by math) prevents filing v0.1.5 as MINOR even though the work is MINOR-content; the canonical workaround is 0.1.4 → 0.2.0 = MINOR (strict semver passes). The script passes for v0.2.0 with the JSON manifest (11 added / 6 modified / 6 deleted). Verified in the parent ticket body's verified-state capture (op-guard-19).
+- Second-strike trigger: this is the 2nd semver-verification failure within this method (`t_7aa96032`'s framework-vs-instance distinction was the first). Per `2-ATOMIC/rules/three-op-guard-rule-2026-07-20.md`, two strikes = durable fix warranted.
+- Companion rule: `op-guard-5-paired-wiki-update-2026-07-21.md` (the M-doc + the 04c paired-wiki + the CHANGELOG entry ship in the same change set).
+- Companion rule: `op-guard-16-spec-first-flow-2026-08-05.md` (doc-writer is spec-only; this M-doc + CHANGELOG entry + 04c paired-wiki are the doc-writer's ship; the env-mutation child tickets ship via coder per the META `t_6bbbe1ed` Part B + Part C).
+- Companion rule: `op-guard-17-methodology-canonical-instance-conforms-2026-08-08.md` (alice-first / instance-second / compliance-gate; the methodology + paired-wiki ship now; the template + script + loop-wiring children ship as Part B coder tickets AFTER the methodology lands; the compliance-verifier is the META done-gate).
+- Companion rule: `op-guard-19-pre-verify-artifact-state-2026-08-08.md` (the `verified-state` capture for this amendment lands in the compliance-verifier child ticket body).
+- Companion rule: `op-guard-21-chat-side-orchestrator-only-no-direct-edit-2026-08-09.md` (the doc-writer ships the methodology files only; the instance child tickets ship via the coder profile).
+- Companion rule: `op-guard-20-use-existing-loops-not-bespoke-2026-08-08.md` (this publish ticket IS the alice-publish loop ticket; loop registration in `~/.hermes/loops/hermes.yaml` alice-publish v0.5.0 with STEP 0 wired).
+- Source tickets: t_d2d0db6a (x-article-review master-title shape), t_42e0c91c (x-article-review retro-position amendment), t_7aa96032 (framework-vs-instance distinction + instance-leak CI gate + audit reorg), t_275f1fbf (06b-decide-blocked-ticket-recovery promotion), t_6bbbe1ed (semver discipline + check_version_discipline.py pre-flight), t_36795558 (4 stale x-refs fix), t_764d71c9 (instance-leak H1 fixtures), t_a7a26ea4 (operator Path A decision), t_604c0927 (instance-side check_version_discipline.py + 13-case regression suite), t_60859140 (superseded by Path A), t_773fb4a8 (absorbed by t_b0d6dd79).
+- Publish ticket: `t_b0d6dd79` (the consolidated publish ticket; supersedes `t_60859140` per Path A).
 
 ## [v0.1.4] — 2026-08-11
 
@@ -169,7 +291,7 @@ The vault rule section (`~/Documents/HermesVault/2-ATOMIC/rules/`) was renamed i
 
 ### Source
 - Council verdict: `/Users/homestead/Documents/HermesVault/2-ATOMIC/decisions/alice-v0.1.1-build-vs-maintain-council-verdict.md` (0.78 confidence, 7 recommendations accepted by operator).
-- Cross-references: GBU review at `/Users/homestead/.hermes/cache/documents/doc_6e594c40214f_alice_GBU_0.1.0.txt`; council log at `/Users/homestead/Documents/alice-framework/_inbox/council-v0.1.0-GBU-review-2026-08-06.md`; maintenance council log at `/Users/homestead/Documents/alice-framework/_inbox/council-v0.1.1-build-vs-maintain-review-2026-08-06.md`.
+- Cross-references: GBU review at `/Users/homestead/.hermes/cache/documents/doc_6e594c40214f_alice_GBU_0.1.0.txt`; council log at `/Users/homestead/.hermes/decisions/council-logs/council-v0.1.0-GBU-review-2026-08-06.md`; maintenance council log at `/Users/homestead/.hermes/decisions/council-logs/council-v0.1.1-build-vs-maintain-review-2026-08-06.md`.
 
 ## [v0.1.2] — 2026-08-08
 
@@ -241,3 +363,8 @@ Link references (added at tag time):
   [v0.1.1]: https://github.com/042Trix/Alice/releases/tag/v0.1.1
   [0.1.0]: https://github.com/042Trix/Alice/releases/tag/v0.1.0
 -->
+
+## 2026-08-11 — _inbox process-artifact cleanup
+
+Removed 29 process artifacts from `_inbox/` per t_275f1fbf classification (7 gap records INTEGRATED + 16 Card H polish reports + 6 `_polish-archive` duplicates).
+

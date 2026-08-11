@@ -40,6 +40,10 @@ If the material only describes one deployment, move it to a worked-example skele
 - Open a focused pull request and request review from the maintainer/operator. Include the problem addressed, files changed, method-not-instance checklist confirmation, and related issue references.
 - Wait for review. Do not bundle unrelated cleanup.
 
+## Pre-commit instance-leak check
+
+Every commit runs `python3 ~/.hermes/tools/check_instance_leaks.py` against the working tree (the operator's `~/.git/hooks/pre-commit` symlinks to `~/.hermes/hooks/instance-leak-pre-commit`). The check blocks the commit if the alice-framework repo contains any Hermes-instance leak (H1-H5 patterns) or local artifact (X1 pattern). See [`references/instance-leak-check-spec.md`](references/instance-leak-check-spec.md) for the patterns it catches and the canonical methodology behind the rule (`methodology/M-decide-instance-vs-framework.md`).
+
 A change is done when its documentation is clear and portable, the method-not-instance checklist passes, terminology and cross-references are updated, internal links are checked, and the maintainer has accepted it.
 
 ## Project policies

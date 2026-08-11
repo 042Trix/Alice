@@ -1,7 +1,7 @@
 ---
 id: alice-reference-tool-mapping
 created: 2026-08-04T12:30:00Z
-updated: 2026-08-05T00:00:00Z
+updated: 2026-08-11T23:30:00Z
 title: "Tool mapping guide — Alice's abstract concepts in your tool"
 type: reference
 status: draft
@@ -9,6 +9,7 @@ source: alice-framework
 tags: [kind:reference, kind:tool-mapping, project:alice]
 confidence: 0.0
 links: []
+teaching-example: true
 ---
 
 # Tool mapping guide

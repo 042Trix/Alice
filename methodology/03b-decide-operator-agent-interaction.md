@@ -1,7 +1,7 @@
 ---
 id: alice-methodology-03b-decide-operator-agent-interaction
 created: 2026-08-04T12:30:00Z
-updated: 2026-08-08T16:35:00Z
+updated: 2026-08-11T23:30:00Z
 title: "Methodology 03b — Decide how the operator interacts with agents (5 roles + ticket lifecycle + chat budget + PDF review format)"
 type: methodology
 status: draft
@@ -11,6 +11,7 @@ amended_by: ["[[ticket:t_5dc19cae]]", "[[ticket:t_472c75f2]]", "[[ticket:t_34dc1
 tags: [kind:methodology, kind:operator-agent, kind:operator-review, kind:pdf-format, kind:executive-reporting-aligned, project:alice]
 confidence: 0.0
 links: ["[[methodology/03-decide-agents.md]]", "[[methodology/03a-decide-agent-vault-interaction.md]]", "[[methodology/05-op-guards.md]]", "[[methodology/06-iteration-loop.md]]", "[[methodology/07-council-methodology.md]]", "[[methodology/01a-decide-memory.md]]", "[[methodology/M-decide-human-digest.md]]", "[[templates/operator-interaction-patterns.md.template]]", "[[templates/agent-soul.md.template]]", "[[templates/AGENTS.md.template]]", "[[templates/human-digest.md.template]]"]
+teaching-example: true
 ---
 
 # Methodology 03b — Decide how the operator interacts with agents

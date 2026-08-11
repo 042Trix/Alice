@@ -1,16 +1,17 @@
 ---
 id: alice-methodology-00-decide-ticket-naming
 created: 2026-08-05T14:30:00Z
-updated: 2026-08-08T15:55:00Z
+updated: 2026-08-11T23:58:00Z
 title: "Methodology 00 — Decide ticket naming"
 type: methodology
 status: draft
 source: alice-framework
 tags: [kind:methodology, kind:naming, kind:ticket, kind:universal-discipline, project:alice]
 confidence: 0.0
-amended_by: ["[[ticket:t_94c0c7cf]]"]
-version: 0.4.0
-links: ["[[methodology/04c-decide-master-ticket.md]]", "[[methodology/04b-decide-board-routing.md]]", "[[templates/AGENTS.md.template]]", "[[references/board-routing.md]]"]
+amended_by: ["[[ticket:t_94c0c7cf]]", "[[ticket:t_6bbbe1ed]]", "[[ticket:t_7be253bd]]"]
+version: 0.4.4
+links: ["[[methodology/04c-decide-master-ticket.md]]", "[[methodology/04b-decide-board-routing.md]]", "[[~/.hermes/methodology/M-decide-alice-versioning.md]]", "[[~/.hermes/methodology/M-decide-worker-stall-detection.md]]", "[[methodology/M-decide-instance-vs-framework.md]]", "[[templates/AGENTS.md.template]]", "[[references/board-routing.md]"]
+teaching-example: true
 ---
 
 # Methodology 00 — Decide ticket naming
@@ -245,6 +246,10 @@ Redundancy is the point. The ticket body is the source of truth for the *current
 - **v2 (2026-08-05 morning → afternoon, `t_d17af817`):** `AREA (<Section>) TOPIC <N> (<descriptive name — ...>)` introduced. Added the AREA-parens, TOPIC-number, and parenthetical-with-em-dash structure. Solves the "what's a ticket" scan problem but introduces bookkeeping tax (the operator has to track TOPIC numbers per AREA) and a verbose shape that fights list-view truncation. Superseded.
 - **v3 (2026-08-05 afternoon, `t_d727f13f`):** two-line `AREA\n<topic-name>: <descriptive name>`. Dropped the parenthetical section label, dropped the TOPIC number, and dropped the em-dash from the topic-name line. The colon becomes the canonical separator between topic and descriptor; em-dash survives only inside the descriptive name. Topic numbering is implicit in filing order. Operator's direct example, two lines, no em-dash, no topic number.
 - **v4 (2026-08-08, `t_94c0c7cf`, redirect of `t_2a513f60`):** added Part 3 (Universal title discipline) — the rule that every ticket title carries a descriptive topic, the body carries the source identifier, and the title survives 60–80 char list-view truncation. The rule is universal: applies to every ticket type, every board, every profile. Master tickets get a `[MASTER]` prefix on top of the universal rule (cross-ref `04c` Part 8 §Master Title Discipline). The two-line `AREA\n<topic-name>: <descriptive name>` format (Part 1) remains the canonical shape for `alice-framework` tickets. Triggered by operator direction 2026-08-08: "this 'descriptive master task title' should apply to all tickets, not just the x articles." Verified violator: `t_62a99460` (URL-only title).
+- **v4.1 (2026-08-11, `t_6bbbe1ed`):** paired-wiki for `M-decide-alice-versioning.md` (added `[[methodology/M-decide-alice-versioning.md]]` link). No contract change to 00 itself; only the `links` frontmatter bumped per op-guard-5.
+- **v4.2 (2026-08-11, `t_4d9bd6c5`):** corrected the `M-decide-alice-versioning.md` link to the instance-side path `[[~/.hermes/methodology/M-decide-alice-versioning.md]]` (per operator direction 2026-08-11: M-decide-* docs are Hermes-instance, not alice-framework). Added `[[methodology/M-decide-instance-vs-framework.md]]` link per op-guard-5 paired-wiki (the framework-vs-instance rule shipped in `t_7aa96032` is the decision-tree the versioning rule is a specialization of).
+- **v4.3 (2026-08-11, `t_7be253bd`):** paired-wiki for `M-decide-worker-stall-detection.md` (added `[[~/.hermes/methodology/M-decide-worker-stall-detection.md]]` link). The new methodology codifies the forward-progress stall detection rule (heartbeat is liveness, not progress; 5-signal taxonomy in priority order; auto-reclaim on 1st stall, auto-block kind=stall_repeat + operator-DM on 2x stall on same task; per-profile config block; cron registration shape). No contract change to 00 itself; only the `links` frontmatter bumped per op-guard-5.
+- **v4.4 (2026-08-11, `t_7be253bd`):** paired-wiki amendment for `M-decide-worker-stall-detection.md` v0.1.0 → v0.1.1 (operator refinement: monitoring + tuning feedback loop). Added Part 11 §8.1-8.5 to the methodology (structured jsonl log, daily aggregator, auto-tuning proposer, weekly operator review). No contract change to 00 itself; only the revision-history + `amended_by` field is preserved per op-guard-5 paired-wiki integrity discipline. The methodology is instance-side per `M-decide-instance-vs-framework.md`; this is a PATCH-level amendment to the instance doc, not an alice-framework framework version bump.
 
 ---
 

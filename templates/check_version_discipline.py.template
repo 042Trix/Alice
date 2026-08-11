@@ -1,0 +1,411 @@
+---
+id: alice-template-check-version-discipline-py
+created: 2026-08-11T23:30:00Z
+updated: 2026-08-11T23:30:00Z
+title: "Version-discipline check — pre-flight script template (Python)"
+type: template
+status: draft
+source: alice-framework
+tags: [kind:template, kind:ci, kind:gate, kind:version-discipline, kind:semver, kind:python, kind:tool-agnostic, project:alice]
+confidence: 0.9
+alice-ticket: t_6bbbe1ed
+companion: ["[[methodology/M-decide-alice-versioning.md]]", "[[methodology/M-decide-instance-vs-framework.md]]"]
+language: python
+runtime: ">=3.10"
+links: ["[[methodology/M-decide-alice-versioning.md]]", "[[methodology/M-decide-alice-publish-flow.md]]", "[[methodology/M-decide-instance-vs-framework.md]]", "[[templates/AGENTS.md.template]]"]
+---
+
+# Version-discipline check — pre-flight script template (Python)
+
+> **Copy this template to `~/.hermes/tools/check_version_discipline.py` (or your tool's equivalent) and customize the operator-specific paths.** The check is tool-agnostic: any tool that can read the alice-framework repo + compare versions + diff working-tree-changes can run it. The canonical spec is `methodology/M-decide-alice-versioning.md` Part 4.
+
+## Usage
+
+```bash
+python3 check_version_discipline.py <repo_path> \
+    --proposed-version <X.Y.Z> \
+    --last-release <last-tag> \
+    --working-tree-changes <diff-stat-or-json> \
+    [--allow-major-without-operator-auth]
+```
+
+| Flag | Effect |
+|---|---|
+| `--proposed-version <X.Y.Z>` | The proposed framework version for the upcoming release. Required. |
+| `--last-release <last-tag>` | The current git tag (or last released version). Required. |
+| `--working-tree-changes <path>` | Path to a `git diff --stat` output file OR a JSON manifest of changed files. Special value `/dev/null` for empty diff. Required. |
+| `--allow-major-without-operator-auth` | Opt-out for the rare v0.0.x → v0.1.0 first-tag case. Default false. |
+
+## Exit codes
+
+| Code | Meaning |
+|---|---|
+| 0 | PASS — version is sequential, bump-type matches the working-tree, no unauthorized MAJOR. |
+| 1 | FAIL — version skip OR bump-type mismatch. The body of the failure cites `methodology/M-decide-alice-versioning.md` Part 4 §rejection ladder bullet (a) or (b). |
+| 2 | FAIL — MAJOR bump proposed without operator authorization. Cites Part 4 §rejection ladder bullet (c). |
+| 3 | FAIL — missing arguments or malformed input. |
+
+## What the script checks
+
+1. **Sequential version check** — `<proposed>` is exactly `<last-release> + 1` in the appropriate semver position. PATCH → `+0.0.1`; MINOR → `+0.1.0` (PATCH resets to 0); MAJOR → `+1.0.0` (MINOR + PATCH reset to 0). Skip rejected.
+2. **Bump-type / change-type match** — compares the proposed bump type (computed from the diff between proposed and last-release) against the working-tree-changes:
+   - **MAJOR** trigger: any path under `methodology/00-decide-*.md`, `methodology/04a-decide-work-graph.md`, `methodology/04c-decide-master-ticket.md`, `methodology/04d-decide-flow-spec.md`, `methodology/M-decide-instance-vs-framework.md`, OR `MAJOR bump` literal in the working-tree body.
+   - **MINOR** trigger: at least one NEW path under `methodology/<new>.md`, `templates/<new>.md.template`, `references/<new>.md`, OR `worked-examples/<NN>-<new>-skeleton/`.
+   - **PATCH** trigger: no MAJOR or MINOR triggers; tooling/reorg/clarification.
+3. **MAJOR requires operator auth** — when the bump is MAJOR, the script checks for an explicit opt-out (`--allow-major-without-operator-auth`) OR a `[HUMAN ACTION]` child ticket id in the working-tree-changes. Absent both, exit 2.
+
+## Script
+
+```python
+#!/usr/bin/env python3
+"""
+Version-discipline check — verify that a proposed alice-framework release
+version is sequential, bump-type-matched, and operator-authorized for MAJOR.
+
+Spec: ../methodology/M-decide-alice-versioning.md Part 4 §pre-flight gate.
+
+Tool-agnostic template. Customize the MAJOR_PATH_PATTERNS, MINOR_PATH_PATTERNS,
+and MAJOR_BUMP_LITERAL constants for your tooling if your methodology corpus
+naming differs.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import re
+import sys
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Literal
+
+
+# --- Tool-specific configuration (CUSTOMIZE FOR YOUR TOOL) ---
+
+# Paths whose presence signals a MAJOR bump (canonical-contract breakage).
+# Per M-decide-alice-versioning.md Part 2 §MAJOR bump bullets 1-4.
+MAJOR_PATH_PATTERNS = [
+    r"^methodology/00-decide-[^/]+\.md$",
+    r"^methodology/04a-decide-work-graph\.md$",
+    r"^methodology/04c-decide-master-ticket\.md$",
+    r"^methodology/04d-decide-flow-spec\.md$",
+    r"^methodology/M-decide-instance-vs-framework\.md$",
+]
+
+# Literal that signals a MAJOR bump was declared in the working tree body.
+MAJOR_BUMP_LITERAL = "MAJOR bump"
+
+# Paths whose presence signals a MINOR bump (new canonical artifact).
+# Per M-decide-alice-versioning.md Part 2 §MINOR bump bullets 1-4.
+# Exclusions: the 00-decide-* (naming-convention core) + 04[abcd]-decide-*
+# (work-graph/master-ticket/flow-spec core) + M-decide-instance-vs-framework.md
+# (framework-vs-instance boundary) are MAJOR-only when modified. Other
+# M-decide-<new>.md files are valid MINOR additions per Part 2 §MINOR bullet 1.
+MINOR_PATH_NEW_PATTERNS = [
+    r"^methodology/(?P<name>(?!00-decide-|04[abcd]-decide-|M-decide-instance-vs-framework\.)[^/]+)\.md$",
+    r"^templates/(?P<name>[^/]+)\.md\.template$",
+    r"^references/(?P<name>[^/]+)\.md$",
+    r"^worked-examples/(?P<dir>\d{2}-[^/]+)/$",
+]
+
+# Optional opt-out for the rare v0.0.x → v0.1.0 first-tag case. Operator must
+# pass `--allow-major-without-operator-auth` AND have a documented rationale
+# (per M-decide-alice-versioning.md Part 2 §MAJOR bump §"first pre-1.0 cut").
+# Otherwise MAJOR bumps require a [HUMAN ACTION] child ticket id captured in
+# the working-tree-changes (the master ticket body in practice).
+
+
+# --- Version parsing ---
+
+@dataclass(frozen=True)
+class Version:
+    major: int
+    minor: int
+    patch: int
+
+    @classmethod
+    def parse(cls, raw: str) -> "Version":
+        s = raw.strip().lstrip("v").strip()
+        parts = s.split(".")
+        if len(parts) != 3:
+            raise ValueError(f"version must be <major>.<minor>.<patch>; got {raw!r}")
+        try:
+            return cls(int(parts[0]), int(parts[1]), int(parts[2]))
+        except ValueError as e:
+            raise ValueError(f"version components must be integers; got {raw!r}") from e
+
+    def __str__(self) -> str:
+        return f"v{self.major}.{self.minor}.{self.patch}"
+
+
+@dataclass(frozen=True)
+class VersionDelta:
+    bump: Literal["MAJOR", "MINOR", "PATCH"]
+    proposed: Version
+    last: Version
+
+    @classmethod
+    def compute(cls, proposed: Version, last: Version) -> "VersionDelta":
+        if proposed.major != last.major:
+            if proposed.major != last.major + 1 or proposed.minor != 0 or proposed.patch != 0:
+                raise VersionSkipError(
+                    proposed=proposed, last=last,
+                    expected=f"v{last.major + 1}.0.0 (MAJOR)",
+                )
+            return cls(bump="MAJOR", proposed=proposed, last=last)
+        if proposed.minor != last.minor:
+            if proposed.minor != last.minor + 1 or proposed.patch != 0:
+                raise VersionSkipError(
+                    proposed=proposed, last=last,
+                    expected=f"v{last.major}.{last.minor + 1}.0 (MINOR)",
+                )
+            return cls(bump="MINOR", proposed=proposed, last=last)
+        if proposed.patch != last.patch + 1:
+            raise VersionSkipError(
+                proposed=proposed, last=last,
+                expected=f"v{last.major}.{last.minor}.{last.patch + 1} (PATCH)",
+            )
+        return cls(bump="PATCH", proposed=proposed, last=last)
+
+
+# --- Errors ---
+
+@dataclass
+class CheckError(Exception):
+    code: int
+    rule_citation: str
+    proposed: Version | None = None
+    last: Version | None = None
+
+    def __str__(self) -> str:
+        parts = [f"[exit {self.code}] {self.rule_citation}"]
+        if self.proposed is not None and self.last is not None:
+            parts.append(f"  proposed: {self.proposed}")
+            parts.append(f"  last:     {self.last}")
+        return "\n".join(parts)
+
+
+class VersionSkipError(CheckError):
+    def __init__(self, proposed: Version, last: Version, expected: str):
+        super().__init__(
+            code=1,
+            rule_citation=(
+                f"REJECTED (version skip / bump-type mismatch): "
+                f"proposed={proposed} last={last} expected={expected}. "
+                "Per methodology/M-decide-alice-versioning.md Part 4 §rejection "
+                "ladder bullet (a): version MUST be exactly last+1 in the "
+                "appropriate semver position. File the missing intermediate "
+                "releases OR amend the proposed version to the actual change type."
+            ),
+            proposed=proposed, last=last,
+        )
+
+
+class MajorWithoutAuthError(CheckError):
+    def __init__(self, proposed: Version, last: Version):
+        super().__init__(
+            code=2,
+            rule_citation=(
+                f"REJECTED (MAJOR bump without operator authorization): "
+                f"proposed={proposed} last={last}. "
+                "Per methodology/M-decide-alice-versioning.md Part 4 §rejection "
+                "ladder bullet (c): a MAJOR bump requires an `[HUMAN ACTION]` "
+                "child ticket in the master body OR explicit "
+                "--allow-major-without-operator-auth opt-out (rare v0.0.x→v0.1.0 "
+                "first-tag case only)."
+            ),
+            proposed=proposed, last=last,
+        )
+
+
+# --- Working-tree-changes parsing ---
+
+@dataclass
+class WorkingTreeChanges:
+    added: list[str] = field(default_factory=list)
+    modified: list[str] = field(default_factory=list)
+    body_text: str = ""  # for MAJOR_BUMP_LITERAL detection
+
+    @classmethod
+    def load(cls, path: Path) -> "WorkingTreeChanges":
+        if not path.exists() or path == Path("/dev/null"):
+            return cls()
+        text = path.read_text(encoding="utf-8", errors="replace")
+        # Try JSON manifest first.
+        stripped = text.strip()
+        if stripped.startswith("{") or stripped.startswith("["):
+            try:
+                data = json.loads(stripped)
+                return cls(
+                    added=list(data.get("added", [])),
+                    modified=list(data.get("modified", [])),
+                    body_text=stripped,
+                )
+            except json.JSONDecodeError:
+                pass  # fall through to git diff --stat parse
+        # Parse `git diff --stat` output: " <path> | N +-" lines.
+        added: list[str] = []
+        modified: list[str] = []
+        for line in text.splitlines():
+            m = re.match(r"^\s*(?P<path>\S+)\s*\|\s*[\d\s+-]+$", line)
+            if not m:
+                continue
+            p = m.group("path")
+            # `git diff --stat` shows added files with `| 0 +` only; in raw stat
+            # we can't tell added vs modified without --raw. The standard CI
+            # caller passes `--raw` output via the same channel; detect the
+            # leading tab convention.
+            modified.append(p)
+        return cls(modified=modified, body_text=text)
+
+    def all_paths(self) -> list[str]:
+        return self.added + self.modified
+
+    def has_major_path(self) -> bool:
+        for p in self.all_paths():
+            for pat in MAJOR_PATH_PATTERNS:
+                if re.search(pat, p):
+                    return True
+        return False
+
+    def has_major_literal(self) -> bool:
+        return MAJOR_BUMP_LITERAL in self.body_text
+
+    def has_minor_new_path(self) -> bool:
+        # A path matches MINOR only if it's BRAND NEW (per Part 2 §MINOR bullet 1-4).
+        for p in self.added:
+            for pat in MINOR_PATH_NEW_PATTERNS:
+                if re.search(pat, p):
+                    return True
+        return False
+
+
+# --- Main check ---
+
+def check(args: argparse.Namespace) -> int:
+    proposed = Version.parse(args.proposed_version)
+    last = Version.parse(args.last_release)
+
+    # Sequential check (exit 1 on skip / bump-type mismatch).
+    try:
+        delta = VersionDelta.compute(proposed, last)
+    except VersionSkipError as e:
+        print(e, file=sys.stderr)
+        return 1
+
+    # Load working-tree-changes (a /dev/null or missing path = no changes).
+    changes = WorkingTreeChanges.load(Path(args.working_tree_changes))
+
+    # MAJOR requires operator authorization.
+    if delta.bump == "MAJOR":
+        if not args.allow_major_without_operator_auth:
+            # Per Part 4 bullet (c): MAJOR bumps require a [HUMAN ACTION] child
+            # ticket id in the master body OR explicit opt-out. We check the
+            # body_text for the structural prefix.
+            if "[HUMAN ACTION]" not in changes.body_text:
+                err = MajorWithoutAuthError(proposed=proposed, last=last)
+                print(err, file=sys.stderr)
+                return 2
+
+    # Bump-type / change-type match.
+    if delta.bump == "MINOR":
+        if not changes.has_minor_new_path() and not changes.has_major_path():
+            err = CheckError(
+                code=1,
+                rule_citation=(
+                    f"REJECTED (bump-type mismatch): proposed={proposed} last={last} "
+                    f"declared bump is MINOR but working-tree-changes contains no "
+                    f"NEW canonical artifact path (methodology/<new>.md, "
+                    f"templates/<new>.md.template, references/<new>.md, or "
+                    f"worked-examples/<NN>-<new>-skeleton/) AND no MAJOR trigger. "
+                    f"Per methodology/M-decide-alice-versioning.md Part 4 §rejection "
+                    f"ladder bullet (b): the proposed bump type must match the "
+                    f"actual change. Either ship as PATCH (drop MINOR) or add a "
+                    f"NEW canonical artifact."
+                ),
+                proposed=proposed, last=last,
+            )
+            print(err, file=sys.stderr)
+            return 1
+    elif delta.bump == "PATCH":
+        if changes.has_major_path() or changes.has_major_literal():
+            err = CheckError(
+                code=1,
+                rule_citation=(
+                    f"REJECTED (bump-type mismatch): proposed={proposed} last={last} "
+                    f"declared bump is PATCH but working-tree-changes contains a "
+                    f"MAJOR-pattern path or MAJOR_BUMP_LITERAL. Per "
+                    f"methodology/M-decide-alice-versioning.md Part 4 §rejection "
+                    f"ladder bullet (b): the proposed bump type must match the "
+                    f"actual change. Bump to MAJOR with operator authorization."
+                ),
+                proposed=proposed, last=last,
+            )
+            print(err, file=sys.stderr)
+            return 1
+        if changes.has_minor_new_path():
+            err = CheckError(
+                code=1,
+                rule_citation=(
+                    f"REJECTED (bump-type mismatch): proposed={proposed} last={last} "
+                    f"declared bump is PATCH but working-tree-changes contains a "
+                    f"NEW canonical artifact path. Per "
+                    f"methodology/M-decide-alice-versioning.md Part 4 §rejection "
+                    f"ladder bullet (b): new canonical content requires MINOR. "
+                    f"Bump MINOR (last.minor+1.0) OR defer the new artifact to a "
+                    f"follow-on release."
+                ),
+                proposed=proposed, last=last,
+            )
+            print(err, file=sys.stderr)
+            return 1
+
+    # PASS
+    print(
+        f"PASS — proposed={proposed} last={last} bump={delta.bump} "
+        f"changes(added={len(changes.added)}, modified={len(changes.modified)}) "
+        f"matches methodology/M-decide-alice-versioning.md Part 4."
+    )
+    return 0
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        description=(
+            "Version-discipline pre-flight for alice-framework releases. "
+            "See methodology/M-decide-alice-versioning.md Part 4."
+        )
+    )
+    parser.add_argument(
+        "repo_path",
+        nargs="?",
+        default=".",
+        help="Path to the alice-framework repo (informational; for future hooks).",
+    )
+    parser.add_argument("--proposed-version", required=True, help="e.g. 0.1.5")
+    parser.add_argument("--last-release", required=True, help="e.g. 0.1.4")
+    parser.add_argument(
+        "--working-tree-changes",
+        required=True,
+        help="Path to `git diff --stat` output or JSON manifest, or /dev/null.",
+    )
+    parser.add_argument(
+        "--allow-major-without-operator-auth",
+        action="store_true",
+        help="Opt-out for the rare v0.0.x → v0.1.0 first-tag case.",
+    )
+    args = parser.parse_args(argv)
+    return check(args)
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+```
+
+## Cross-references
+
+- **Spec:** `methodology/M-decide-alice-versioning.md` Part 4 §pre-flight gate + Part 6 §worked examples.
+- **Loop integration:** `~/.hermes/loops/hermes.yaml` `alice-publish` block Step 0 (per `t_6bbbe1ed-B`).
+- **Sibling gate:** `templates/instance-leak-check.py.template` — Step 1 of `alice-publish`.
+- **Methodology companion:** `methodology/M-decide-instance-vs-framework.md` Part 3 §When the framework version does NOT bump — the methodology side of what this script enforces at the gate.
+```

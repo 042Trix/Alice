@@ -1,6 +1,6 @@
 # Alice — methodology (linear walkthrough)
 
-> A linear overview for readers who want the framework at a glance. The 17 decision guides in `methodology/` go deeper; this file is the index.
+> A linear overview for readers who want the framework at a glance. The 20 decision guides in `methodology/` go deeper; this file is the index.
 
 Alice is a tool-agnostic methodology for designing a personal or small-team operating system supported by agents. It organizes the decisions behind persistent knowledge, reusable procedures, agent roles, recurring work, work tracking, and constraints derived from repeated failures. This walkthrough presents those decisions in sequence; the detailed guides and fillable templates provide the next step for each one.
 
@@ -57,13 +57,16 @@ Read `methodology/07-council-methodology.md`. Council-worthy Alice decisions use
 ### 7a. Decide navigation-aid caption convention (2 min)
 Read `methodology/M-decide-navigation-aid-caption.md`. **Any diagram or visual aid labeled as a "navigation aid" must carry a 3-part caption**: (1) name the artifact a navigation aid, (2) state the date or context of the framing, (3) name Alice's canonical schema. The caption is honest about the diagram's role — without it, the diagram over-promises. Use `templates/caption-convention-rule.md.template` to record the caption text when you add a navigation aid; the council log framework-retro template's `caption` field carries the same string when the council proposes a navigation aid as a delta.
 
+### 7b. Decide alice-framework versioning discipline (3 min)
+Read `methodology/M-decide-alice-versioning.md`. **The framework version is the operator's first read of what changed; it MUST map to the actual contract change.** Part 2 codifies the MAJOR/MINOR/PATCH mapping (MAJOR = breaking contract change to canonical ticket-naming or core architecture; MINOR = new methodology/template/reference doc; PATCH = typos/reorg/clarification/tooling) + Part 3 §authority levels (MAJOR = operator authorization via `[HUMAN ACTION]` child ticket; MINOR + PATCH = coder worker) + Part 4 §pre-flight gate (`check_version_discipline.py` refuses skip / bump-type mismatch / unauthorized MAJOR) + Part 7 §batch-or-split operator decision. The companion enforcement surface is `templates/check_version_discipline.py.template` (Alice-canonical form) + the instance-side `~/.hermes/tools/check_version_discipline.py` (coder child ticket per op-guard-17). The pre-flight is wired into the `alice-publish` loop Step 0 (BEFORE the existing Step 1 instance-leak gate). Use this doc whenever you (a) bump the framework version, (b) write a master ticket with a release label like `[CODER] alice-publish v<X.Y.Z>`, (c) review whether prior CHANGELOG entries match their actual change type, or (d) decide between MAJOR/MINOR/PATCH for a new release.
+
 ### 8. Inbox routing (2 min)
 Read `methodology/08-inbox-route.md`. Items from your external inbox get classified, deduplicated, and routed by `templates/inbox-route.md.template`.
 
 ### 9. External sources (X, articles, podcasts) (2 min)
 Read `methodology/09-inbox-from-external-sources.md`. The X-ingestion pipeline is a specialization of inbox routing. See `references/x-ingestion-pipeline.md` for the operating spec.
 
-## How the 16 guides relate
+## How the 20 guides relate
 
 ```
 1. Decide vault tier  →  the substrate (where notes live)
@@ -100,7 +103,9 @@ Read `methodology/09-inbox-from-external-sources.md`. The X-ingestion pipeline i
                           ↓
 7a. Navigation-aid caption → the rendering convention (3-part caption on diagrams)
                           ↓
-8. Inbox route        →  the input filter (how external items become work)
+7b. Alice-framework versioning → the discipline (semver mapping + authority + pre-flight gate)
+                          ↓
+8. Inbox route        → the input filter (how external items become work)
                           ↓
 9. Inbox from external → X posts, articles, podcasts (special case)
 ```

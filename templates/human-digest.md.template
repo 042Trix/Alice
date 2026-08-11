@@ -9,7 +9,7 @@ source: alice-framework
 version: 0.4.0
 tags: [kind:template, kind:human-digest, kind:operator-facing, kind:retro, kind:executive-reporting-aligned, project:alice]
 confidence: 0.9
-links: ["[[methodology/06a-decide-retro-v2.md]]", "[[methodology/M-decide-x-article-review-flow.md]]", "[[methodology/M-decide-human-digest.md]]"]
+links: ["[[methodology/06a-decide-retro-v2.md]]", "[[methodology/M-decide-human-digest.md]]"]
 ---
 
 # Digest: <flow title>

@@ -1,0 +1,45 @@
+name: ci
+
+# alice-framework CI: instance-leak check + canonical lint.
+# Runs on every PR + push to main.
+#
+# Why the script is materialized from the template at CI time:
+# The instance-leak check is the canonical pre-commit gate (per
+# ~/.hermes/hooks/instance-leak-pre-commit). The script itself lives
+# in the operator's instance home (~/.hermes/tools/check_instance_leaks.py)
+# — we do NOT bake instance code into alice-framework (op-guard-17
+# alice-first/instance-second). The template ships publicly; the
+# workflow materializes the script from the template's Python code
+# block at CI time, so future template updates propagate for free.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  instance-leak:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Materialize check_instance_leaks.py from template
+        run: |
+          python3 - <<'PY'
+          import re, pathlib
+          t = pathlib.Path("templates/instance-leak-check.py.template").read_text()
+          m = re.search(r"```python\n(.*?)```", t, re.DOTALL)
+          if not m:
+              raise SystemExit("could not find ```python``` block in template")
+          pathlib.Path("check_instance_leaks.py").write_text(m.group(1))
+          PY
+
+      - name: Run instance-leak check
+        run: |
+          python3 check_instance_leaks.py .
+        # Exit 0 = clean; exit 1 = block PR; exit 2 = script error (also block).

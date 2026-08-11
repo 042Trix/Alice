@@ -1,0 +1,682 @@
+---
+id: alice-template-instance-leak-check-py
+created: 2026-08-11T22:30:00Z
+updated: 2026-08-11T23:30:00Z
+title: "Instance-leak check — CI script template (Python)"
+type: template
+status: draft
+source: alice-framework
+tags: [kind:template, kind:ci, kind:gate, kind:instance-leak, kind:python, kind:tool-agnostic, project:alice]
+confidence: 0.9
+alice-ticket: t_7aa96032
+companion: ["[[methodology/M-decide-instance-vs-framework.md]]", "[[references/instance-leak-check-spec.md]]"]
+language: python
+runtime: ">=3.10"
+links: ["[[methodology/M-decide-instance-vs-framework.md]]", "[[references/instance-leak-check-spec.md]]", "[[templates/AGENTS.md.template]]"]
+---
+
+# Instance-leak check — CI script template (Python)
+
+> **Copy this template to `~/.hermes/tools/check_instance_leaks.py` (or your tool's equivalent) and customize the operator-specific paths.** The check is tool-agnostic: any tool that can read the alice-framework repo + match patterns can run it. The canonical spec is `references/instance-leak-check-spec.md`.
+
+## Usage
+
+```bash
+python3 check_instance_leaks.py <repo_path> \
+    [--output-format text|json] \
+    [--strict-warnings] \
+    [--ignore-example-blocks] \
+    [--include-dirs DIR_NAME]
+```
+
+| Flag | Effect |
+|---|---|
+| `--output-format text\|json` | Default `text`; `json` is CI-consumable |
+| `--strict-warnings` | Treat H3/H4 WARNINGs as ERRORs (exit 1) |
+| `--ignore-example-blocks` | Strip fenced (```...```) and inline (`...`) code blocks before pattern matching — suppresses false-positive ERRORs on teaching-example mentions of `~/.hermes/...` inside code fences |
+| `--include-dirs DIR_NAME` | Re-include a directory the defaults would skip; repeatable |
+
+Two frontmatter shapes also suppress false-positive ERRORs on teaching/docs:
+
+1. `teaching-example: true` — opts the file out of H2/H3/H4 content patterns.
+2. `instance-leak-exceptions: [H2, H4]` (list or comma-separated string) — opts the file out of those specific patterns.
+
+H1 / H5 / X1 are NOT exceptionable — those are structural signals (genuine instance leaks / local artifacts).
+
+## Script
+
+```python
+#!/usr/bin/env python3
+"""
+Instance-leak check — verify that alice-framework repo contains only
+framework content (A), no Hermes-instance content (H), no local artifacts (X).
+
+Spec: ../references/instance-leak-check-spec.md
+Methodology: ../methodology/M-decide-instance-vs-framework.md
+
+Tool-agnostic template. Customize the HERMES_PROFILE_NAMES and HERMES_PATH
+constants for your tool.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import re
+import sys
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Literal
+
+
+# --- Tool-specific configuration (CUSTOMIZE FOR YOUR TOOL) ---
+
+# Hermes profile names that signal an instance-specific doc.
+HERMES_PROFILE_NAMES = [
+    "jarvis", "coder", "planner", "verifier", "doc-writer",
+    "business-analyst", "council", "marketing", "msaa-scout",
+    "web-research", "default",
+]
+
+# Hermes path patterns that signal an instance-specific doc.
+HERMES_PATH_PATTERNS = [
+    r"~/.hermes/profiles/[a-z-]+/",
+    r"~/.hermes/loops/intents/[a-z0-9-]+-intent\.md",
+    r"~/.hermes/cron/jobs\.json",
+]
+
+# Tool-specific CLI invocations that signal an instance-specific doc.
+TOOL_CLI_PATTERNS = [
+    r"\bhermes\s+(kanban|cron|profile|computer-use|config|setup)\s+",
+    r"\bhermes\s+[a-z-]+\s+(list|show|complete|block|create|edit|run)\s+",
+]
+
+# Default directories to skip (local scratch / archives / cache).
+# Per spec §X1, `_inbox/` is X-class local artifact surface.
+DEFAULT_EXCLUDE_DIRS = frozenset({
+    "_inbox",
+    "_polish-archive",
+    ".git",
+    "workspaces",
+    "__pycache__",
+    ".pytest_cache",
+})
+
+# --- Frontmatter parsing (YAML-lite; no PyYAML dependency) ---
+
+FRONTMATTER_RE = re.compile(r"^---\s*\n(.*?)\n---\s*\n", re.DOTALL)
+
+# Fenced code block matchers — used by --ignore-example-blocks to suppress
+# pattern matches inside ``` ... ``` blocks (the typical teaching-example surface).
+FENCED_CODE_RE = re.compile(r"```[^\n]*\n.*?```", re.DOTALL)
+INLINE_CODE_RE = re.compile(r"`[^`\n]+`")
+# Lines wrapped in inline backticks that themselves contain internal backticks
+# (e.g. audit-line entries that quote inline paths like `` `~/.hermes/...` ``).
+# The naive `[^`\n]+` regex refuses to match because it forbids inner backticks,
+# leaving the inner paths exposed to H2/H4 matching. Detect via: line starts
+# and ends with a backtick, AND the line contains an odd number of backticks
+# (a strong signal the whole line is one inline-code wrap).
+LINE_WRAPPED_INLINE_RE = re.compile(
+    r"^`(?:[^`\n]|`[^`\n]*`)*`\s*$",
+    re.MULTILINE,
+)
+
+
+@dataclass
+class Frontmatter:
+    """Minimal YAML frontmatter parser. Handles key: value pairs and lists."""
+    raw: str
+    fields: dict[str, str | list[str]] = field(default_factory=dict)
+
+    @classmethod
+    def parse(cls, text: str) -> "Frontmatter | None":
+        match = FRONTMATTER_RE.match(text)
+        if not match:
+            return None
+        raw = match.group(1)
+        fields: dict[str, str | list[str]] = {}
+        current_list_key: str | None = None
+        for line in raw.split("\n"):
+            # key: value
+            kv_match = re.match(r"^([a-z_-]+):\s*(.*?)\s*$", line)
+            if kv_match:
+                key, value = kv_match.group(1), kv_match.group(2)
+                if value:
+                    fields[key] = value.strip('"').strip("'")
+                    current_list_key = None
+                else:
+                    fields[key] = []
+                    current_list_key = key
+                continue
+            # list item under current key
+            list_match = re.match(r"^\s+-\s+(.+?)\s*$", line)
+            if list_match and current_list_key:
+                value = list_match.group(1).strip('"').strip("'")
+                if isinstance(fields[current_list_key], list):
+                    fields[current_list_key].append(value)
+        return cls(raw=raw, fields=fields)
+
+
+# --- File classification ---
+
+@dataclass
+class Finding:
+    severity: Literal["ERROR", "WARNING", "INFO"]
+    pattern_id: str  # H1, H2, H3, H4, H5, X1
+    file_path: Path
+    message: str
+    evidence: str  # the matched line/snippet
+    action: str  # what to do (MOVE, DELETE, REVIEW)
+
+
+@dataclass
+class FileReport:
+    file_path: Path
+    findings: list[Finding] = field(default_factory=list)
+
+    @property
+    def highest_severity(self) -> str:
+        if any(f.severity == "ERROR" for f in self.findings):
+            return "ERROR"
+        if any(f.severity == "WARNING" for f in self.findings):
+            return "WARNING"
+        return "INFO"
+
+
+def _strip_example_blocks(body: str) -> str:
+    """Strip fenced and inline code from a body, preserving line numbers.
+
+    Used by ``--ignore-example-blocks`` to suppress false-positive ERRORs
+    on teaching-example mentions of `~/.hermes/...` paths inside code fences.
+
+    Replacements use sentinel whitespace so byte offsets (and therefore line
+    numbers) are preserved — operators can still locate a match in the
+    original file via the line number shown in the report.
+    """
+    # Lines wrapped entirely in inline backticks (audit-line entries that
+    # themselves contain backticks). Strip them BEFORE the naive inline-code
+    # regex would otherwise match the outermost pair only and leave the
+    # inner backticks as orphans. We must do this first because the inline
+    # regex would otherwise partially consume the line and leave fragments.
+    body = LINE_WRAPPED_INLINE_RE.sub(lambda m: re.sub(r"[^\n]", " ", m.group(0)), body)
+    # Fenced code blocks: replace each non-newline char with a space.
+    body = FENCED_CODE_RE.sub(lambda m: re.sub(r"[^\n]", " ", m.group(0)), body)
+    # Inline code: same treatment.
+    body = INLINE_CODE_RE.sub(lambda m: " " * len(m.group(0)), body)
+    return body
+
+
+# --- False-positive filter (per-file frontmatter opt-out) ---
+EXCEPTIONABLE_PATTERN_IDS = frozenset({"H2", "H3", "H4"})
+TEACHING_EXAMPLE_PATTERN_IDS = frozenset({"H2", "H3", "H4"})
+
+
+def _get_exception_set(fm_fields):
+    """Return the set of pattern IDs the current file opts out of.
+
+    Two frontmatter shapes are supported:
+
+    1. ``teaching-example: true`` — opts the file out of H2/H3/H4.
+    2. ``instance-leak-exceptions: [H2, H4]`` (list) or comma-separated
+       string — opts the file out of those specific patterns.
+
+    H1 / H5 / X1 are NOT exceptionable.
+    """
+    exc = set()
+    teaching = fm_fields.get("teaching-example")
+    if isinstance(teaching, str) and teaching.strip().lower() in {"true", "yes", "1"}:
+        exc |= TEACHING_EXAMPLE_PATTERN_IDS
+    raw = fm_fields.get("instance-leak-exceptions")
+    if isinstance(raw, list):
+        exc |= {v for v in raw if isinstance(v, str) and v in EXCEPTIONABLE_PATTERN_IDS}
+    elif isinstance(raw, str) and raw.strip():
+        # Accept flat forms: "[H2, H4]", "[H2,H4]", "H2 H4", "H2,H4" -- the YAML-lite
+        # parser treats `[H2, H4]` as a literal string when written inline, so we
+        # split on comma/whitespace and strip bracket chars.
+        s = raw.replace("[", " ").replace("]", " ")
+        tokens = [t.strip() for t in re.split(r"[\s,]+", s) if t.strip()]
+        exc |= {t for t in tokens if t in EXCEPTIONABLE_PATTERN_IDS}
+    return exc
+
+
+# --- False-positive filter (per-file frontmatter opt-out) ---
+# Pattern IDs that opting out of is allowed for teaching/example docs.
+# H1 (M-decide frontmatter kind/source/loop/intent) is structural and MUST NOT
+# be opted out — a file with `kind: hermes-instance` is genuinely a leak.
+# H5 (operator-instance frontmatter keys) is also structural.
+# X1 (local artifacts) is filename-based; opting out doesn't make sense.
+def classify_file(
+    file_path: Path,
+    body: str,
+    fm: Frontmatter | None,
+    *,
+    ignore_example_blocks: bool = False,
+) -> list[Finding]:
+    """Apply H1-H5 + X1 patterns. Returns findings (empty list = clean).
+
+    When ``ignore_example_blocks`` is True, fenced code blocks (``` ... ```)
+    and inline code (`...`) are stripped from the body BEFORE pattern matching,
+    so teaching-example mentions of `~/.hermes/...` paths inside code fences
+    do not produce false-positive ERRORs.
+    """
+    findings: list[Finding] = []
+
+    # X1: local artifacts (filename-based)
+    if file_path.suffix == ".bak":
+        findings.append(Finding(
+            severity="ERROR", pattern_id="X1",
+            file_path=file_path,
+            message="Local backup file (*.bak); never committed",
+            evidence=file_path.name,
+            action="DELETE",
+        ))
+        return findings  # no need to check patterns if X1 fires
+    if file_path.name in {".DS_Store"} or file_path.suffix in {".swp", ".swo", ".pyc"}:
+        findings.append(Finding(
+            severity="ERROR", pattern_id="X1",
+            file_path=file_path,
+            message="OS / editor cruft; should be in .gitignore",
+            evidence=file_path.name,
+            action="DELETE or add to .gitignore",
+        ))
+        return findings
+
+    # Only check .md files for content patterns
+    if file_path.suffix != ".md":
+        return findings
+
+    fm_fields = fm.fields if fm else {}
+
+    # Per-file false-positive filter (frontmatter opt-out for teaching docs).
+    exception_set = _get_exception_set(fm_fields)
+
+    # Strip example blocks from the body when the false-positive filter is on.
+    match_body = _strip_example_blocks(body) if ignore_example_blocks else body
+
+    # H1: instance-flow M-decide files (frontmatter-based)
+    # Spec: references/instance-leak-check-spec.md §H1
+    # Sub-patterns: kind ∈ {hermes-instance, instance}, source ∈ {hermes-instance, hermes-council},
+    #               intent matches ~/.hermes/loops/intents/*.md, loop set
+    if file_path.name.startswith("M-decide-") and file_path.parent.name == "methodology":
+        # Sub-pattern A: kind frontmatter
+        kind_value = str(fm_fields.get("kind", ""))
+        if kind_value in ("hermes-instance", "instance"):
+            findings.append(Finding(
+                severity="ERROR", pattern_id="H1",
+                file_path=file_path,
+                message=f"M-decide file with instance kind ({kind_value}); should be in instance",
+                evidence=f"kind: {kind_value}",
+                action="MOVE to ~/.hermes/methodology/",
+            ))
+        # Sub-pattern B: source frontmatter (instance-specific)
+        source_value = str(fm_fields.get("source", ""))
+        if source_value in ("hermes-instance", "hermes-council"):
+            findings.append(Finding(
+                severity="ERROR", pattern_id="H1",
+                file_path=file_path,
+                message=f"M-decide file with instance source ({source_value}); should be in instance",
+                evidence=f"source: {source_value}",
+                action="MOVE to ~/.hermes/methodology/",
+            ))
+        # Sub-pattern C: intent → instance intent doc
+        intent = fm_fields.get("intent", "")
+        if isinstance(intent, str) and "loops/intents/" in intent:
+            findings.append(Finding(
+                severity="ERROR", pattern_id="H1",
+                file_path=file_path,
+                message="M-decide file references instance intent doc",
+                evidence=f"intent: {intent}",
+                action="MOVE to ~/.hermes/methodology/",
+            ))
+        # Sub-pattern D: loop frontmatter (instance-loop binding)
+        loop_value = str(fm_fields.get("loop", ""))
+        if loop_value:
+            findings.append(Finding(
+                severity="ERROR", pattern_id="H1",
+                file_path=file_path,
+                message=f"M-decide file declares a loop binding ({loop_value}); should be in instance",
+                evidence=f"loop: {loop_value}",
+                action="MOVE to ~/.hermes/methodology/",
+            ))
+
+    # H2: instance paths in body
+    for pattern in HERMES_PATH_PATTERNS:
+        for match in re.finditer(pattern, match_body):
+            findings.append(Finding(
+                severity="ERROR", pattern_id="H2",
+                file_path=file_path,
+                message=f"Body references instance path ({pattern})",
+                evidence=match.group(0),
+                action="Genericize the reference or MOVE to instance",
+            ))
+            break  # one finding per pattern per file
+
+    # H3: Hermes profile names without genericizing
+    profile_count = 0
+    for name in HERMES_PROFILE_NAMES:
+        # Count occurrences as standalone words
+        matches = re.findall(rf"\b{re.escape(name)}\b", match_body)
+        profile_count += len(matches)
+    if profile_count >= 3:
+        findings.append(Finding(
+            severity="WARNING", pattern_id="H3",
+            file_path=file_path,
+            message=f"Hermes profile names appear {profile_count} times (likely instance-specific)",
+            evidence=f"count={profile_count}",
+            action="REVIEW: rewrite to be friend-portable, or MOVE to instance",
+        ))
+
+    # H4: tool-specific CLI invocations
+    for pattern in TOOL_CLI_PATTERNS:
+        if re.search(pattern, match_body):
+            findings.append(Finding(
+                severity="WARNING", pattern_id="H4",
+                file_path=file_path,
+                message="Body documents tool-specific CLI invocations",
+                evidence=pattern,
+                action="Genericize to 'your tool's CLI' or MOVE to instance",
+            ))
+            break
+
+    # H5: operator-instance frontmatter
+    for key in ["tenant", "board", "assignee"]:
+        if key in fm_fields and not str(fm_fields[key]).startswith("alice"):
+            findings.append(Finding(
+                severity="ERROR", pattern_id="H5",
+                file_path=file_path,
+                message=f"Frontmatter has instance-specific {key}: {fm_fields[key]}",
+                evidence=f"{key}: {fm_fields[key]}",
+                action="Remove instance-specific frontmatter or MOVE to instance",
+            ))
+
+    # Apply per-file false-positive filter: drop findings whose pattern_id is in the
+    # file's exception set (e.g. `teaching-example: true` opts the file out of H2/H3/H4).
+    if exception_set:
+        findings = [f for f in findings if f.pattern_id not in exception_set]
+
+    return findings
+
+
+# --- Repo walk ---
+
+def walk_repo(
+    repo_path: Path,
+    exclude_dirs: frozenset[str] = DEFAULT_EXCLUDE_DIRS,
+) -> list[Path]:
+    """Walk the repo and return all non-.git, non-excluded files."""
+    files: list[Path] = []
+    for path in sorted(repo_path.rglob("*")):
+        # Skip if any parent directory matches an exclude pattern.
+        if any(part in exclude_dirs for part in path.parts):
+            continue
+        if path.is_file():
+            files.append(path)
+    return files
+
+
+def check_repo(
+    repo_path: Path,
+    *,
+    ignore_example_blocks: bool = False,
+    exclude_dirs: frozenset[str] = DEFAULT_EXCLUDE_DIRS,
+) -> list[FileReport]:
+    """Run the full check on a repo. Returns per-file reports."""
+    reports: list[FileReport] = []
+    for file_path in walk_repo(repo_path, exclude_dirs=exclude_dirs):
+        try:
+            body = file_path.read_text(encoding="utf-8")
+        except (UnicodeDecodeError, OSError):
+            continue  # skip binary / unreadable files
+        fm = Frontmatter.parse(body)
+        findings = classify_file(
+            file_path, body, fm, ignore_example_blocks=ignore_example_blocks,
+        )
+        if findings:
+            reports.append(FileReport(file_path=file_path, findings=findings))
+    return reports
+
+
+# --- Output formatting ---
+
+def format_text(reports: list[FileReport], repo_path: Path) -> str:
+    """Format reports as human-readable text (matches the spec's example)."""
+    lines: list[str] = []
+    lines.append(f"INSTANCE-LEAK CHECK — {repo_path}")
+    lines.append("=" * 50)
+    lines.append("")
+    error_count = 0
+    warning_count = 0
+    info_count = 0
+    for report in reports:
+        severity = report.highest_severity
+        bracket = f"[{severity}]"
+        if severity == "ERROR":
+            error_count += 1
+        elif severity == "WARNING":
+            warning_count += 1
+        else:
+            info_count += 1
+        rel_path = report.file_path.relative_to(repo_path)
+        lines.append(f"{bracket} {rel_path}")
+        # Group findings by pattern_id (one line per pattern)
+        seen_patterns: set[str] = set()
+        for finding in report.findings:
+            if finding.pattern_id in seen_patterns:
+                continue
+            seen_patterns.add(finding.pattern_id)
+            lines.append(f"  {finding.pattern_id}: {finding.message}")
+            lines.append(f"    Evidence: {finding.evidence}")
+            lines.append(f"  → Action: {finding.action}")
+        lines.append("")
+    lines.append(f"Summary: {error_count} ERRORs, {warning_count} WARNINGs, {info_count} INFOs")
+    return "\n".join(lines)
+
+
+def format_json(reports: list[FileReport], repo_path: Path) -> str:
+    """Format reports as JSON for CI consumption."""
+    payload = {
+        "repo": str(repo_path),
+        "reports": [
+            {
+                "file": str(r.file_path.relative_to(repo_path)),
+                "highest_severity": r.highest_severity,
+                "findings": [
+                    {
+                        "severity": f.severity,
+                        "pattern_id": f.pattern_id,
+                        "message": f.message,
+                        "evidence": f.evidence,
+                        "action": f.action,
+                    }
+                    for f in r.findings
+                ],
+            }
+            for r in reports
+        ],
+    }
+    return json.dumps(payload, indent=2)
+
+
+# --- Main ---
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description="Instance-leak check for alice-framework repo"
+    )
+    parser.add_argument("repo_path", type=Path, help="Path to the alice-framework repo")
+    parser.add_argument(
+        "--output-format",
+        choices=["text", "json"],
+        default="text",
+        help="Output format (default: text)",
+    )
+    parser.add_argument(
+        "--strict-warnings",
+        action="store_true",
+        help="Treat warnings as errors (non-zero exit on warnings)",
+    )
+    parser.add_argument(
+        "--ignore-example-blocks",
+        action="store_true",
+        help=(
+            "Strip fenced (``` ... ```) and inline (`...`) code blocks from the "
+            "body before pattern matching. Suppresses false-positive ERRORs on "
+            "teaching-example mentions of `~/.hermes/...` paths inside code fences."
+        ),
+    )
+    parser.add_argument(
+        "--include-dirs",
+        action="append",
+        default=None,
+        metavar="DIR_NAME",
+        help=(
+            "Re-include a directory that the default exclude set would skip. "
+            "Repeatable. Use to whitelist dirs the operator has audited."
+        ),
+    )
+    args = parser.parse_args()
+
+    repo_path = args.repo_path.resolve()
+    if not repo_path.is_dir():
+        print(f"ERROR: {repo_path} is not a directory", file=sys.stderr)
+        return 2
+
+    # Compose the exclude set: defaults minus any re-inclusions.
+    exclude_dirs = set(DEFAULT_EXCLUDE_DIRS)
+    if args.include_dirs:
+        exclude_dirs -= set(args.include_dirs)
+
+    reports = check_repo(
+        repo_path,
+        ignore_example_blocks=args.ignore_example_blocks,
+        exclude_dirs=frozenset(exclude_dirs),
+    )
+
+    if args.output_format == "json":
+        print(format_json(reports, repo_path))
+    else:
+        print(format_text(reports, repo_path))
+
+    # Exit code
+    has_errors = any(r.highest_severity == "ERROR" for r in reports)
+    has_warnings = any(r.highest_severity == "WARNING" for r in reports)
+    if has_errors:
+        return 1
+    if args.strict_warnings and has_warnings:
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+```
+
+## Verification
+
+The script is verified when:
+
+1. **Runs on the canonical alice-framework repo:** `python3 check_instance_leaks.py ~/Documents/alice-framework/` → exits 0 (no errors after the reorg completes)
+2. **Runs on a deliberate-leak fixture:** `python3 check_instance_leaks.py /tmp/leak-fixture/` → exits 1 with the leaked files flagged
+3. **JSON output is parseable:** `python3 check_instance_leaks.py ~/Documents/alice-framework/ --output-format json | jq .` → no errors
+4. **Strict-warnings mode works:** `python3 check_instance_leaks.py ~/Documents/alice-framework/ --strict-warnings` → exits 1 if any warnings present
+
+## Test fixture (canonical regression suite)
+
+```python
+# tests/test_instance_leak_check.py
+import subprocess
+import tempfile
+from pathlib import Path
+
+SCRIPT = Path(__file__).parent.parent / "check_instance_leaks.py"
+
+def test_clean_repo_passes(tmp_path):
+    """A repo with only Alice framework content passes."""
+    (tmp_path / "methodology").mkdir()
+    (tmp_path / "methodology" / "00-decide-ticket-naming.md").write_text(
+        "---\nid: alice-methodology-00-decide-ticket-naming\n"
+        "title: Methodology 00 — Decide ticket naming\ntype: methodology\n"
+        "source: alice-framework\ntags: [kind:methodology, project:alice]\n"
+        "---\n\n# Ticket naming\n"
+    )
+    result = subprocess.run(["python3", str(SCRIPT), str(tmp_path)], capture_output=True)
+    assert result.returncode == 0, f"Expected 0, got {result.returncode}\n{result.stdout.decode()}"
+
+def test_m_decide_with_instance_intent_fails(tmp_path):
+    """An M-decide file with an instance intent in frontmatter is an ERROR."""
+    (tmp_path / "methodology").mkdir()
+    (tmp_path / "methodology" / "M-decide-x-flow.md").write_text(
+        "---\nid: alice-methodology-M-decide-x-flow\ntitle: M-decide x\n"
+        "type: methodology\nsource: alice-framework\n"
+        "intent: ~/.hermes/loops/intents/x-flow-intent.md\n"
+        "tags: [kind:methodology, project:alice]\n---\n\n# x flow\n"
+    )
+    result = subprocess.run(["python3", str(SCRIPT), str(tmp_path)], capture_output=True)
+    assert result.returncode == 1
+    assert "H1" in result.stdout.decode()
+
+def test_hermes_path_in_body_fails(tmp_path):
+    """A body that references ~/.hermes/profiles/ is an ERROR."""
+    (tmp_path / "methodology").mkdir()
+    (tmp_path / "methodology" / "00-decide-test.md").write_text(
+        "---\nid: test\ntitle: test\ntype: methodology\nsource: alice-framework\n"
+        "tags: [kind:methodology, project:alice]\n---\n\n"
+        "The jarvis profile lives at ~/.hermes/profiles/jarvis/SOUL.md\n"
+    )
+    result = subprocess.run(["python3", str(SCRIPT), str(tmp_path)], capture_output=True)
+    assert result.returncode == 1
+    assert "H2" in result.stdout.decode()
+
+def test_bak_file_fails(tmp_path):
+    """A .bak file is an ERROR (X1)."""
+    (tmp_path / "CHANGELOG.md.bak").write_text("backup\n")
+    result = subprocess.run(["python3", str(SCRIPT), str(tmp_path)], capture_output=True)
+    assert result.returncode == 1
+    assert "X1" in result.stdout.decode()
+
+def test_profile_name_warning(tmp_path):
+    """3+ Hermes profile names in body is a WARNING."""
+    (tmp_path / "methodology").mkdir()
+    (tmp_path / "methodology" / "00-decide-test.md").write_text(
+        "---\nid: test\ntitle: test\ntype: methodology\nsource: alice-framework\n"
+        "tags: [kind:methodology, project:alice]\n---\n\n"
+        "jarvis, coder, planner, verifier all do this.\n"
+    )
+    result = subprocess.run(["python3", str(SCRIPT), str(tmp_path)], capture_output=True)
+    # Default: warnings don't block; exit 0
+    assert result.returncode == 0
+    # With --strict-warnings: exit 1
+    result_strict = subprocess.run(
+        ["python3", str(SCRIPT), str(tmp_path), "--strict-warnings"],
+        capture_output=True,
+    )
+    assert result_strict.returncode == 1
+    assert "H3" in result_strict.stdout.decode()
+```
+
+Run the tests: `pytest tests/test_instance_leak_check.py -v`
+
+## Customization notes
+
+When copying this template to your instance:
+
+1. **Update `HERMES_PROFILE_NAMES`** — replace with your tool's profile names (if not Hermes)
+2. **Update `HERMES_PATH_PATTERNS`** — replace with your tool's instance paths
+3. **Update `TOOL_CLI_PATTERNS`** — replace with your tool's CLI invocations
+4. **Add new pattern checks** — extend `classify_file()` for tool-specific leak patterns
+5. **Wire into your CI** — the script's exit codes (0/1/2) are designed for direct CI integration
+
+## Cross-references
+
+- **Methodology:** `methodology/M-decide-instance-vs-framework.md`
+- **Spec:** `references/instance-leak-check-spec.md`
+- **Test fixture:** see the pytest block above
+- **Audit ticket:** `t_7aa96032`
+
+## Audit-line
+
+```
+## [2026-08-11T23:30Z] paired-wiki-sync — templates/instance-leak-check.py.template v0.1.0 — CI script template + 5-case regression suite. Tool-agnostic: any operator copies the template to their instance's tools dir + customizes the profile/path/CLI constants. Source: t_7aa96032 (audit + durable fix).
+## [2026-08-11T23:30Z] instance-leak-check-template-v0.2.0 -- sync template to operator-side script (added `_strip_example_blocks` + `ignore_example_blocks` flag + `EXCEPTIONABLE_PATTERN_IDS` + `_get_exception_set` + per-file frontmatter `teaching-example` / `instance-leak-exceptions` opt-out + `--ignore-example-blocks` CLI flag + `--include-dirs` re-include). Source: t_764d71c9 (Part A rework per op-guard-17 instance-conforms-to-Alice-doc).
+
+```

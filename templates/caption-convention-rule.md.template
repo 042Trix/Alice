@@ -13,7 +13,7 @@ derived_from:
   customized_on: <YYYY-MM-DD>
 tags: [kind:template, kind:navigation-aid, kind:caption, kind:convention, kind:rendering, project:alice]
 confidence: 0.0
-links: ["[[methodology/M-decide-navigation-aid-caption.md]]", "[[methodology/00-decide-ticket-naming.md]]", "[[methodology/07-council-methodology.md]]", "[[methodology/M-decide-x-article-review-flow.md]]"]
+links: ["[[methodology/M-decide-navigation-aid-caption.md]]", "[[methodology/00-decide-ticket-naming.md]]", "[[methodology/07-council-methodology.md]]"]
 ---
 
 # Navigation-aid caption convention — fillable template
@@ -122,7 +122,7 @@ If unsure whether an artifact counts as a navigation aid, apply the test: **does
 - `methodology/M-decide-navigation-aid-caption.md` — the canonical methodology doc for this convention.
 - `methodology/00-decide-ticket-naming.md` — the Delta-1 stack diagram's home doc.
 - `methodology/07-council-methodology.md` — the council methodology that produces navigation-aid deltas.
-- `methodology/M-decide-x-article-review-flow.md` — the flow that surfaced the convention.
+- `~/.hermes/methodology/M-decide-x-article-review-flow.md` — the flow that surfaced the convention (instance-side per op-guard-17).
 - `~/.hermes/skills/autonomous-ai-agents/hermes-council/templates/council-log-framework-retro.md` — the council log template with the `caption` field.
 - t_6314966f — the ticket this template was filed under.
 - t_aa72881c — Delta-1 stack-diagram ticket (the first aid to receive the caption).
