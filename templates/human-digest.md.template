@@ -1,0 +1,270 @@
+---
+id: alice-template-human-digest
+created: 2026-08-07T00:00:00Z
+updated: 2026-08-08T16:35:00Z
+title: "Human-readable retro digest — fillable template"
+type: template
+status: draft
+source: alice-framework
+version: 0.4.0
+tags: [kind:template, kind:human-digest, kind:operator-facing, kind:retro, kind:executive-reporting-aligned, project:alice]
+confidence: 0.9
+links: ["[[methodology/06a-decide-retro-v2.md]]", "[[methodology/M-decide-x-article-review-flow.md]]", "[[methodology/M-decide-human-digest.md]]"]
+---
+
+# Digest: <flow title>
+
+> This is the operator-facing summary of a completed agent retro. The technical retro task remains the audit record. This digest is a plain-language reading surface: it should help the operator decide what deserves attention without opening the technical record.
+
+> **Spec alignment (2026-08-08, source=t_5dc19cae):** This template is the canonical 10-section retro-digest fillable form, **Type 2 (Retro digest)** in the `executive-reporting` skill's 5-type taxonomy (`~/.hermes/skills/productivity/executive-reporting/references/per-digest-type-shape.md`). The canonical 8-section shape contract it specializes is in `methodology/03b-decide-operator-agent-interaction.md` Part 13; this template preserves all 8 canonical sections and adds 2 retro-specific sections — §4 "Council / agent agree and disagree" (between canonical §3 and §5) and §9 "Individual council / agent responses" (between canonical §5 and §6, with the per-seat detail at the bottom tier). The canonical 8-section fillable form for non-retro operator-review artifacts (Types 1, 3, 4, 5) is `~/.hermes/skills/productivity/executive-reporting/templates/executive-report.md.template` (the skill's counterpart to this template). v0.4.0 added the §4 agreement-column guidance (closes audit gap 3) and the §3 "Why it matters" sourcing guidance (closes audit gap 4) — see the HTML comments in §3 and §4 below.
+
+**Reading guidance:** the operator reads top-down. Sections 1–3 are the **actionable top tier** — what this is, what matters, and what you need to do. Read them in 30 seconds. Sections 4–5 are the **transitional interpretation layer** — the council's overall disagreement structure and the substantive findings with proposed corrective actions. Sections 6–7 are the **operator action surface** — your decisions and your observations, in your own hand. Sections 8–10 are the **technical-detail bottom tier**, collapsed — evidence anchors, per-seat / per-axis individual responses, and digest metadata. **Technical detail belongs in sections 8–10, collapsed, expandable.** The single largest change vs v0.1.x: Individual council / agent responses was section 5 (middle) and is now section 9 (bottom tier), per the operator's 2026-08-08 direction (source=t_4d1de050). v0.3.0 added "Council content decisions (inline)" under section 3 + "Council content decisions (per-seat)" under section 9, so the operator can read and disposition content decisions without leaving the digest, per the operator's 2026-08-08 direction (source=t_9450b7e0).
+
+## 1. What this is
+
+<One or two sentences: what was reviewed, why it was reviewed, and whether this is the agent's review (Retro-A) or the operator's review window (Retro-H).>
+
+## 2. The headline
+
+<!--
+Write 3–5 bullets maximum. These bullets are the first thing the operator sees.
+Use plain language. Do not put jargon, ticket IDs, file paths, run identifiers,
+agent/profile names, or implementation details in this section. State the
+practical consequence, the most important risk, and what needs a decision.
+-->
+
+- <What went well or is stable, in plain language.>
+- <Most important problem or risk, in plain language.>
+- <What is already addressed, if applicable.>
+- <What still needs the operator's attention.>
+
+## 3. Action items
+
+<!--
+Bulleted list of what the operator needs to decide, in priority order. Each
+item: state what to do + the deadline + the consequence of not acting. The
+operator's first read after the headline. Keep each item to 2–3 sentences.
+
+When the Retro-A is attached to a master ticket that carries council content
+decisions (Q1..Q5 or analogous) on a separate operator gate, those decisions
+MUST be embedded inline in this section under "Council content decisions" —
+not referenced by pointer. The operator reads the digest to make a decision;
+they must not have to leave the digest to read another doc to know what the
+content questions are. Per operator direction 2026-08-08 (source=t_9450b7e0).
+
+**Why it matters sourcing (v0.4.0, source=t_5dc19cae — closes audit gap 4):**
+the "Why it matters" + "Consequence of not acting" copy MUST come from the
+Retro-A task body's proposed corrective action for each finding. Do NOT use
+stub strings from the verifier's `result` payload (e.g.
+"(residual surfaced in Retro-A publish comment)" is a stub, not a real
+reason). When the verifier's result is minimal, re-read the Retro-A task
+body and extract the actual consequence. Per skill translation discipline
+Rule 4 (translate severity into consequence) and Rule 5 (translate jargon
+into outcome): the action items surface is plain-language consequence, not
+the verifier's payload. The action items MUST satisfy the canonical 6
+translation rules in `~/.hermes/skills/productivity/executive-reporting/
+references/translation-discipline.md`.
+-->
+
+1. **<plain-language action>** — <deadline or urgency>
+   - Why it matters: <consequence or expected benefit>
+   - Consequence of not acting: <what stays unaddressed>
+
+2. **<plain-language action>** — <deadline or urgency>
+   - Why it matters: <consequence or expected benefit>
+   - Consequence of not acting: <what stays unaddressed>
+
+### Council content decisions (inline)
+
+<!--
+Required when the parent master ticket carries council content decisions
+(Q1..Q5 or analogous) that the operator dispositions separately from the
+flow-retro findings. The digest must NOT reference these by pointer only;
+the operator must be able to read and disposition the content decisions
+without leaving the digest. Per operator direction 2026-08-08
+(source=t_9450b7e0).
+
+Each decision gets its own bullet: the question, the council recommendation,
+and the operator's three choices (Accept / Reject / Defer). The council's
+per-seat rationale is in section 9 (Individual council / agent responses);
+the headline here is the action surface, not the analysis.
+-->
+
+- **<Q1 or content question 1, in plain language>** — Council recommends: <recommendation>
+  - Accept / Reject / Defer: <operator fills this in>
+- **<Q2 or content question 2, in plain language>** — Council recommends: <recommendation>
+  - Accept / Reject / Defer: <operator fills this in>
+
+## 4. Council / agent agree and disagree
+
+<!--
+Transitional interpretation layer. If a council deliberated, this section
+shows the agree-vs-disagree table. The operator sees the structure of any
+disagreement in 10 seconds. Include this section only when a council ran;
+for single-agent retros, omit and replace with a one-paragraph "Direction"
+statement.
+
+Agreement column guidance (v0.4.0, source=t_5dc19cae — closes audit gap 3):
+- "Unanimous (N/N)" — every seat's verdict matches the recommendation header.
+- "Split (X-Y, <seat-names> dissented)" — at least one seat differs from the
+  recommendation header; name the dissenting seats and show the count.
+- The agreement column reflects the ACTUAL per-seat outcome (section 9), not
+  the recommendation header. If section 4 says "Unanimous" but section 9
+  shows a split, section 4 is WRONG. The verifier should spot-check this
+  before marking ready.
+
+Per skill translation discipline Rule 1 (preserve conclusions, replace
+language): the conclusion is the actual agreement shape, not the
+recommendation header. The digest reports the agreement shape; the
+operator's decisions on the agreement live in section 6 (Operator decisions).
+-->
+
+| Question or axis | Council / agent position | Agreement |
+|---|---|---|
+| <Q1 or axis 1> | <recommendation> | Unanimous / Split (dissent named) |
+| <Q2 or axis 2> | <recommendation> | Unanimous / Split (dissent named) |
+| <Q3 or axis 3> | <recommendation> | Unanimous / Split (dissent named) |
+
+**Direction:** <one-paragraph synthesis of where the council landed and where the open disagreements are, in plain language.>
+
+## 5. Detailed findings
+
+<!--
+Transitional interpretation layer. Bulleted list of the substantive findings,
+with severity and proposed corrective action. This is the agent's synthesis
+across the per-seat / per-axis individual responses in section 9 below; the
+operator reads this section before drilling into per-seat detail. Reference
+material — the operator reads only when they want to dig past the headline +
+action items.
+-->
+
+- **<finding 1>** — severity: <low | medium | high>
+  - Proposed corrective action: <what to do>
+- **<finding 2>** — severity: <low | medium | high>
+  - Proposed corrective action: <what to do>
+- **<finding 3>** — severity: <low | medium | high>
+  - Proposed corrective action: <what to do>
+
+## 6. Operator decisions
+
+<!--
+Operator action surface. Record each finding as Accept, Reject, or Defer.
+This is the operator's first hand-on action; section 7 (Observations) and
+section 8 (Evidence anchors) follow. Decisions here are mirrored into the
+technical retro task per `06a`; the digest does not replace the technical
+disposition. Silence is not consent — an operator who does not respond has
+not accepted.
+-->
+
+| Finding | Agent's recommendation | Accept / Reject / Defer | Reason |
+|---|---|---|---|
+| <F-1 or plain-language finding> | <recommendation> | <operator fills this in> | <operator fills this in> |
+| <F-2 or plain-language finding> | <recommendation> | <operator fills this in> | <operator fills this in> |
+
+## 7. Operator's observations
+
+<!--
+Operator action surface. The operator adds observations here for context the
+agent could not know, to override the agent's recommendation, or to confirm
+the plain-language rendering. Use plain language. The observations section
+sits just below the decisions table so the operator can capture decisions
+and observations in the same review pass.
+-->
+
+- <operator: add observation here>
+- <operator: confirm or override the agent's recommendation>
+- <operator: record context the agent could not know>
+
+## 8. Evidence anchors
+
+<!--
+Technical-detail bottom tier. Collapsible section pointing to the technical
+record. The operator expands only when they need depth. This section is
+intentionally for verification; identifiers, paths, run IDs, and other
+technical vocabulary belong here.
+-->
+
+<details>
+<summary>Open technical references</summary>
+
+These references are for verification only. They may contain technical terms, identifiers, and paths.
+
+- Technical retro record: <path or kanban reference>
+- Master flow record: <path or kanban reference>
+- Agent comments and events: <references>
+- Related implementation work: <references, if any>
+
+</details>
+
+## 9. Individual council / agent responses
+
+<!--
+Technical-detail bottom tier. Per-seat or per-axis summary. Each section is
+short (1–2 paragraphs). Lives at the bottom per the operator's 2026-08-08
+direction so the actionable top tier stays decision-driven. The operator
+reads only the seats that matter to them. Use plain language. Do not merely
+repeat the technical record.
+
+When the parent master ticket carries council content decisions (Q1..Q5
+or analogous), this section MUST include a "Council content decisions
+(per-seat)" subsection that surfaces each seat's verdict on each Q — so
+the operator sees the disagreement structure on the content gate in 10
+seconds, without leaving the digest. Per operator direction 2026-08-08
+(source=t_9450b7e0). The action surface is in section 3 (Council content
+decisions inline); this is the analysis underneath.
+-->
+
+### <Seat or axis 1>
+
+<pass / partial / fail — plain-language explanation>
+
+### <Seat or axis 2>
+
+<pass / partial / fail — plain-language explanation>
+
+### <Seat or axis 3>
+
+<pass / partial / fail — plain-language explanation>
+
+### <Seat or axis 4>
+
+<pass / partial / fail — plain-language explanation>
+
+### <Seat or axis 5>
+
+<pass / partial / fail — plain-language explanation>
+
+### <Seat or axis 6>
+
+<pass / partial / fail — plain-language explanation>
+
+### Council content decisions (per-seat)
+
+<!--
+Required when the parent master ticket carries council content decisions
+(Q1..Q5 or analogous). For each Q, surface each seat's verdict (Position
++ 1-sentence Reasoning) in a compact table. The operator reads this in
+10 seconds to see the disagreement structure. The action surface for the
+operator is in section 3. Per operator direction 2026-08-08
+(source=t_9450b7e0).
+
+For Retro-A on a flow-level retro (no council content decisions), this
+subsection is omitted.
+-->
+
+| Q | <Seat 1> | <Seat 2> | <Seat 3> | <Seat 4> | <Seat 5> |
+|---|---|---|---|---|---|
+| Q1 — <plain-language question> | <Position — 1-line reason> | ... | ... | ... | ... |
+| Q2 — <plain-language question> | ... | ... | ... | ... | ... |
+
+## 10. Digest metadata
+
+<!--
+Technical-detail bottom tier. Audit trail.
+-->
+
+- Digest status: <draft | ready for review | reviewed>
+- Generated after: <Retro-A completion timestamp>
+- Review window: <Retro-H opening and closing timestamps>
+- Technical record is canonical: yes
+- Operator-facing attachment sent: <yes | no | not applicable>

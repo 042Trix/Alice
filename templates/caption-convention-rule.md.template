@@ -1,0 +1,133 @@
+---
+id: alice-template-caption-convention-rule
+created: 2026-08-08T15:35:00Z
+updated: 2026-08-08T15:35:00Z
+title: "Navigation-aid caption convention — fillable template for the 3-part caption on diagrams labeled as aids"
+type: template
+status: draft
+source: alice-framework
+derived_from:
+  project: Alice
+  template: templates/caption-convention-rule.md.template
+  version: 0.1.0
+  customized_on: <YYYY-MM-DD>
+tags: [kind:template, kind:navigation-aid, kind:caption, kind:convention, kind:rendering, project:alice]
+confidence: 0.0
+links: ["[[methodology/M-decide-navigation-aid-caption.md]]", "[[methodology/00-decide-ticket-naming.md]]", "[[methodology/07-council-methodology.md]]", "[[methodology/M-decide-x-article-review-flow.md]]"]
+---
+
+# Navigation-aid caption convention — fillable template
+
+> Every diagram or visual aid added to Alice's methodology that is labeled as a **navigation aid** (not a canonical schema) MUST carry a 3-part caption. This template is the fillable record for each navigation aid: it captures the aid's location, its caption text, and its canonical-schema reference. Copy this template into the methodology doc or PR description that introduces a navigation aid.
+
+## The rule
+
+Any diagram or visual aid in Alice's methodology that is labeled as a "navigation aid" — vs. a canonical schema — must carry a caption with exactly three parts:
+
+1. **Names the artifact a "navigation aid."** The first words are the literal phrase: `Navigation aid`.
+2. **States the date or context of the framing.** A short parenthetical: `<YYYY>-<period-or-version> <framing-nature>`. Examples: `(2026-mid-year public framing)`, `(Q3 2026 retro framing)`, `(2026 v0.1.x family framing)`.
+3. **Names Alice's canonical schema.** A second sentence that names the authoritative schema this aid is rendering. The schema name and (optionally) the canonical doc path.
+
+### Format template
+
+```
+Navigation aid (<date-or-context>). Alice's canonical schema is <canonical-schema-name><[, see <path-to-canonical-doc>]>.
+```
+
+## Fillable record
+
+Copy this section into the doc, PR, or council log that introduces a navigation aid. Fill every field. Leave no field blank.
+
+### Navigation aid metadata
+
+- **Aid name:** <short name of the diagram; e.g., "3-layer stack diagram", "memory-tier map", "operator-role chart">
+- **Location:** <absolute path or doc-relative path; e.g., `methodology/00-decide-ticket-naming.md`, `README.md §2`>
+- **Labeled as a navigation aid by:** <source of the labeling; e.g., "ticket t_aa72881c", "council log t_73ea1fff §Seat 3 — Product">
+- **Framing context:** <the date or context string used in the caption; e.g., `2026-mid-year public framing`>
+- **Canonical schema name:** <the authoritative schema name; e.g., `the AREA taxonomy`>
+- **Canonical schema doc path:** <path to the canonical schema doc; e.g., `methodology/00-decide-ticket-naming.md Part 1`>
+- **Caption text (verbatim, copy into the diagram):**
+
+```
+<fill at the doc; the caption text is the single sentence rendered under the diagram>
+```
+
+### Verifier checklist (must pass before aid ships)
+
+- [ ] Caption text begins with the literal `Navigation aid` (case-sensitive).
+- [ ] Caption text contains the framing-context parenthetical in the second position.
+- [ ] Caption text contains a second sentence that names Alice's canonical schema.
+- [ ] The canonical schema name matches an actual schema in Alice's methodology (not invented).
+- [ ] The caption text does not contain promotional language, schema-equivalence claims, shelf-life claims, or operator-action claims.
+- [ ] The location field above is correct; the caption is rendered under the diagram at that location.
+- [ ] If the council proposed this aid as a delta, the council log's `caption` field carries the same caption text.
+
+## Worked examples
+
+### Worked example 1 — Delta-1 3-layer stack diagram (the canonical example)
+
+Source: ticket `t_aa72881c` (Delta-1 stack diagram), council-verified in the 5-seat re-run on `t_73ea1fff`.
+
+#### Navigation aid metadata
+
+- **Aid name:** 3-layer stack diagram
+- **Location:** `methodology/00-decide-ticket-naming.md` (the diagram is rendered under Part 1 or as an appendix, per the ticket body)
+- **Labeled as a navigation aid by:** council log `t_73ea1fff` §Seat 3 — Product verdict (caption-required), operator acceptance 2026-08-08
+- **Framing context:** `2026-mid-year public framing`
+- **Canonical schema name:** `the AREA taxonomy`
+- **Canonical schema doc path:** `methodology/00-decide-ticket-naming.md Part 1`
+- **Caption text (verbatim, copy into the diagram):**
+
+```
+Navigation aid (2026-mid-year public framing). Alice's canonical schema is the AREA taxonomy.
+```
+
+### Worked example 2 — hypothetical memory-tier map (placeholder, no live content)
+
+#### Navigation aid metadata
+
+- **Aid name:** Memory-tier map (placeholder)
+- **Location:** `methodology/01a-decide-memory.md` (hypothetical appendix)
+- **Labeled as a navigation aid by:** future council proposal (placeholder, no live content)
+- **Framing context:** `2026 v0.1.x family framing`
+- **Canonical schema name:** `the 7-tier memory taxonomy`
+- **Canonical schema doc path:** `methodology/01a-decide-memory.md`
+- **Caption text (verbatim, copy into the diagram):**
+
+```
+Navigation aid (2026 v0.1.x family framing). Alice's canonical schema is the 7-tier memory taxonomy (see methodology/01a-decide-memory.md).
+```
+
+## What does NOT count as a navigation aid
+
+The caption convention does NOT apply to these artifacts. They are load-bearing for builders or are explicit guarantees; the rule does not require a caption because the artifact is not a framing aid.
+
+- **Canonical schemas.** The AREA taxonomy, the 7-tier memory taxonomy, the 5-decision-cluster methodology index, the 5-role operator taxonomy. These are authoritative; a caption would imply they might be mistaken for navigation aids.
+- **Decision-ordered taxonomies.** Anything that prescribes an order or sequence of decisions: the iteration loop (detect → surface → act), the spec-first-flow phases (1→2→3→4 with V-1/V-2/V-3), the work-graph states (ready/running/done/archived). The order is the schema; a visual aid that adds nothing beyond the ordered list is decorative.
+- **Bill-of-rights lists.** The agent design principles, the operator role boundaries, the doc-writer role contract, the closed-canon op-guard rules. These are explicit guarantees; a visual aid that re-states them is a redundant render.
+- **Inline ASCII flow sketches that are part of the prose.** Small sketches like `1 → 2 → 3` rendered inline within a methodology doc, where the prose already names the order. These are not separate diagrams; they are typography.
+
+If unsure whether an artifact counts as a navigation aid, apply the test: **does the diagram add a "how to read Alice" framing that isn't already in the prose?** If yes, it's a navigation aid; this template applies. If no, it's decorative or canonical; no caption required.
+
+## How a friend uses this template
+
+1. **When you add a diagram to a methodology doc, decide first whether it's a navigation aid.** Apply the test in §"What does NOT count as a navigation aid." If the diagram is a navigation aid, this template applies.
+2. **Copy the fillable record into the doc, PR, or council log that introduces the aid.** Fill every field. The caption text is the load-bearing output; the metadata is the audit trail.
+3. **Run the verifier checklist before the aid ships.** All seven boxes must be checked. A diagram with an incomplete caption is a wiki_lint failure.
+4. **If the council proposed the aid as a delta, also fill the `caption` field in the council log.** The field is required when the council proposes a navigation aid; both this template and the council log carry the same caption text. Drift between the two is a verification failure.
+5. **When the aid's framing context shifts, refresh the caption and update this template's record.** E.g., `(2026-mid-year public framing)` → `(2027-mid-year public framing)`. The maintenance burden is ~0.5 doc edits/year.
+
+## Cross-references
+
+- `methodology/M-decide-navigation-aid-caption.md` — the canonical methodology doc for this convention.
+- `methodology/00-decide-ticket-naming.md` — the Delta-1 stack diagram's home doc.
+- `methodology/07-council-methodology.md` — the council methodology that produces navigation-aid deltas.
+- `methodology/M-decide-x-article-review-flow.md` — the flow that surfaced the convention.
+- `~/.hermes/skills/autonomous-ai-agents/hermes-council/templates/council-log-framework-retro.md` — the council log template with the `caption` field.
+- t_6314966f — the ticket this template was filed under.
+- t_aa72881c — Delta-1 stack-diagram ticket (the first aid to receive the caption).
+- t_73ea1fff — the 5-seat council verdict that originated the rule.
+
+## Audit-line
+
+`## [2026-08-08T15:35Z] doc-writer-ship — templates/caption-convention-rule.md.template v0.1.0 shipped; fillable template for the 3-part caption convention; pairs with methodology/M-decide-navigation-aid-caption.md and the council log's caption field. source=t_6314966f.`

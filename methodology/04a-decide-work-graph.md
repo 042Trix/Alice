@@ -1,16 +1,16 @@
 ---
 id: alice-methodology-04a-decide-work-graph
 created: 2026-08-04T12:30:00Z
-updated: 2026-08-08T15:00:00Z
+updated: 2026-08-09T18:30:00Z
 title: "Methodology 04a — Decide your work graph (stateful work + relationships)"
 type: methodology
 status: draft
 source: alice-framework
-version: 0.1.2
-amended_by: ["[[ticket:t_94c0c7cf]]", "[[ticket:t_323ad698]]"]
+version: 0.1.3
+amended_by: ["[[ticket:t_94c0c7cf]]", "[[ticket:t_323ad698]]", "[[ticket:t_78936c6e]]"]
 tags: [kind:methodology, kind:work-graph, kind:node-types, project:alice]
 confidence: 0.0
-links: ["[[methodology/04-decide-crons.md]]", "[[methodology/05-op-guards.md]]", "[[methodology/07-council-methodology.md]]", "[[methodology/M-decide-spec-first-flow.md]]", "[[worked-examples/01-solo-founder-skeleton/AGENTS.md]]"]
+links: ["[[methodology/04-decide-crons.md]]", "[[methodology/05-op-guards.md]]", "[[methodology/07-council-methodology.md]]", "[[methodology/M-decide-spec-first-flow.md]]", "[[worked-examples/01-solo-founder-skeleton/AGENTS.md]]", "[[methodology/references/04a-node-admission-taxonomy.md]]"]
 ---
 
 # Methodology 04a — Decide your work graph
@@ -229,6 +229,25 @@ A **work graph** is a unit-of-work system that has both:
 
 Without states, the system can't reason about the unit's lifecycle. Without relationships, the system can't reason about the unit's context. Both are needed.
 
+> **Headline — Is this node earning its place?**
+>
+> Before adding a non-root node, ask three questions in order:
+> 1. **What job or boundary forces this node?** Name the differentiated responsibility the parent cannot own.
+> 2. **What evidence shows the current node cannot own it?** Cite an artifact, a state, or a constraint the parent does not satisfy.
+> 3. **What condition would let us collapse it later?** Name the observable result that, if true, would justify merging this node into its parent.
+>
+> The three-question test is the **node-admission gate** for Alice's work graph. It is per-design-review and per-retro, not per-dispatch — applying it as a per-node checkbox defeats its purpose. The fuller taxonomy of admission signals lives in `methodology/references/04a-node-admission-taxonomy.md` (per the F-2 amendment, 2026-08-09).
+
+### Alice's positive definition (do not import the "loop vs graph" framing)
+
+Alice defines the work graph in **its own terms**, not by contrast with simpler patterns:
+
+- A work graph is **state + relationships** across **Human, Scripts/Code, and Agent** nodes (per Part 4 below).
+- A graph is *not* defined as "more than one node" or "more than one agent." Two agents in series still form a graph when they share explicit state and an auditable edge; one agent alone, with verifier gates between its transitions, still forms a graph when those transitions are first-class nodes with states.
+- The pedagogical one-liner "a loop is a graph with one node and an edge back to itself" is **true in Alice's graph definition** (the single node is an Agent or Scripts/Code node; the self-edge is a relationship) but it is **not** the canonical description. Methodology prose must not lean on it; examples may.
+
+This explicit restatement preserves Alice's richer topology — deterministic verifier gates, Scripts/Code nodes for reproducible mutations, human approval as a first-class graph element — against any teaching simplification that would collapse the three-node-type taxonomy into a single agent-orchestration frame. (Per F-9 / Q3, 2026-08-09.)
+
 ### The work graph as a queryable structure
 
 The work graph is **queryable.** Common queries:
@@ -273,6 +292,109 @@ The canonical implementation of the work graph is the **kanban board** (see `ref
 - **Cascading effects:** surfaced by a cron (e.g., "parent done → children ready") and acted on by the operator or a worker
 
 The kanban board is the **worked example** for this methodology. **The methodology is not the kanban board.** Other tools can implement the work graph differently (e.g., linear issues, GitHub issues, Asana tasks), as long as they satisfy the methodology's requirements.
+
+---
+
+## Part 3.6: Scoped general node-admission rule (per-design and per-retro, not per-node)
+
+The Part 3 headline poses three questions for any non-root node: differentiated job, evidence the parent cannot own it, and collapse condition. This Part 3.6 names that test as a **scoped general node-admission rule** and says where it applies.
+
+### What the rule is
+
+Before adding a non-root node to a work graph, the designer MUST name:
+
+1. The **differentiated job or boundary** the node owns — the responsibility the parent cannot absorb. Vague answers ("specialization," "cleaner separation") are an automatic fail; the answer must cite a concrete artifact, state, privilege, or contract.
+2. The **evidence the parent cannot own it** — a measurable condition, observation, or invariant the parent does not satisfy. "The parent is busy" is not evidence; "the parent runs >4h wall-clock on this slice without a verifier checkpoint" is evidence.
+3. The **collapse condition** — the observable result that, if it ever holds, would justify merging the node back into its parent. Without a collapse condition the node is permanent, which is a graph-design smell.
+
+### Where the rule applies
+
+The rule is **per-design-review and per-retro**, not per-dispatch. It applies when:
+
+- A new node is being added to a graph in a design-review conversation (operator or planner + designer).
+- A retro re-examines an existing node and asks whether the node still earns its place after a flow has run.
+- The methodology reader wants the **deepest taxonomy** of admission signals — distinct specialties, independent fan-out, executor/tool boundary, auditable branching, verifier overload, privilege/human boundary, durable-state boundary, failure containment, ownership/SLA. That taxonomy lives in `methodology/references/04a-node-admission-taxonomy.md` and is referenced from the Part 3 headline; the taxonomy is illustrative, not finite.
+
+### Where the rule does NOT apply
+
+- **Per-dispatch intake.** Every task entering the kanban is not a graph-design event; the rule is not a 7th required metadata field on every ticket. Per-dispatch admission is governed by `methodology/04c-decide-master-ticket.md` and the iteration loop; the gate here is design-quality, not admission-pipeline.
+- **Root nodes.** The root of a flow does not need to "earn its place" against a parent — it is the entrypoint. The rule applies to non-root nodes only.
+- **Verifier nodes.** Verifier nodes are inserted between phase transitions that carry reviewable work product (Part 3.5); they are admitted by the verifier-gate rule, not by this rule. A verifier without a named reviewer role is not admitted at all.
+- **One-off scripting.** A shell command that runs once and never again is not a node. Promote to a node only when the command becomes a pattern.
+
+### Why scoped, not blanket
+
+A blanket per-node admission field produces three predictable failure modes:
+
+- **Checkbox theater.** Designers fill the field with "TBD" or tautologies; the field becomes noise the verifier ignores.
+- **Bureaucracy tax.** Every dispatch slows by one field; the methodology cost grows linearly with node count.
+- **Skewed optimization.** Designers optimize for "passing the field" instead of "the graph is right." A scope per-design-review conversation is a friction that forces the right conversation at the right time.
+
+The rule lives at the design-review surface because that is where node shape is decided. Per-retro, because that is where node shape is re-decided after evidence lands. (Per F-2 / Q1, 2026-08-09.)
+
+### Worked example
+
+A flow "ship a methodology release" might decompose as: `[Human] LGTM on spec → [Agent] produce docs → [Agent] produce code → [Agent] produce review → [V] verify → [Scripts/Code] publish`. The third agent (review) is admitted by:
+
+1. Differentiated job: produce an independent review verdict the producing agents cannot self-issue.
+2. Evidence the parent cannot own it: producers are incentivized to ship; a reviewer's incentive is to challenge.
+3. Collapse condition: if the methodology is small enough that a producer can self-verify against a deterministic test, the reviewer node can collapse into the producer.
+
+Without those three answers, the reviewer is a permanent cost the methodology cannot justify.
+
+## Part 3.7: Parallel fan-out / fan-in contract
+
+A work graph with parallel branches needs an explicit contract at the **fan-out** point (where one node dispatches N siblings) and at the **fan-in** point (where the parent rejoins on N results). Without the contract, parallel work re-discovers the same failures every flow: shared mutable state, partial fan-in, lost retry semantics. This Part is scoped to **Alice's primitives** (parent/child edges + `blocks`/`blocked_by` dependency edges per Part 2); it does not introduce new edge types.
+
+### Fan-out requirements
+
+Before dispatching N parallel children from a parent node, the parent MUST name:
+
+1. **Branch independence.** Each child must be able to run without reading or writing any state owned by another sibling. The designer names the shared state surface (if any); the parent proves the absence of cross-branch writes.
+2. **State ownership.** Exactly one node owns each piece of shared mutable state at any time. The owner may be the parent, one specific child, or an external store — but the ownership must be named before fan-out, not discovered at fan-in.
+3. **Failure isolation.** If one child fails or escalates, the others continue or halt by named policy. Default: fail closed — siblings are cancelled on first failure unless the parent has named a partial-failure policy.
+
+### Fan-in requirements
+
+The fan-in node (typically the parent or a designated join owner) MUST name:
+
+1. **Join owner.** The single node that aggregates the N results. Default: the fan-out parent. If a separate join node owns the aggregation, that node is itself admitted under Part 3.6.
+2. **Aggregation semantics.** Deterministic: name how partial results combine (concatenation, vote, quorum, weighted average). Non-deterministic aggregation is a graph-design bug.
+3. **Order.** If order matters (e.g., "review runs after code, even though they were parallel"), the dependency edges name it; the join does not infer it.
+4. **Partial-failure handling.** What the join emits when N-1 of N children succeeded and one failed. Default: fail closed; the join escalates with the failed child's id and the partial result.
+5. **Retry behavior.** Whether a failed child can be re-dispatched without re-running the others. Default: re-dispatch the failed child only; siblings are not re-run unless their inputs depend on the failed child's output.
+
+### When the contract fails closed
+
+If the designer cannot answer any of the fan-out requirements (independence, ownership, isolation) or fan-in requirements (join owner, aggregation, order, partial-failure, retry), the contract fails closed: do not parallelize. Run the children sequentially or fold them into the parent. A parallel branch with unknown join semantics is a branch that will surprise the operator at fan-in; the surprise is more expensive than the lost parallelism.
+
+This fail-closed posture is **operator-overridable** for low-stakes flows where the cost of surprise is bounded; the override is named in the design-review notes, not inferred. (Per F-4 / Q2, 2026-08-09.)
+
+### Worked example
+
+A flow "ship a methodology release" might fan-out as:
+
+```
+[Parent: ship-methodology-release]
+  ├── [Child: produce-docs]
+  ├── [Child: produce-code]
+  └── [Child: produce-review]
+  ← fan-in on [V: verify] (parent owns the join)
+```
+
+The fan-out contract:
+
+- **Independence:** each child reads the spec artifact, writes to its own sub-path (`docs/`, `code/`, `review/`), and never writes the others' paths. No shared mutable state.
+- **State ownership:** the parent owns the spec artifact and the final release artifact. Each child owns its sub-path.
+- **Failure isolation:** fail closed — if one child fails, the parent cancels the others and escalates. No partial release.
+
+The fan-in contract:
+
+- **Join owner:** the verifier node, which reads all three sub-paths and emits a single verdict.
+- **Aggregation:** verifier's verdict is the conjunction of three per-child verdicts; any per-child fail collapses to overall fail.
+- **Order:** none required for the parallel branches; the verifier depends on all three.
+- **Partial-failure:** not applicable — fail-closed fan-out means there is no partial state to join.
+- **Retry:** verifier-FAIL on one child re-dispatches that child only; the other two are not re-run unless the verifier-FAIL surfaces an evidence dependency.
 
 ---
 

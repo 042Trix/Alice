@@ -1,23 +1,25 @@
 ---
 id: alice-methodology-04c-decide-master-ticket
 created: 2026-08-05T00:00:00Z
-updated: 2026-08-08T00:00:00Z
-title: "Methodology 04c — Decide when to use a master ticket (v0.1.2: operator-LGTM-done and descriptive master titles)"
+updated: 2026-08-09T19:00:00Z
+title: "Methodology 04c — Decide when to use a master ticket (v0.1.3: rename-application discipline + flow-agnostic title-rendering discipline)"
 type: methodology
 status: draft
 source: alice-framework
-version: 0.1.2
-tags: [kind:methodology, kind:work-graph, kind:master-ticket, kind:done-gate, kind:operator-lgtm, project:alice]
+version: 0.1.3
+tags: [kind:methodology, kind:work-graph, kind:master-ticket, kind:done-gate, kind:operator-lgtm, kind:title-discipline, project:alice]
 confidence: 0.0
-amended_by: ["[[ticket:t_248722d8]]", "[[ticket:t_2a513f60]]"]
-links: ["[[methodology/04a-decide-work-graph.md]]", "[[methodology/04b-decide-board-routing.md]]", "[[methodology/00-decide-ticket-naming.md]]", "[[methodology/03b-decide-operator-agent-interaction.md]]", "[[methodology/06a-decide-retro-v2.md]]", "[[references/kanban-lite-disciplines.md]]", "[[references/tool-mapping-guide.md]]"]
+amended_by: ["[[ticket:t_248722d8]]", "[[ticket:t_2a513f60]]", "[[ticket:t_84782c7c]]"]
+links: ["[[methodology/04a-decide-work-graph.md]]", "[[methodology/04b-decide-board-routing.md]]", "[[methodology/00-decide-ticket-naming.md]]", "[[methodology/03b-decide-operator-agent-interaction.md]]", "[[methodology/06a-decide-retro-v2.md]]", "[[methodology/M-decide-x-article-review-flow.md]]", "[[references/kanban-lite-disciplines.md]]", "[[references/tool-mapping-guide.md]]"]
 ---
 
-# Methodology 04c — Decide when to use a master ticket
+# Methodology 04c — Decide when to use a master ticket (v0.1.3)
 
-> A master ticket is the operator-facing root of a multi-step request. It preserves the original request, holds the planned flow, links the work graph, and gives the operator one place to see progress after the work fans out.
+|> A master ticket is the operator-facing root of a multi-step request. It preserves the original request, holds the planned flow, links the work graph, and gives the operator one place to see progress after the work fans out.
 
 This methodology explains **when and why** to use a master ticket, how to structure its children, how to choose its done-gate, and how to verify the resulting work graph.
+
+**v0.1.3 (2026-08-09, t_84782c7c):** Part 8 §Master Title Discipline strengthened with a new `## Title-rendering discipline` sub-section. Rename discipline is now flow-agnostic: a `## Rename` ticket comment MUST be applied via `hermes kanban edit --title` on the next orchestration tick, not posted as a soft suggestion. The 80-codepoint title budget + the 4-method title-recovery ladder (xurl → web_search → browser_snapshot → post-id fallback) + the post-creation assertion are flow-agnostic contract; per-flow filename conventions (e.g. the x-article-review `[MASTER] x-article-review / <author-slug> <topic-slug> — <description>` shape) live in flow-specific methodology docs. The companion instance change is `~/.hermes/tools/file_x_article.py` (script amendment ships as a coder child ticket; this methodology is the contract). Source: operator Retro-H body observation 2026-08-09 ("when we rename the master ticket, the name should reflect the topic + author").
 
 It is tool-agnostic by design. The abstract method belongs here. Per-tool commands and invocation details belong in `references/tool-mapping-guide.md`.
 
@@ -468,6 +470,35 @@ The operator reading 50 of these in list view should be able to identify each by
 
 On a board that uses the two-line AREA + topic + descriptor format from `methodology/00-decide-ticket-naming.md`, apply the same scannability discipline to master titles. The `[MASTER]` prefix replaces the AREA line for master tickets; the remaining title carries the topic and descriptive name in a single list-view line. The full source URL or identifier remains in the body under `## Source`.
 
+**Rename discipline (v0.1.3, t_84782c7c).** A `## Rename` ticket comment is a **rename request that MUST be applied**, not a soft suggestion. The orchestrator (jarvis or planner lane) MUST execute `hermes kanban edit --title <new-title>` on the next orchestration tick and append a `## Rename applied` confirmation comment with the old title, the new title, and an operator-quoted rationale (or, for an auto-recovered rename, the recovery trigger). The rename comment is a request, not an application. Verified violator: `t_6c49fbd9` (wandermist article-3 master) had a `## Rename` comment posted but the rename was never applied — the title stayed at the 88-char URL-shaped fallback. The rule closes the request-vs-application gap.
+
+#### Title-rendering discipline (v0.1.3, t_84782c7c)
+
+The title discipline is enforceable at three points in a master's life. The shape of the title is flow-specific (per-flow filename convention); the contract below is flow-agnostic.
+
+**A. At filing time (the master's first `kanban create`).** The orchestrator MUST:
+
+1. **Run the 4-method title-recovery ladder BEFORE the first `kanban create` invocation:**
+   - **Method 1 (xurl / apify / vendor-API).** Preferred when the source has a typed API that returns the article title cheaply. Returns the article's H1 or canonical title.
+   - **Method 2 (web_search).** Search for the article's distinctive phrase or quoted snippet; the search-result page often carries the canonical title.
+   - **Method 3 (browser_snapshot).** Drive a logged-in browser to the source URL; capture the H1 from the rendered DOM.
+   - **Method 4 (post-id fallback).** When the body is unavailable, the topic-slug is `tweet-<last-8>` (or the source-type equivalent). The `## Title source` block in the body records which method produced the chosen slug.
+2. **Build the title from three descriptive fields** (per the per-flow filename convention, e.g. for x-article-review: `<author-slug> <topic-slug> — <one-line description>`).
+3. **Assert the codepoint count.** The assembled title MUST be ≤80 codepoints. If it exceeds 80, retry with a further-truncated `<topic-slug>` (1–2 words). If the retry still exceeds 80 codepoints, the filing REFUSES with a clear error (no silent URL-shaped fallback). The em dash `—` is one codepoint; the budget is in codepoints, not bytes.
+4. **Record the source.** The master body MUST include a `## Title source` block documenting which method succeeded + the codepoint count of the assembled title.
+
+**B. During the flow (post-source-resolution rename).** When the source becomes available partway through Phase 1 (e.g. after the source worker resolves the auth path) and the auto-filed title was built from the post-id fallback, the orchestrator MUST apply a `## Rename` comment + `hermes kanban edit --title` invocation on the next orchestration tick, using the recovered title as the new topic-slug. The 80-char budget is re-checked; the rename is truncated if needed. A `## Rename applied` confirmation comment is appended + the `## Title source` block is updated.
+
+**C. On operator rename (any time).** When the operator posts a `## Rename` comment with a new title, the orchestrator MUST apply the rename via `hermes kanban edit --title` on the next orchestration tick. The application is NOT a follow-up; the rename comment is the trigger, the edit is the contract. The 80-char budget applies; an over-budget operator rename is truncated with the truncation rule recorded in the confirmation comment.
+
+**Failure surface.** If `hermes kanban edit --title` fails (CLI rejected, dispatcher timeout, no-op returned), the orchestrator MUST:
+
+- Append a `## Rename failed` comment with the CLI error, the requested title, and the previous title.
+- Surface the failure to the operator via the operator-DM cron (per the `REAL_ASK_BUCKETS` gate in op-guard-13) only when the rename is a real operator ask (operator-authored `## Rename` comment); auto-recovered renames (post-source-resolution rename) are logged to the master body's `## Title source` block instead.
+- Never post a second `## Rename` comment as a substitute for the failed edit. Comments are not applications.
+
+**Why this rule is flow-agnostic.** The 80-codepoint budget + the 4-method recovery ladder + the rename-application contract are properties of every master ticket, not just x-article-review. Per-flow filename conventions (e.g. `[MASTER] x-article-review / <author-slug> <topic-slug>`) live in flow-specific methodology docs (e.g. `methodology/M-decide-x-article-review-flow.md` Part 3 §Title-rendering discipline). The contract is the durable surface; the per-flow shape is the specialization.
+
 ### Completion ratio
 
 The basic ratio is:
@@ -720,6 +751,26 @@ This methodology is amended through the same loop-builder mechanism used for ame
 
 **Concurrent re-upgrade (2026-08-07, t_ba4b9a90):** The loop yaml was concurrently upgraded to v0.2.0 by the F-1..F-8 ACCEPTED findings from the article-1 retro (council synthesis). The v0.2.0 yaml layers on top of the v0.1.1 gate contract: master assignee = jarvis OR planner (orchestrator lane); STRICT sequential parents (not parents=[master] alone for P2-P4); V-1 hard gate; 4-method retrieval ladder; preflight; master body IS the findings doc; post_graph_retro F-6 gate; attribution URL rule. The 04c Part 7.5 rule remains canonical; the v0.2.0 specs are extent refinements. See intent file `notes:` field for the F-1..F-8 specifics.
 
+### v0.1.3 (2026-08-09) — rename-application discipline + flow-agnostic title-rendering discipline (Part 8)
+
+**Ticket:** `t_84782c7c`
+
+**Change:** Strengthened Part 8 §Master Title Discipline with a new `## Title-rendering discipline` sub-section (h4). Codifies the three application points where the title discipline is enforceable: (A) at filing time (4-method title-recovery ladder before the first `kanban create`; 80-codepoint assertion; `## Title source` block in the body), (B) during the flow (post-source-resolution rename via `hermes kanban edit --title` + `## Rename applied` confirmation), (C) on operator rename (the `## Rename` comment is a request that MUST be applied, not a soft suggestion). Added the rename-discipline paragraph above the sub-section to make the request-vs-application gap explicit. The 80-codepoint budget + the 4-method ladder + the rename-application contract are flow-agnostic; per-flow filename conventions (e.g. `[MASTER] x-article-review / <author-slug> <topic-slug>`) live in flow-specific methodology docs (e.g. `methodology/M-decide-x-article-review-flow.md` Part 3 §Title-rendering discipline, v0.2.3 amendment in the same change set; paired per op-guard-5 paired-wiki integrity).
+
+**Source:** Operator Retro-H body observation 2026-08-09 — *"when we rename the master ticket, the name should reflect the topic + author."* Verified violator: `t_6c49fbd9` (wandermist article-3 master) had a `## Rename` comment posted but the rename was never applied; the title stayed at the 88-char URL-shaped fallback. The rule closes the request-vs-application gap and the over-budget-fallback gap.
+
+**Companion changes (in the same change set):**
+
+- `~/Documents/alice-framework/methodology/M-decide-x-article-review-flow.md` bumped v0.2.2 → v0.2.3. Part 3 strengthened (rename-application + new `## Title-rendering discipline` sub-section) + the per-flow filename convention is referenced from the flow-agnostic contract.
+- `~/.hermes/loops/intents/x-article-review-intent.md` v0.4.0's title-recovery and 80-char rules are now codified by the methodology (paired per op-guard-5). The intent does not need a re-amendment; the v0.4.0 contract is the instance-conforming target.
+- `~/.hermes/tools/file_x_article.py` gets the title-recovery ladder + post-creation 80-char assertion + `## Title source` block as a coder child ticket (the script is the executable enforcement of the methodology contract).
+
+**Cross-references added:**
+
+- `kind:title-discipline` tag added to frontmatter.
+- `amended_by: [[ticket:t_84782c7c]]` added to frontmatter.
+- `methodology/M-decide-x-article-review-flow.md` added to frontmatter `links:` (the flow-agnostic partner).
+
 ### v0.1.2 (2026-08-08) — Master Title Discipline (Part 1 and Part 8)
 
 **Ticket:** `t_2a513f60`
@@ -741,3 +792,4 @@ Amend `methodology/04c-decide-master-ticket.md` when:
 - The body skeleton (Part 4) needs a new mandatory section.
 - A cross-board / cross-tool case changes one of the canonical patterns.
 - The 6 anti-patterns (Part 9) grow a seventh (the operator-LGTM-done anti-pattern is a strong candidate for Part 9.7 — the v0.1.1 amendment deferred this to keep the diff focused on the rule itself).
+- A master-ticket title discipline gap is observed (the v0.1.3 trigger — e.g. a `## Rename` comment was posted but never applied, or a master landed with an over-budget URL-shaped fallback title). Next instance warrants a v0.1.4 with the title-rendering enforcement promoted or refactored.

@@ -1,22 +1,23 @@
 ---
 id: alice-methodology-06a-decide-retro-v2
 created: 2026-08-06T07:40:00Z
-updated: 2026-08-07T18:30:00Z
-version: 0.1.3
-title: "Methodology 06a (v2, Amendment 1+2+3) — Decide the retro (flow-level retro split into agent half + human half; retro is two kanban tasks)"
+updated: 2026-08-11T00:00:00Z
+version: 0.1.4
+title: "Methodology 06a (v2, Amendment 1+2+3+4) — Decide the retro (flow-level retro split into agent half + human half; retro is two kanban tasks; Retro-H parent edge is [retro_a] only)"
 type: methodology
 status: draft
-supersedes: ["[[methodology/06a-decide-retro.md]]", "[[methodology/06a-decide-retro-v2.md#initial-v2-draft]]", "[[methodology/06a-decide-retro-v2.md#amendment-1--2]]"]
-amended_by: ["[[ticket:t_f0cd340b]]", "[[ticket:t_323ad698]]"]
+supersedes: ["[[methodology/06a-decide-retro.md]]", "[[methodology/06a-decide-retro-v2.md#initial-v2-draft]]", "[[methodology/06a-decide-retro-v2.md#amendment-1--2]]", "[[methodology/06a-decide-retro-v2.md#amendment-3--2026-08-07----the-retro-is-2-parts-agent-retro-a--human-retro-h]]"]
+amended_by: ["[[ticket:t_f0cd340b]]", "[[ticket:t_323ad698]]", "[[ticket:t_33843787]]"]
 amendment_initial_v2_draft_by: "[[ticket:t_3569c32c]]"
 amendment_3_by: "[[ticket:t_323ad698]]"
+amendment_4_by: "[[ticket:t_33843787]]"
 source: alice-framework
-tags: [kind:methodology, kind:retro, kind:iteration-loop, kind:feedback, kind:self-improvement, kind:flow-level, kind:two-part, kind:retro-a, kind:retro-h, project:alice, amendment:1, amendment:2, amendment:3]
-confidence: 0.0
+tags: [kind:methodology, kind:retro, kind:iteration-loop, kind:feedback, kind:self-improvement, kind:flow-level, kind:two-part, kind:retro-a, kind:retro-h, kind:parent-edge, kind:circular-gate-fix, project:alice, amendment:1, amendment:2, amendment:3, amendment:4]
+confidence: 1.0
 links: ["[[methodology/06-iteration-loop.md]]", "[[methodology/04a-decide-work-graph.md]]", "[[methodology/04b-decide-board-routing.md]]", "[[methodology/04c-decide-master-ticket.md]]", "[[methodology/04d-decide-flow-spec.md]]", "[[methodology/05-op-guards.md]]", "[[methodology/M-decide-spec-first-flow.md]]", "[[methodology/M-decide-human-digest.md]]", "[[methodology/06a-decide-retro.md]]", "[[worked-examples/01-solo-founder-skeleton/AGENTS.md]]"]
 ---
 
-# Methodology 06a (v2, Amendment 1+2+3) — Decide the retro (flow-level retro split into agent half + human half; retro is two kanban tasks)
+# Methodology 06a (v2, Amendment 1+2+3+4) — Decide the retro (flow-level retro split into agent half + human half; retro is two kanban tasks; Retro-H parent edge is [retro_a] only)
 
 > v1 documented a 1-retro-per-node shape with 3 freeform fields ("what worked / what didn't / what to change"). v2 changes the shape, the writer, the scope, and the format. The retro is now **flow-level**, **written by a different agent than the executor**, **scoped to master-ticket flows**, **structured as observed-issue + proposed-corrective-action findings**, **filed as a kanban task on a substrate board (NOT a file in `0-INBOX/`)**, and **split into two tasks**: **Retro-A** (the agent half — verifier runs the 6-axis evaluation and produces findings) and **Retro-H** (the human half — operator reviews Retro-A's findings, adds observations, and dispositions each finding as ACCEPT / REJECT / DEFER within a fixed 24h window). ACCEPTED findings spawn child tickets. This document supersedes v1. Read this one; archive v1 to the historical notes section.
 
@@ -62,7 +63,7 @@ The operator's reasoning (2026-08-05):
 
 These rules replace the v1 "three fields" pattern. They are the canonical retro contract; any retro that violates one of them is malformed.
 
-**Rule count history.** Part 2 originally shipped with 4 rules (Rules 1–4). Amendment 1 renumbered the prior Rule 4 to Rule 5 and added Rule 4 (retro is a kanban task). Amendment 3 added Rule 5 (the retro is 2 parts) and renumbered the prior Rule 5 to Rule 6. The canonical Part 2 now has **6 rules**:
+**Rule count history.** Part 2 originally shipped with 4 rules (Rules 1–4). Amendment 1 renumbered the prior Rule 4 to Rule 5 and added Rule 4 (retro is a kanban task). Amendment 3 added Rule 5 (the retro is 2 parts) and renumbered the prior Rule 5 to Rule 6. Amendment 4 (2026-08-11) is a clarification, not a new rule: it changes the parent-edge shape (`parents=[retro_a]` only, was `[master, retro_a]`) and adds explicit parent-edge vs required-children-set terminology. The canonical Part 2 still has **6 rules**.
 
 ### Rule 1 — A different agent runs the retro
 
@@ -183,7 +184,9 @@ The retro is **two tasks on the kanban board**, filed when the master ticket tra
 - **Retro-A** — the agent half. `assignee=verifier` (or council/coach per Rule 1). The agent writes the 6-axis assessment + structured findings. This is the technical retro record.
 - **Retro-H** — the human half. `assignee=operator`. The operator reviews Retro-A's findings, adds observations, and dispositions each finding as ACCEPT / REJECT / DEFER.
 
-Both Retro-A and Retro-H are children of the master ticket. Retro-H is also a child of Retro-A (so Retro-H cannot open until Retro-A is `done`). The master has **TWO retro children in its required-child set** under the operator-LGTM-done gate; both must reach `done` for the master to auto-close.
+**Parent edges (as of Amendment 4, 2026-08-11):** Retro-A is filed with `parents=[master]`. Retro-H is filed with `parents=[retro_a]` ONLY (NOT `[master, retro_a]`). Retro-H blocks on Retro-A being `done` via the retro_a parent edge; adding the master to Retro-H's parent list would create a circular gate (master blocks on Retro-H done, Retro-H blocks on master done) — see Amendment 4 §"Why this matters" for the verified incident.
+
+**Master's required-children set (unchanged):** The master has TWO retro children in its required-child set under the operator-LGTM-done gate (per `methodology/04c-decide-master-ticket.md` Part 7.5): both Retro-A and Retro-H must reach `done` for the master to auto-close. The required-children set is a separate mechanism from the parent edges; it is the done-gate list (what the dispatcher checks at master close), not a parent edge. Retro-H is in the master's required-children set but NOT in Retro-H's parent list.
 
 See Rule 5 for the full 2-part shape. See Part 3 for the dual-path lifecycle.
 
@@ -342,7 +345,7 @@ The master has **two retro children** in its required-child set under `done-gate
 The two halves run in sequence, not parallel:
 
 1. Retro-A opens when the master opens (Phase 0, per Part 7.5 of 04c). Retro-A runs through `drafting → ready → running → open → done` as the verifier publishes the 6-axis assessment + findings.
-2. Retro-H opens when Retro-A reaches `done`. Retro-H is filed as a child of Retro-A AND a child of the master; Retro-H blocks on Retro-A being `done`.
+2. Retro-H opens when Retro-A reaches `done`. Retro-H is filed as a child of Retro-A (with `parents=[retro_a]` per Amendment 4); Retro-H is NOT a child of the master via parent edges (the master is in Retro-H's required-children set via the done-gate list, not via parent edges). Retro-H blocks on Retro-A being `done` via the retro_a parent edge.
 3. The operator has 24h from Retro-H's `open` transition to disposition each finding.
 4. Retro-H transitions through `drafting → ready → running → open → applied → done` as the operator dispositions each finding and the verifier-gate confirms closure conditions.
 5. The master auto-closes after BOTH Retro-A and Retro-H reach `done`.
@@ -377,7 +380,7 @@ The two halves are coupled but distinct. The Retro-A writer is forbidden from ed
 
 - **A single retro ticket.** A retro that is filed as one ticket (e.g., `assignee=verifier` with operator dispositions in the comments) is malformed as of Amendment 3. Future flows MUST file Retro-A and Retro-H as separate tickets.
 - **Retro-H assigned to an agent.** Retro-H's assignee is `operator` (a literal-human ticket). Retro-H assigned to a verifier / coder / planner / jarvis / doc-writer is a structural violation — the operator's review cannot be delegated to an agent.
-- **Retro-H running before Retro-A is `done`.** Retro-H is a child of Retro-A; Retro-H cannot open until Retro-A is `done`. Filing Retro-H at Phase 0 with `parents=[master]` only (and not `parents=[master, retro_a]`) is a violation.
+- **Retro-H running before Retro-A is `done`.** Retro-H is a child of Retro-A via the retro_a parent edge; Retro-H cannot open until Retro-A is `done`. Filing Retro-H at Phase 0 with `parents=[master]` only (no retro_a edge) is a violation — Retro-H would be ready immediately instead of waiting for Retro-A to publish. The correct parent list is `parents=[retro_a]` ONLY (per Amendment 4, 2026-08-11); the master is in the required-children set, not in the parent list. Filing Retro-H with `parents=[master, retro_a]` was the prior shape (Amendment 3) but creates a circular gate that prevents both retro halves from closing (see Amendment 4 §"Why this matters" for the verified incident).
 - **The master closing before both retro halves are `done`.** Under `done-gate: operator-LGTM-done`, the master MUST include both Retro-A and Retro-H in its required-child set. Closing the master with only one retro child is a violation (per `methodology/04c-decide-master-ticket.md` Part 7.5 + the amendment-3 done-gate update).
 
 ### Rule 6 — Structured findings: observed issue + proposed corrective action
@@ -441,25 +444,27 @@ Master ticket (t_M, done-gate: operator-LGTM-done per 04c Part 7.5)
 │
 └── Retro-H (t_RH) — human half
     ├── assignee: operator (literal-human ticket)
-    ├── parents: [t_M, t_RA]   ← blocks on Retro-A being done
+    ├── parents: [t_RA]   ← blocks on Retro-A being done (Amendment 4: master NOT in parent list; avoids circular gate)
     ├── title: "[HUMAN ACTION] Retro-H: <flow title> (master t_M)"
     ├── body: Rule 4 §"What goes in the Retro-H task body" template
     ├── lifecycle: drafting → ready → running → open → applied → done
-    └── child of master: yes (2 of 2 retro children)
+    ├── child of master: yes (2 of 2 retro children, via the master's required-children set — NOT via parent edge)
+    └── required-by-master-done-gate: yes (operator-LGTM-done per 04c Part 7.5)
 
 Master auto-closes only when BOTH t_RA.status = done AND t_RH.status = done.
 ```
 
 ### Why this card matters
 
-Workers filing retro children at Phase 0 (per `methodology/04c-decide-master-ticket.md` Part 7.5) should consult this card to confirm the canonical shape. A worker that files one retro child instead of two, or files Retro-H with `parents=[t_M]` only (no `t_RA`), or assigns Retro-H to a verifier, is filing a malformed retro and will fail the verifier-gate at `applied → done`.
+Workers filing retro children at Phase 0 (per `methodology/04c-decide-master-ticket.md` Part 7.5) should consult this card to confirm the canonical shape. A worker that files one retro child instead of two, or files Retro-H with `parents=[master, retro_a]` (the prior Amendment 3 shape — now superseded; creates circular gate), or files Retro-H with `parents=[master]` only (no retro_a edge — Retro-H would unblock immediately), or assigns Retro-H to a verifier, is filing a malformed retro and will fail the verifier-gate at `applied → done`.
 
 ### Anti-patterns (the card's failure modes)
 
 - **One retro child instead of two.** Wrong. File both.
 - **Retro-H assigned to verifier.** Wrong. Retro-H is `operator` (human).
-- **Retro-H without `parents=[t_RA]`.** Wrong. Retro-H must block on Retro-A.
-- **Master closing with only one retro `done`.** Wrong. Master must wait for both.
+- **Retro-H without `parents=[retro_a]`.** Wrong. Retro-H must block on Retro-A via the retro_a edge. The master is NOT in the parent list (Amendment 4); the master is in Retro-H's required-children set via the done-gate.
+- **Retro-H with `parents=[master, retro_a]`.** Wrong (Amendment 4). This was the Amendment 3 shape; it creates a circular gate (master blocks on Retro-H done; Retro-H blocks on master done via the parent edge; neither can transition). The correct shape is `parents=[retro_a]` only.
+- **Master closing with only one retro `done`.** Wrong. Master must wait for both retro halves (Retro-A AND Retro-H) via the required-children set + the done-gate.
 - **Retro-A running without an independence check.** Wrong. Retro-A writer must not be the executor.
 
 The full rules are in Part 2 (Rules 1–6); the lifecycle is in Part 3; the disposition step is in Part 4; the worked example is in Part 8.
@@ -593,6 +598,56 @@ The structural rationale:
 - `t_bfe37f39` — Retro-A (the agent retro on `t_62a99460`).
 - `t_248722d8` — the v0.1.1 structural fix ticket for the x-article-review loop; includes the operator-LGTM-done gate.
 
+### Amendment 4 (2026-08-11) — Retro-H parent edge is `[retro_a]` only (circular-gate bug fix)
+
+Amendment 3 specified Retro-H's parent list as `parents=[master, retro_a]` (master + Retro-A). The intent was sound: Retro-H is in the master's required-children set (so the master auto-closes only after Retro-H is `done`) AND Retro-H blocks on Retro-A being `done`. **But putting master in Retro-H's parent list created a circular gate:** the master's done-gate waits for Retro-H done; Retro-H's parent edge waits for master done. Neither child could transition. The 2-part retro done gate never fired.
+
+**Triggering ticket:** `t_33843787` (operator amendment, 2026-08-11; this ticket's own source).
+
+#### What changed
+
+- **Rule 4 (the retro is two kanban tasks)** — clarified: Retro-A is filed with `parents=[master]`. Retro-H is filed with `parents=[retro_a]` ONLY. The master's required-children set (per `methodology/04c-decide-master-ticket.md` Part 7.5) still contains BOTH Retro-A AND Retro-H; the master still waits for both to reach `done` before auto-closing. But the parent's edge list (the `parents=[...]` parameter on `kanban_create`) for Retro-H no longer contains the master. The parent edge is a separate mechanism from the required-children set: the parent edge controls whether Retro-H can promote to `ready`; the required-children set controls whether the master can transition to `done`.
+- **Rule 5 (the retro is 2 parts)** — clarified: step 2 of the ordering now reads "Retro-H is filed as a child of Retro-A (with `parents=[retro_a]` per Amendment 4); Retro-H is NOT a child of the master via parent edges." The structural rule (Retro-H blocks on Retro-A being `done`) is unchanged; only the parent edge list changed.
+- **Rule 5 anti-pattern** — extended: the prior anti-pattern ("Filing Retro-H at Phase 0 with `parents=[master]` only (and not `parents=[master, retro_a]`) is a violation") is now split. The `parents=[master]` only shape is STILL a violation (no retro_a edge means Retro-H would unblock immediately, not after Retro-A is `done`). A new anti-pattern is added: `parents=[master, retro_a]` is ALSO a violation (creates the circular gate). The correct shape is `parents=[retro_a]` ONLY.
+- **Part 2.5 reference card** — Retro-H's `parents:` field changed from `[t_M, t_RA]` to `[t_RA]`. Added explicit `child of master: yes (2 of 2 retro children, via the master's required-children set — NOT via parent edge)` and `required-by-master-done-gate: yes` fields to make the parent-edge vs required-children distinction load-bearing for workers filing retro children.
+- **Part 2.5 anti-patterns** — added the new anti-pattern (Retro-H with `parents=[master, retro_a]`) explicitly. The "Retro-H without `parents=[retro_a]`" anti-pattern is preserved (Retro-H still must block on Retro-A).
+- **Part 5 worked example** — Retro-H's `parents` changed from `[t_404, t_410]` to `[t_410]`. The narrative explaining Retro-H's blocking is updated.
+- **Q&A 17** — "Retro-H runs before Retro-A is done" — the parent-edge description updated from `[master, retro_a]` to `[retro_a]` (the master is in the required-children set, not the parent list).
+- **Touch-points with other methodology docs** — `methodology/04c-decide-master-ticket.md` Part 7.5 follow-up amendment description updated: the parent-edge shape is now `parents=[retro_a]` only (was `[master, retro_a]`).
+- **Implementation example** — the `kanban_create(parents=[...])` call for Retro-H now reads `parents=[retro_a_id]` (was `[master_ticket_id, retro_a_id]`).
+
+#### Why these changes
+
+The circular-gate bug is real and verified. The verified case:
+
+- **Master:** `t_6c49fbd9` (alice-framework, blocked/needs_input — the wandermist article-3 master).
+- **Retro-A:** `t_59b36bd5` (alice-framework, done — Retro-A reached `done` cleanly).
+- **Retro-H:** `t_993f88f7` (alice-framework, done — operator disposition ticket; but reached `done` only after manual unlink).
+- **Manual unlink:** operator ran `hermes kanban unlink t_6c49fbd9 t_993f88f7` to clear the master-as-parent edge before Retro-H could close. The unlink event was logged.
+
+With `parents=[master, retro_a]`: Retro-H could not transition to `done` because master was still blocked. Retro-H could not promote to `ready` because `parents_not_done` (Retro-A was done, master was not). Retro-A was done but the master was blocked. The dispatcher correctly refused the transition because the parent-edge gate is structural.
+
+The fix: Retro-H's parent edge is `[retro_a]` only. The master's required-children set is the canonical mechanism for the master→Retro-H "wait for both retro halves to be done" relationship. The required-children set does not introduce a circular edge because it is a one-way list (master's children-list → what master waits for), not a parent edge (child's parent-list → what child waits for).
+
+#### Structural rationale
+
+The parent-edge mechanism and the required-children-set mechanism are distinct:
+
+- **Parent edge** (`parents=[...]` on `kanban_create`) — controls whether a child task can promote to `ready`. A child with `parents=[X]` cannot promote to `ready` until X reaches `done`. Parent edges are part of the child's definition.
+- **Required-children set** (the `done-gate` field on the master) — controls whether the master can transition to `done`. The master waits for its required-children set to reach `done`. The required-children set is part of the master's definition.
+
+Putting the master in Retro-H's parent list is a **structural violation** because parent edges are part of the child's definition, not the parent's. The master waits for Retro-H via the master's required-children set; Retro-H does NOT wait for the master via a parent edge. The retro_a parent edge is sufficient: Retro-H promotes to `ready` when Retro-A reaches `done`, regardless of the master's status.
+
+#### Cross-references for Amendment 4
+
+- `methodology/04c-decide-master-ticket.md` Part 7.5 — the operator-LGTM-done gate. Part 7.5's wording should be updated to clarify that the master's required-children set (not Retro-H's parent list) is what makes the master wait for Retro-H. This is a follow-up amendment to 04c (separate ticket).
+- `t_6c49fbd9` — the wandermist article-3 master ticket where the bug surfaced.
+- `t_993f88f7` — Retro-H for the wandermist article-3 master (operator disposition ticket for F-R1..F-R12; done after manual unlink).
+- `t_59b36bd5` — Retro-A for the wandermist article-3 master (done; verifier 6-axis eval).
+- `t_882f78a8` — Retro-A verifier PASS ticket (the verifier evaluated Retro-A's findings; pending master's done-gate).
+- `t_33843787` — this ticket (the durable fix).
+- `t_248722d8` — the original operator-LGTM-done gate ticket (Part 7.5 of 04c); the structural foundation Amendment 4 inherits.
+
 ---
 
 ## Part 4: The disposition step (what happens to findings in Retro-H at `applied`)
@@ -650,7 +705,7 @@ All 6 children complete over 4 days. Verifier passes; operator LGTMs; master tra
 Per `methodology/04c-decide-master-ticket.md` Part 7.5, the master has **`done-gate: operator-LGTM-done`** and 2 retro children filed at Phase 0. The retro children are:
 
 - **Retro-A** (`t_410: Retro-A for t_404`) on the work-graph substrate board with `parents=[t_404]`, `assignee=verifier`. Retro-A runs `drafting → ready → running → open → done` as the verifier publishes the 6-axis assessment + findings.
-- **Retro-H** (`t_411: [HUMAN ACTION] Retro-H for t_404`) on the same board with `parents=[t_404, t_410]`, `assignee=operator`. Retro-H is filed at Phase 0 but blocks on Retro-A being `done`; Retro-H opens when Retro-A reaches `done`.
+- **Retro-H** (`t_411: [HUMAN ACTION] Retro-H for t_404`) on the same board with `parents=[t_410]`, `assignee=operator` (per Amendment 4, the master is in Retro-H's required-children set via the done-gate, not in the parent list). Retro-H is filed at Phase 0 but blocks on Retro-A being `done`; Retro-H opens when Retro-A reaches `done`.
 
 **Retro-A writer profile:** verifier (per Rule 1; the verifier did not execute any children, only verified).
 **Retro-H writer profile:** operator (human; structurally satisfies Rule 1's "different agent" rule).
@@ -785,7 +840,7 @@ The retro IS tied to a board. Specifically: the retro is a kanban task on the ap
 | msaa / north-star income work | `msaa-pipeline` |
 | Anything else | `default` |
 
-The retro task has `parents=[master_ticket_id]` and `assignee=<writer-profile>` (default: verifier). The board routing is consistent with `methodology/04b-decide-board-routing.md`. The retro is NOT a free-form note that may live anywhere; it is a structured task on a specific board.
+The retro tasks have parent edges as defined by Amendment 4 (2026-08-11): Retro-A is filed with `parents=[master_ticket_id]` and `assignee=<writer-profile>` (default: verifier); Retro-H is filed with `parents=[retro_a_id]` ONLY and `assignee=operator`. The board routing is consistent with `methodology/04b-decide-board-routing.md`. The retro is NOT a free-form note that may live anywhere; it is a structured task on a specific board.
 
 ### Not a feedback channel for unrelated thoughts
 
@@ -857,13 +912,14 @@ Audit the retro pattern every **30 days**. The audit reviews the preceding perio
 The retro pattern passes when all of these conditions hold:
 
 - Every eligible master-ticket flow generated BOTH a Retro-A and a Retro-H task (Amendment 3). A flow with only one retro task is a failed check.
+- **Retro-H's parent edge is `parents=[retro_a]` only** (Amendment 4, 2026-08-11). Retro-H with `parents=[master, retro_a]` is a circular-gate violation; Retro-H with `parents=[master]` only is a missing-parent-gate violation. Both fail the check.
 - Retro-A was written by a different agent than the executor (Rule 1). Retro-H is `assignee=operator` (literal-human ticket; structurally satisfies Rule 1).
 - All **6 evaluation axes** in Retro-A have a pass/partial/fail assessment with evidence.
 - Every finding contains an observed issue and a proposed corrective action with a destination.
 - Findings were ACCEPTED, REJECTED, or DEFERRED by the operator in Retro-H within the fixed **24-hour** Retro-H window (starting on Retro-H's `open`, per Amendment 3) — therefore within the **7-day** maintenance ceiling — and each ACCEPTED finding has a child ticket with `parents=[retro_h_id]`.
 - The master auto-closed only after BOTH Retro-A and Retro-H reached `done` (per Part 3 + Part 7.5 of 04c).
 
-A missing axis, unsupported finding, missing disposition, missing retro half, or a master that closed with only one retro `done` is a failed check, not partial credit. Record the verdict and corrective action for each failed condition.
+A missing axis, unsupported finding, missing disposition, missing retro half, an incorrect Retro-H parent edge (per Amendment 4), or a master that closed with only one retro `done` is a failed check, not partial credit. Record the verdict and corrective action for each failed condition.
 
 ### 3. Drift signals
 
@@ -871,6 +927,7 @@ Surface drift before the next scheduled audit when any of these occurs:
 
 - No eligible master-ticket flow has produced a Retro-A + Retro-H pair in **30 days**.
 - A master-ticket flow has Retro-A but no Retro-H (or vice versa) — the 2-part shape is broken.
+- **A Retro-H is filed with `parents=[master, retro_a]` or `parents=[master]` only** — the parent-edge shape is wrong (Amendment 4, 2026-08-11). The correct shape is `parents=[retro_a]` only.
 - Retro-A or Retro-H findings repeatedly remain PROPOSED or are not actioned after acceptance.
 - Retro-A or Retro-H tasks accumulate in `ready` or `running` without resolution.
 - A retro omits one or more axes, lacks verifiable evidence, or uses an executor as Retro-A writer.
@@ -938,7 +995,7 @@ The digest does not alter the Rule 4 lifecycle, auto-accept findings, or remove 
 14. **"The retro closes when the writer publishes."** → No. The retro pair closes (`Retro-A → done` and `Retro-H applied → done`) only after every finding has a disposition in Retro-H and every ACCEPTED finding has a child ticket, gated by the verifier-gate (op-guard-13). **The master auto-closes only after BOTH retro halves reach `done`** (per Amendment 3 + Part 7.5 of 04c).
 15. **"The retro is a single task."** → No (Amendment 3). The retro is two tasks: Retro-A (agent half, `assignee=verifier`) + Retro-H (human half, `assignee=operator`). A single-task retro is a structural violation as of 2026-08-07.
 16. **"Retro-H is assigned to a verifier or other agent."** → No. Retro-H is `assignee=operator` (literal-human ticket). Retro-H assigned to verifier / coder / planner / jarvis / doc-writer is a structural violation.
-17. **"Retro-H runs before Retro-A is done."** → No. Retro-H is a child of Retro-A; Retro-H cannot open until Retro-A reaches `done`. The parent edge `parents=[master, retro_a]` is structural.
+17. **"Retro-H runs before Retro-A is done."** → No. Retro-H is a child of Retro-A via the retro_a parent edge; Retro-H cannot open until Retro-A reaches `done`. The parent edge `parents=[retro_a]` is structural (per Amendment 4, 2026-08-11; the master is NOT in the parent list — the master is in Retro-H's required-children set via the done-gate, which is a separate mechanism).
 18. **"The master closes with only one retro `done`."** → No. Under `done-gate: operator-LGTM-done`, the master waits for BOTH Retro-A and Retro-H to reach `done`. Closing with one retro `done` violates Part 3 of this doc + Part 7.5 of `methodology/04c-decide-master-ticket.md`.
 
 ## Touch-points with other methodology docs
@@ -947,7 +1004,7 @@ This doc touches:
 
 - `methodology/06-iteration-loop.md` — append paragraph: "the iteration loop's `feedback` element is per-tick for crons and per-flow for master-ticket flows. The retro is the per-flow `feedback`. Per Rule 3 of 06a-v2, the retro does not fire for cron-only flows. **Per Amendment 3, the per-flow `feedback` has two tasks (Retro-A + Retro-H), not one.**"
 - `methodology/04a-decide-work-graph.md` — note in Part 1: "the `done` state transition of a master triggers TWO retro tasks (Retro-A + Retro-H per 06a-v2 Rule 5) on the appropriate substrate board (per 06a-v2 Rule 4). The retro tasks are co-located with the master's `done` event, not separately scheduled. Per Rule 3, retros do not fire on non-master tickets or on non-`done` transitions."
-- `methodology/04c-decide-master-ticket.md` — Part 7.5 (v0.1.1, t_248722d8) needs a **follow-up amendment** to update the wording from "the retro child" (singular) to "the two retro children (Retro-A + Retro-H)" per Amendment 3. The parent-edge shape (Retro-H `parents=[master, retro_a]`) and the master-auto-close gate (`done-gate: operator-LGTM-done` requires BOTH retro halves to reach `done`) are documented in Part 2.5 of 06a-v2. Until the 04c follow-up lands, treat Part 7.5 as describing the 2-children shape per Amendment 3.
+- `methodology/04c-decide-master-ticket.md` — Part 7.5 (v0.1.1, t_248722d8) needs a **follow-up amendment** to update the wording from "the retro child" (singular) to "the two retro children (Retro-A + Retro-H)" per Amendment 3. The parent-edge shape (Retro-H `parents=[retro_a]` only, per Amendment 4 — the master is in Retro-H's required-children set, not the parent list) and the master-auto-close gate (`done-gate: operator-LGTM-done` requires BOTH retro halves to reach `done`) are documented in Part 2.5 of 06a-v2. Until the 04c follow-up lands, treat Part 7.5 as describing the 2-children shape per Amendment 3.
 - `methodology/04b-decide-board-routing.md` — add retro board routing table from Part 6 (alice-framework → alice-framework, skills → agent-resources, hermes → hermes, patchwork → patchwork, msaa → msaa-pipeline, default → default). Both Retro-A and Retro-H live on the same substrate board per Amendment 3.
 - `methodology/04d-decide-flow-spec.md` — extend the 6-field spec with a 7th optional field: `retro_writer` (the profile that runs Retro-A; default verifier; council for cross-flow findings). The 24h window field is implicit per Amendment 2 + 3.
 - `methodology/05-op-guards.md` — add op-guard-17 candidate: "Retro-A writer is the executor" — same shape as op-guard-13's verifier-gate pattern; the Retro-A writer's profile must be checked against the executor's profile at Retro-H's `applied → done`. Add op-guard-18 candidate: "retro is a file in 0-INBOX/" — the durable artifact is the kanban task (Retro-A + Retro-H), not a vault file. Add op-guard-19 candidate: "Retro-H is assigned to an agent" — Retro-H must be `assignee=operator`, surfaces via `operator-action-dm` cron.
@@ -959,7 +1016,7 @@ The retro-as-kanban-task pattern (Rule 4) — extended to **two tasks** (Retro-A
 
 **If the operator's environment currently has a `post-graph-retro` cron (or equivalent) that produces retro FILES in `0-INBOX/`, that infrastructure is superseded by the retro-as-kanban-task pattern.** The cron must be re-implemented (per the spec-first flow in `methodology/M-decide-spec-first-flow.md`) to:
 
-1. **File TWO retro TASKS** (Retro-A + Retro-H) per master, not one. Retro-A via `kanban_create(parents=[master_ticket_id], assignee=verifier, board=<substrate board>)`; Retro-H via `kanban_create(parents=[master_ticket_id, retro_a_id], assignee=operator, title_prefix='[HUMAN ACTION]', board=<substrate board>)`. The prior single-file pattern (writing to `0-INBOX/retro-*.md`) is fully superseded.
+1. **File TWO retro TASKS** (Retro-A + Retro-H) per master, not one. Retro-A via `kanban_create(parents=[master_ticket_id], assignee=verifier, board=<substrate board>)`; Retro-H via `kanban_create(parents=[retro_a_id], assignee=operator, title_prefix='[HUMAN ACTION]', board=<substrate board>)` (per Amendment 4, 2026-08-11: the master is NOT in Retro-H's parent list; it is in the master's required-children set via the done-gate). The prior single-file pattern (writing to `0-INBOX/retro-*.md`) is fully superseded.
 2. **Use the Rule 4 body templates** (the Retro-A + Retro-H templates from Rule 4's "What goes in the Retro-A task body" + "What goes in the Retro-H task body" sections) as the retro tasks' `body` parameters. The Retro-A template carries Context + 6-axis assessment + Findings; the Retro-H template carries mirrored findings + Operator's observations + per-finding disposition.
 3. **Manage the 24h Retro-H window** (per Amendments 2 + 3) instead of the "flow's natural review window" the initial v2 draft proposed. The clock starts on Retro-H's `open`, not Retro-A's.
 4. **Fire the verifier-gate** at Retro-H's window close (per Part 3's Closure gating and Part 4's disposition step) — the verifier confirms every finding has a disposition and every ACCEPTED finding has a child ticket, before Retro-H transitions to `done`. The master auto-closes only after BOTH Retro-A and Retro-H reach `done`.
