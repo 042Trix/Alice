@@ -1,7 +1,7 @@
 ---
 id: alice-reference-instance-leak-check
 created: 2026-08-11T22:15:00Z
-updated: 2026-08-11T23:30:00Z
+updated: 2026-08-17T22:00:00Z
 title: "Instance-leak check — specification for the framework-vs-instance CI gate"
 type: reference
 status: draft
@@ -134,6 +134,47 @@ Flat-string form is also accepted: `instance-leak-exceptions: "[H2, H4]"` (the Y
 
 H1 (M-decide frontmatter `kind`/`source`/`intent`/`loop`) is structural — a file with `kind: hermes-instance` is genuinely a leak, not a teaching example. H5 (operator-instance `tenant`/`board`/`assignee`) is also structural. X1 (filename patterns for `*.bak` and OS cruft) is filename-based and unaffected by frontmatter. The four exceptionable pattern IDs are {H2, H3, H4}.
 
+## Deliberate-fixture opt-out (`--allow-deliberate-fixtures`)
+
+Some M-decide files are **deliberate fixtures** — they intentionally trigger the H1 ERROR pattern so the regression suite (`~/.hermes/tests/test_check_instance_leaks.py`) has a real on-disk target to exercise end-to-end. Per `kanban:t_764d71c9`, the fixtures MUST stay on disk and MUST stay ERROR-flagged when checked without the opt-out flag; they cannot be removed or fixed because the regression suite depends on them.
+
+To avoid blocking every commit on the fixtures (which would force operators to `--no-verify` on every commit), the canonical opt-out is the **`--allow-deliberate-fixtures`** flag:
+
+```bash
+python3 ~/.hermes/tools/check_instance_leaks.py ~/Documents/alice-framework/ --allow-deliberate-fixtures
+```
+
+When set, the flag downgrades findings for files matching the **canonical fixture pattern** from `ERROR` → `INFO` (with a `[deliberate-fixture]` message prefix). All three conditions must hold:
+
+1. `file_path.name` starts with `M-decide-` AND parent is `methodology/`
+2. Frontmatter `kind` ∈ {`hermes-instance`, `instance`}
+3. Frontmatter `tags` contains BOTH `kind:fixture` AND `leak:deliberate` (list form OR inline-bracket form)
+
+```yaml
+---
+type: methodology
+id: M-decide-h1-leak
+version: 0.0.1
+kind: hermes-instance
+source: hermes-instance
+tags: [domain:test, kind:fixture, leak:deliberate]
+---
+```
+
+### When to use this flag
+
+- **`~/.hermes/hooks/instance-leak-pre-commit`** always passes this flag. The hook is wired to the canonical opt-out surface so the fixtures don't block every commit.
+- **Manual local runs** (`hermes-cli`-style dev loop): pass the flag when checking a tree that contains the fixtures.
+- **`alice-publish` loop Step 1** (the publish gate) does NOT pass the flag. The publish gate enforces a stricter contract — if a real H1 leak has shipped into the framework repo, the publish must block. Operators can override the publish gate manually with `--allow-deliberate-fixtures` for the same reason the local pre-commit hook does.
+- **GitHub Actions CI**: same as `alice-publish` Step 1 — does NOT pass the flag by default.
+
+### What the flag does NOT do
+
+- It does NOT remove the fixtures from the on-disk tree. They are still the regression suite's target.
+- It does NOT change the default behavior of the check. Without the flag, the fixtures still fire `ERROR` (regression suite's contract per `t_764d71c9`).
+- It does NOT suppress genuine H1 leaks. A file matching the H1 pattern structurally (M-decide-* + kind: hermes-instance) but lacking the canonical fixture tags (`kind:fixture` + `leak:deliberate`) still fires `ERROR` regardless of the flag.
+- It does NOT bypass the gate for H2/H3/H4/H5/X1 — those patterns have their own opt-out surfaces (`teaching-example: true` or `instance-leak-exceptions`) and are not affected by this flag.
+
 ## Check output format
 
 
@@ -173,6 +214,21 @@ Exit code: 1 (errors found)
 - **1** — one or more ERRORs found (must fix before publish)
 - **2** — script error (e.g., can't read repo, malformed frontmatter)
 
+## Acceptance criteria (Part 7)
+
+The implementation is complete when ALL of the following hold:
+
+1. `--allow-deliberate-fixtures` flag is wired into `~/.hermes/tools/check_instance_leaks.py` (the `argparse` parser + `classify_file()` downgrade + the CLI exit-code path).
+2. The canonical fixture pattern (per the section above) is enforced by a dedicated `is_deliberate_fixture()` helper; the helper accepts both list-form and inline-bracket-form `tags:` values (matching the YAML-lite parser's two output shapes).
+3. With the flag, files matching the canonical fixture pattern downgrade from `ERROR` → `INFO` and the report adds a `[deliberate-fixture]` prefix on the message.
+4. Without the flag, default behavior is unchanged — fixtures still fire `ERROR` (regression suite's contract per `t_764d71c9`).
+5. Genuine H1 leaks (matching the H1 pattern but lacking the canonical fixture tags) still fire `ERROR` regardless of the flag.
+6. `~/.hermes/hooks/instance-leak-pre-commit` always passes the flag and exits 0 on a working tree that contains the fixtures + genuine Alice-framework content.
+7. `~/.hermes/tests/test_check_instance_leaks.py` includes at minimum: (a) a positive case asserting the flag downgrades the fixture; (b) a negative case asserting genuine H1 leaks still ERROR; (c) a default-behavior case asserting no flag = fixture still ERROR.
+8. Spec (`references/instance-leak-check-spec.md`) documents the flag in the section above + acceptance criteria updated here.
+9. Audit-line appended to `~/Documents/HermesVault/log.md` per op-guard-11.
+10. Compliance-verifier child ticket (per op-guard-17) confirms the flag works end-to-end on the alice-framework repo working tree.
+
 ## Where the check runs
 
 | Surface | When | Block? |
@@ -188,11 +244,18 @@ Exit code: 1 (errors found)
 - **Companion template:** `templates/instance-leak-check.py.template` — the canonical script template
 - **Companion rule:** `2-ATOMIC/rules/op-guard-19-pre-verify-artifact-state-2026-08-08.md` — the verify-before-ship pattern; this check IS the verify step for alice-publish
 - **Companion rule:** `2-ATOMIC/rules/op-guard-20-use-existing-loops-not-bespoke-2026-08-08.md` — the check is wired into the alice-publish loop, not run bespoke
+- **Companion ticket:** `kanban:t_98f2f220` — the `--allow-deliberate-fixtures` flag ticket (this Part 2 fix for the v0.2.0 commit message "follow-up ticket TBD")
+- **Companion ticket:** `kanban:t_764d71c9` — the H1-fixture origination; codifies that fixtures MUST stay ERROR-flagged
+- **Companion ticket:** `kanban:t_d70c695f` — the pre-commit hook origination ticket
 - **Audit ticket:** `t_7aa96032` — the file-by-file audit that established the patterns
 
 ## Audit-line
 
-`## [2026-08-11T23:30Z] instance-leak-check-spec-v0.2.0 — false-positive filter section added (teaching-example: true + instance-leak-exceptions). pattern exemption list = {H2, H3, H4}; H1/H5/X1 remain structural. Source: t_764d71c9 (Part A rework per op-guard-17 instance-conforms-to-Alice-doc).`
+`## [2026-08-17T22:00Z] instance-leak-check-spec-v0.3.0 — --allow-deliberate-fixtures opt-out flag added (Part 2 fix for v0.2.0 commit message 7a34a64 follow-up). Canonical fixture pattern: M-decide-*.md in methodology/ + frontmatter kind ∈ {hermes-instance, instance} + tags contains kind:fixture + leak:deliberate. Pre-commit hook always passes the flag; alice-publish Step 1 does NOT pass the flag (publish gate enforces stricter rule). 10 acceptance criteria listed in Part 7. Source: kanban:t_98f2f220 + kanban:t_b3a6ceb9 (PART 2 of the v0.9.53 amend-61 instance-leak fix).`
+
+```
+## [2026-08-11T23:30Z] instance-leak-check-spec-v0.2.0 — false-positive filter section added (teaching-example: true + instance-leak-exceptions). pattern exemption list = {H2, H3, H4}; H1/H5/X1 remain structural. Source: t_764d71c9 (Part A rework per op-guard-17 instance-conforms-to-Alice-doc).
+```
 
 ```
 ## [2026-08-11T22:15Z] doc-writer-ship — references/instance-leak-check-spec.md v0.1.0 — specification codifies H1-H5 + X1 patterns + U-bucket handling + check output format + exit codes + where-the-check-runs. Source: t_7aa96032 (audit + durable fix).

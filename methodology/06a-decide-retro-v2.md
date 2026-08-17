@@ -1,26 +1,27 @@
 ---
 id: alice-methodology-06a-decide-retro-v2
 created: 2026-08-06T07:40:00Z
-updated: 2026-08-11T23:30:00Z
-version: 0.1.5
-title: "Methodology 06a (v2, Amendment 1+2+3+4+5) — Decide the retro (flow-level retro split into agent half + human half; Retro-H parent edge is [retro_a] only; Retro-A spawns post-council, parents=fan-in)"
+updated: 2026-08-11T23:55:00Z
+version: 0.1.6
+title: "Methodology 06a (v2, Amendment 1+2+3+4+5+6) — Decide the retro (flow-level retro split into agent half + human half; Retro-H parent edge is [retro_a] only; Retro-A spawns post-council, parents=fan-in; Retro-H HITL gate with per-finding ACCEPT/DEFER/REJECT/ADDITIONAL disposition; corrective-action-B children parented to [retro_h, finding_id])"
 type: methodology
 status: draft
 supersedes: ["[[methodology/06a-decide-retro.md]]", "[[methodology/06a-decide-retro-v2.md#initial-v2-draft]]", "[[methodology/06a-decide-retro-v2.md#amendment-1--2]]", "[[methodology/06a-decide-retro-v2.md#amendment-3--2026-08-07----the-retro-is-2-parts-agent-retro-a--human-retro-h]]"]
-amended_by: ["[[ticket:t_f0cd340b]]", "[[ticket:t_323ad698]]", "[[ticket:t_33843787]]", "[[ticket:t_42e0c91c]]"]
+amended_by: ["[[ticket:t_f0cd340b]]", "[[ticket:t_323ad698]]", "[[ticket:t_33843787]]", "[[ticket:t_42e0c91c]]", "[[ticket:t_5c687fae]]"]
 amendment_initial_v2_draft_by: "[[ticket:t_3569c32c]]"
 amendment_3_by: "[[ticket:t_323ad698]]"
 amendment_4_by: "[[ticket:t_33843787]]"
 amendment_5_by: "[[ticket:t_42e0c91c]]"
+amendment_6_by: "[[ticket:t_5c687fae]]"
 source: alice-framework
-tags: [kind:methodology, kind:retro, kind:iteration-loop, kind:feedback, kind:self-improvement, kind:flow-level, kind:two-part, kind:retro-a, kind:retro-h, kind:parent-edge, kind:circular-gate-fix, kind:retro-spawn-position, kind:post-council, kind:done-gate, project:alice, amendment:1, amendment:2, amendment:3, amendment:4, amendment:5]
+tags: [kind:methodology, kind:retro, kind:iteration-loop, kind:feedback, kind:self-improvement, kind:flow-level, kind:two-part, kind:retro-a, kind:retro-h, kind:parent-edge, kind:circular-gate-fix, kind:retro-spawn-position, kind:post-council, kind:done-gate, kind:retro-h-hitl, kind:hitl-gate, kind:corrective-action-b, kind:per-finding-disposition, kind:pdf-delivery, kind:dispatcher-parent-edge-guard, project:alice, amendment:1, amendment:2, amendment:3, amendment:4, amendment:5, amendment:6]
 confidence: 1.0
-links: ["[[methodology/06-iteration-loop.md]]", "[[methodology/04a-decide-work-graph.md]]", "[[methodology/04b-decide-board-routing.md]]", "[[methodology/04c-decide-master-ticket.md]]", "[[methodology/04d-decide-flow-spec.md]]", "[[methodology/05-op-guards.md]]", "[[methodology/M-decide-spec-first-flow.md]]", "[[methodology/M-decide-human-digest.md]]", "[[methodology/06a-decide-retro.md]]", "[[worked-examples/01-solo-founder-skeleton/AGENTS.md]]"]
+links: ["[[methodology/06-iteration-loop.md]]", "[[methodology/04a-decide-work-graph.md]]", "[[methodology/04b-decide-board-routing.md]]", "[[methodology/04c-decide-master-ticket.md]]", "[[methodology/04d-decide-flow-spec.md]]", "[[methodology/05-op-guards.md]]", "[[methodology/M-decide-spec-first-flow.md]]", "[[methodology/M-decide-human-digest.md]]", "[[methodology/03b-decide-operator-agent-interaction.md]]", "[[methodology/06a-decide-retro.md]]", "[[worked-examples/01-solo-founder-skeleton/AGENTS.md]]"]
 teaching-example: true
 ---
 <!-- Note (2026-08-11, t_36795558): M-decide-x-article-review-flow.md moved to instance side at ~/.hermes/methodology/M-decide-x-article-review-flow.md per op-guard-17 methodology-canonical/instance-conforms; not a sibling of this framework doc anymore. -->
 
-# Methodology 06a (v2, Amendment 1+2+3+4+5) — Decide the retro (flow-level retro split into agent half + human half; retro is two kanban tasks; Retro-H parent edge is [retro_a] only; Retro-A spawns post-council with parents=fan-in)
+# Methodology 06a (v2, Amendment 1+2+3+4+5+6) — Decide the retro (flow-level retro split into agent half + human half; retro is two kanban tasks; Retro-H parent edge is [retro_a] only; Retro-A spawns post-council with parents=fan-in; Retro-H HITL gate with per-finding ACCEPT/DEFER/REJECT/ADDITIONAL disposition; corrective-action-B children parented to [retro_h, finding_id])
 
 > v1 documented a 1-retro-per-node shape with 3 freeform fields ("what worked / what didn't / what to change"). v2 changes the shape, the writer, the scope, and the format. The retro is now **flow-level**, **written by a different agent than the executor**, **scoped to master-ticket flows**, **structured as observed-issue + proposed-corrective-action findings**, **filed as a kanban task on a substrate board (NOT a file in `0-INBOX/`)**, and **split into two tasks**: **Retro-A** (the agent half — verifier runs the 6-axis evaluation and produces findings) and **Retro-H** (the human half — operator reviews Retro-A's findings, adds observations, and dispositions each finding as ACCEPT / REJECT / DEFER within a fixed 24h window). ACCEPTED findings spawn child tickets. This document supersedes v1. Read this one; archive v1 to the historical notes section.
 
@@ -62,11 +63,11 @@ The operator's reasoning (2026-08-05):
 
 ---
 
-## Part 2: The rules of v2 (4 original + 2 from Amendment 3)
+## Part 2: The rules of v2 (4 original + 2 from Amendment 3 + 1 sub-rule from Amendment 6)
 
 These rules replace the v1 "three fields" pattern. They are the canonical retro contract; any retro that violates one of them is malformed.
 
-**Rule count history.** Part 2 originally shipped with 4 rules (Rules 1–4). Amendment 1 renumbered the prior Rule 4 to Rule 5 and added Rule 4 (retro is a kanban task). Amendment 3 added Rule 5 (the retro is 2 parts) and renumbered the prior Rule 5 to Rule 6. Amendment 4 (2026-08-11) is a clarification, not a new rule: it changes the parent-edge shape (`parents=[retro_a]` only, was `[master, retro_a]`) and adds explicit parent-edge vs required-children-set terminology. Amendment 5 (2026-08-11, t_42e0c91c) is also a clarification, not a new rule: it changes Retro-A's parent-edge shape from `[master]` (Phase 0 retro spawn) to a post-council fan-in list `[master, P4, V-4, V-of-V, corrective-children-done, ship-done-when-applicable]` — Retro-A's spawn position moves from Phase 0 to the END of the flow (after council output + corrective actions + ship lane). This is the durable fix for the verified wast3 article incident (`t_092e629c`) where the v0.6.0 Phase 0 retro spawn caused the master to auto-close before Retro-H could disposition (the master auto-closed when Retro-A reached `done`, stranding Retro-H at `blocked/kind=needs_input`). Retro-H's parent edge remains `parents=[retro_a]` only (Amendment 4; unchanged). The canonical Part 2 still has **6 rules**.
+**Rule count history.** Part 2 originally shipped with 4 rules (Rules 1–4). Amendment 1 renumbered the prior Rule 4 to Rule 5 and added Rule 4 (retro is a kanban task). Amendment 3 added Rule 5 (the retro is 2 parts) and renumbered the prior Rule 5 to Rule 6. Amendment 4 (2026-08-11) is a clarification, not a new rule: it changes the parent-edge shape (`parents=[retro_a]` only, was `[master, retro_a]`) and adds explicit parent-edge vs required-children-set terminology. Amendment 5 (2026-08-11, t_42e0c91c) is also a clarification, not a new rule: it changes Retro-A's parent-edge shape from `[master]` (Phase 0 retro spawn) to a post-council fan-in list `[master, P4, V-4, V-of-V, corrective-children-done, ship-done-when-applicable]` — Retro-A's spawn position moves from Phase 0 to the END of the flow (after council output + corrective actions + ship lane). This is the durable fix for the verified wast3 article incident (`t_092e629c`) where the v0.6.0 Phase 0 retro spawn caused the master to auto-close before Retro-H could disposition (the master auto-closed when Retro-A reached `done`, stranding Retro-H at `blocked/kind=needs_input`). Retro-H's parent edge remains `parents=[retro_a]` only (Amendment 4; unchanged). **Amendment 6 (2026-08-11, t_5c687fae) adds Rule 5.b — corrective-action-B children parent edge:** when Retro-H is a HITL gate (per `~/.hermes/methodology/M-decide-x-article-review-flow.md` Part 7.7), the operator's ACCEPT / ADDITIONAL-ACCEPT dispositions spawn corrective-action-B children with `parents=[retro_h_ticket, finding_id]` and `initial_status=blocked/needs_input`. The dispatcher MUST refuse the parent-edge promotion if a corrective-action-B child has `parents=[master, finding_id]`, `parents=[retro_a, finding_id]`, `parents=[hitl_a, finding_id]`, or `parents=[retro_h]` only (without `finding_id`). The two corrective-action sets are disjoint in parent edge + scope — corrective-action-A lives under `[hitl_a, finding_id]` (Alice-content improvements) per v0.8.0 amendment 7; corrective-action-B lives under `[retro_h, finding_id]` (local-instance improvements) per v0.9.0 amendment 8. The canonical Part 2 still has **6 top-level rules + Rule 5.b sub-rule**.
 
 ### Rule 1 — A different agent runs the retro
 
@@ -392,6 +393,37 @@ The two halves are coupled but distinct. The Retro-A writer is forbidden from ed
 - **Retro-H running before Retro-A is `done`.** Retro-H is a child of Retro-A via the retro_a parent edge; Retro-H cannot open until Retro-A is `done`. Filing Retro-H at Phase 0 with `parents=[master]` only (no retro_a edge) is a violation — Retro-H would be ready immediately instead of waiting for Retro-A to publish. The correct parent list is `parents=[retro_a]` ONLY (per Amendment 4, 2026-08-11); the master is in the required-children set, not in the parent list. Filing Retro-H with `parents=[master, retro_a]` was the prior shape (Amendment 3) but creates a circular gate that prevents both retro halves from closing (see Amendment 4 §"Why this matters" for the verified incident).
 - **The master closing before both retro halves are `done`.** Under `done-gate: operator-LGTM-done`, the master MUST include both Retro-A and Retro-H in its required-child set. Closing the master with only one retro child is a violation (per `methodology/04c-decide-master-ticket.md` Part 7.5 + the amendment-3 done-gate update).
 
+#### Rule 5.b — corrective-action-B children parent edge (Amendment 6, v0.9.0, t_5c687fae)
+
+When Retro-H is a HITL gate (per `~/.hermes/methodology/M-decide-x-article-review-flow.md` Part 7.7; the v0.9.0 Retro-H HITL promotion), the operator's ACCEPT / ADDITIONAL-ACCEPT dispositions spawn **corrective-action-B children** with `parents=[retro_h_ticket, finding_id]` and `initial_status=blocked/needs_input`. The parent edge is the Retro-H ticket + the finding's disposition, NOT the master / retro_a / hitl_a. The dispatcher MUST refuse the parent-edge promotion if a corrective-action-B child has any of these forbidden parent edges:
+
+- `parents=[master, finding_id]` — wrong. The parent edge is the Retro-H ticket, NOT the master.
+- `parents=[retro_a, finding_id]` — wrong. Retro-A is the technical record; the parent edge references the operator-dispositioned ticket (Retro-H), not the agent's evaluation ticket.
+- `parents=[hitl_a, finding_id]` — wrong. The HITL-A gate dispositions council Q-N findings; the corrective-action-A children for those findings already live under `[hitl_a, finding_id]` (per v0.8.0 amendment 7). Retro-H's dispositions are a separate set; reusing the HITL-A parent edge would collide with corrective-action-A's scope.
+
+**Scope separation between corrective-action-A and corrective-action-B.** The two corrective-action sets are disjoint in parent edge + scope; a master never has both kinds of corrective-action children pointing at the same finding:
+
+| | corrective-action-A (v0.8.0 amendment 7) | corrective-action-B (v0.9.0 amendment 8) |
+|---|---|---|
+| **Parent edge** | `parents=[hitl_a_ticket, finding_id]` | `parents=[retro_h_ticket, finding_id]` |
+| **Source of findings** | Phase 4 council verdict Q-N findings (operator dispositions via HITL-A) | Retro-A 6-axis flow-eval findings (operator dispositions via Retro-H) |
+| **Scope** | Alice-content improvements (methodology amendments, new Alice docs) | Local-instance improvements (graph fixes, verifier tightening, PDF delivery reliability) |
+| **Worker profile** | doc-writer (canonical-writer per op-guard-16) → coder (instance changes per op-guard-17) | coder / planner / verifier (local-instance lane) |
+| **Done-gate** | spec-first 4-phase flow per `M-decide-spec-first-flow.md` | standard spec-first or direct coder ticket |
+
+**Why the parent edge is `[retro_h, finding_id]` and not something else.** The operator's disposition lives in Retro-H's body. The corrective-action-B child's spec-first implementation cites the finding via the Retro-H ticket + the `Finding F-N` index; the parent edge anchors that cite in the kanban DB so the dispatcher can verify the parent-edge gate at promotion time. Using `[retro_h, finding_id]` (NOT `[retro_h]` only) is load-bearing: it prevents a Retro-H with N findings from spawning N corrective-action-B children that all share the same parent edge — the per-finding parent edge lets the dispatcher track each finding independently through the chain (Retro-H → corrective-action-B → implementation child → verifier).
+
+**Forbidden parent-edge promotions (dispatcher MUST refuse):**
+
+1. `parents=[master, finding_id]` for a corrective-action-B child — the parent edge references the master, not the Retro-H ticket. The dispatcher MUST refuse.
+2. `parents=[retro_a, finding_id]` for a corrective-action-B child — the parent edge references Retro-A, not the Retro-H ticket. The dispatcher MUST refuse.
+3. `parents=[hitl_a, finding_id]` for a corrective-action-B child — collides with corrective-action-A's parent edge (same shape, different scope). The dispatcher MUST refuse; if the finding is really an Alice-content improvement that should land in corrective-action-A, route it through HITL-A's re-fire, NOT through Retro-H.
+4. `parents=[retro_h]` ONLY (without `finding_id`) for a corrective-action-B child — the per-finding anchor is missing. The dispatcher MUST refuse; corrective-action-B children MUST carry `finding_id` so each finding's chain is independently auditable.
+
+**Initial status + unblock semantics.** Corrective-action-B children fire with `initial_status=blocked/needs_input` (per the canonical HITL pattern in `methodology/03b-decide-operator-agent-interaction.md` Part 13). The dispatcher unblocks the child ONLY when Retro-H reaches `done` AND the finding has an ACCEPT or ADDITIONAL-ACCEPT disposition in the Retro-H body. A corrective-action-B child that fires before Retro-H is `done` is a v0.9.0 violation — the operator hasn't dispositioned the finding yet, so the child has no spec.
+
+**Cross-references.** `~/.hermes/methodology/M-decide-x-article-review-flow.md` Part 7.7 (Retro-H HITL gate), Part 7.5 (done-gate condition (f-2) "all corrective-action-B children done"), Part 8 (child graph: `[retro_h_ticket, finding_id]` line). The intent doc (`~/.hermes/loops/intents/x-article-review-intent.md`) carries the worker_prompt enforcement; the script (`~/.hermes/tools/post_executive_report_pdf.py`) carries the per-finding disposition-table generator that produces the `Finding F-N` index Retro-H's body uses.
+
 ### Rule 6 — Structured findings: observed issue + proposed corrective action
 
 Every finding has **two parts**, in this order:
@@ -435,11 +467,11 @@ That is **one finding.** A flow may produce zero findings (a clean run with all 
 
 ---
 
-## Part 2.5: The 2-part retro shape (Amendment 3 reference)
+## Part 2.5: The 2-part retro shape (Amendment 3 reference + Amendment 6 Retro-H HITL gate extension)
 
-This section is a **reference card** for the 2-part retro pattern codified in Rule 5. The full rules are in Part 2; this section is the cheat-sheet for workers filing the retro children of a master ticket.
+This section is a **reference card** for the 2-part retro pattern codified in Rule 5, extended in Amendment 6 (v0.9.0, t_5c687fae) to document the Retro-H HITL gate semantics. The full rules are in Part 2 (Rules 1–6 + Rule 5.b); this section is the cheat-sheet for workers filing the retro children of a master ticket.
 
-### Reference card
+### Reference card (Amendment 3 + Amendment 6)
 
 ```
 Master ticket (t_M, done-gate: operator-LGTM-done per 04c Part 7.5)
@@ -454,25 +486,59 @@ Master ticket (t_M, done-gate: operator-LGTM-done per 04c Part 7.5)
 │   │   (the parent-edge gate is the gate; Retro-A promotes to ready only when ALL listed parents reach done)
 │   └── child of master: yes (1 of 2 retro children) — required-by-master-done-gate
 │
-└── Retro-H (t_RH) — human half
+└── Retro-H (t_RH) — human half (HITL gate per Amendment 6 / v0.9.0, t_5c687fae)
     ├── assignee: operator (literal-human ticket)
     ├── parents: [t_RA]   ← blocks on Retro-A being done (Amendment 4: master NOT in parent list; avoids circular gate)
     ├── spawn-position: AFTER Retro-A reaches done (Amendment 4)
     ├── title: "[HUMAN ACTION] Retro-H: <flow title> (master t_M)"
     ├── body: Rule 4 §"What goes in the Retro-H task body" template
+    │         + Retro-H PDF block (## Retro-H PDF) per Amendment 6
+    │         + per-finding ACCEPT/DEFER/REJECT/ADDITIONAL disposition table per Amendment 6
     ├── lifecycle: drafting → ready → running → open → applied → done
     ├── child of master: yes (2 of 2 retro children, via the master's required-children set — NOT via parent edge)
-    └── required-by-master-done-gate: yes (operator-LGTM-done per 04c Part 7.5)
+    ├── required-by-master-done-gate: yes (operator-LGTM-done per 04c Part 7.5)
+    │
+    │   ── Retro-H HITL gate semantics (Amendment 6 / v0.9.0, t_5c687fae) ──
+    ├── HITL pattern: canonical HITL per methodology/03b Part 13
+    │   - [HUMAN ACTION] title prefix (op-guard-3)
+    │   - per-finding ACCEPT / DEFER / REJECT / ADDITIONAL disposition fields
+    │   - initial_status = blocked/needs_input
+    │   - script-driven Markdown → PDF → Discord DM → ticket comment → vault copy 5-step delivery
+    ├── PDF + Discord DM delivery: mandatory via post_executive_report_pdf.py --source retro-h
+    │   - fail-closed to kind=needs_input (mirrors v0.8.0 amendment-7 council-verdict PDF discipline)
+    │   - PDF path lands in Retro-H ticket body under ## Retro-H PDF before operator opens the HITL child
+    ├── operator dispositions per Retro-A finding:
+    │   - ACCEPT → spawn corrective-action-B child (see Rule 5.b)
+    │   - DEFER → record deferral reason + revisit-by date
+    │   - REJECT → record rejection reason
+    │   - ADDITIONAL → operator adds a finding Retro-A missed; disposition ACCEPT/DEFER/REJECT
+    │
+    └── corrective-action-B children (per Rule 5.b; one per ACCEPT or ADDITIONAL-ACCEPT disposition)
+        ├── parent edge: parents=[retro_h_ticket, finding_id]   ← Rule 5.b; dispatcher MUST refuse [master, finding_id], [retro_a, finding_id], [hitl_a, finding_id], or [retro_h] without finding_id
+        ├── initial_status: blocked/needs_input (don't fire before Retro-H reaches done)
+        ├── scope: LOCAL-INSTANCE improvements (graph fixes, verifier tightening, PDF delivery reliability)
+        │         (NOT Alice-content — corrective-action-A lane owns Alice-content via [hitl_a, finding_id])
+        ├── worker profile: coder / planner / verifier (local-instance lane)
+        ├── done-gate: spec-first 4-phase flow (M-decide-spec-first-flow.md) for methodology-shaped changes;
+        │              direct coder ticket for hermes-instance changes
+        └── required-by-master-done-gate: yes (Part 7.5 condition (f-2) "all corrective-action-B children done")
 
 Master auto-closes only when BOTH t_RA.status = done AND t_RH.status = done
-AND every condition in the master-ticket-flow's done-gate fires (the
-v0.7.0 8-condition gate for x-article-review or the equivalent
+AND all corrective-action-B children have reached done (per Part 7.5 condition (f-2))
+AND every other condition in the master-ticket-flow's done-gate fires (the
+v0.9.0 10-condition gate for x-article-review or the equivalent
 flow-specific gate for other flows).
 ```
 
 ### Why this card matters
 
-Workers filing retro children for an x-article-review master (the canonical case for v0.7.0) consult this card to confirm the post-council retro-spawn shape (Amendment 5). A worker that files Retro-A at Phase 0 (with `parents=[master]` only — the v0.6.0 shape), or files Retro-H with `parents=[master, retro_a]` (the prior Amendment 3 shape — now superseded; creates circular gate), or files Retro-H with `parents=[master]` only (no retro_a edge — Retro-H would unblock immediately), or assigns Retro-H to a verifier, is filing a malformed retro and will fail the verifier-gate at `applied → done` (for Retro-H) or the post-council parent-edge gate (for Retro-A).
+Workers filing retro children for an x-article-review master (the canonical case for v0.9.0) consult this card to confirm:
+
+1. **Post-council retro-spawn shape (Amendment 5).** Retro-A fires AFTER Phase 4 + V-4 + V-of-V + corrective-A children + ship lane (when applicable). A worker that files Retro-A at Phase 0 (with `parents=[master]` only — the v0.6.0 shape), or files Retro-H with `parents=[master, retro_a]` (the prior Amendment 3 shape — now superseded; creates circular gate), or files Retro-H with `parents=[master]` only (no retro_a edge — Retro-H would unblock immediately), or assigns Retro-H to a verifier, is filing a malformed retro and will fail the verifier-gate at `applied → done` (for Retro-H) or the post-council parent-edge gate (for Retro-A).
+
+2. **Retro-H HITL gate semantics (Amendment 6).** Retro-H is the SECOND HITL gate in the flow (after HITL-A). The operator dispositions each Retro-A finding with ACCEPT / DEFER / REJECT / ADDITIONAL; ACCEPT (and ADDITIONAL-ACCEPT) dispositions spawn corrective-action-B children. The Retro-H PDF + Discord DM delivery is mandatory (fail-closed to `kind=needs_input`); the Retro-H ticket body carries the `## Retro-H PDF` block + the per-finding disposition table. Without the per-finding disposition table, the Retro-H ticket is REFUSED with a `Retro-H REFUSED — missing per-finding disposition table` pointer comment.
+
+3. **Corrective-action-B parent edge (Rule 5.b).** Corrective-action-B children fire with `parents=[retro_h_ticket, finding_id]` (NOT `[master, finding_id]`, NOT `[retro_a, finding_id]`, NOT `[hitl_a, finding_id]`, NOT `[retro_h]` without `finding_id`). The dispatcher MUST refuse the parent-edge promotion if any of these forbidden parent edges is used. The two corrective-action sets (corrective-action-A under `[hitl_a, finding_id]` + corrective-action-B under `[retro_h, finding_id]`) are disjoint in parent edge + scope.
 
 For NON-x-article-review flows that still use Phase 0 retro spawn (per the v0.1.1–v0.6.0 rule), the card's "parents: [t_M]" line is still the canonical Phase 0 shape; the Amendment 5 fan-in parent list is a flow-specific override for x-article-review and any future flow that adopts it.
 
@@ -485,8 +551,13 @@ For NON-x-article-review flows that still use Phase 0 retro spawn (per the v0.1.
 - **For x-article-review: Retro-A with `parents=[master]` only (Phase 0 retro spawn).** Wrong (Amendment 5). The Phase 0 retro spawn is the v0.6.0 shape that v0.7.0 supersedes; Retro-A's parent list must reference the post-council fan-in `[master, P4, V-4, V-of-V, corrective-children-done, ship-done-when-applicable]` (or the conditional subset when no ship lane ran / no corrective children exist). Retro-A fires AFTER Phase 4 + V-4 + V-of-V + corrective children + ship lane, NOT at master creation.
 - **Master closing with only one retro `done`.** Wrong. Master must wait for both retro halves (Retro-A AND Retro-H) via the required-children set + the done-gate.
 - **Retro-A running without an independence check.** Wrong. Retro-A writer must not be the executor.
+- **Retro-H without per-finding ACCEPT/DEFER/REJECT/ADDITIONAL disposition table.** Wrong (Amendment 6, v0.9.0). The pre-v0.9.0 Retro-H was a free-form retro; the v0.9.0 promotion to HITL gate adds structured per-finding disposition fields. Retro-H that lacks the disposition table is REFUSED with a `Retro-H REFUSED — missing per-finding disposition table` pointer comment.
+- **Retro-H without Retro-H PDF + Discord DM delivery.** Wrong (Amendment 6, v0.9.0). The Retro-H PDF + Discord DM delivery is mandatory (fail-closed to `kind=needs_input`). Retro-H that the operator can open WITHOUT a delivered PDF is a v0.9.0 violation; the orchestrator surfaces a `[HUMAN ACTION] retro-h-pdf-delivery-failed` child ticket per op-guard-3.
+- **Corrective-action-B children parented to `[master, finding_id]` or `[retro_a, finding_id]` or `[hitl_a, finding_id]`.** Wrong (Amendment 6 + Rule 5.b). The parent edge is `[retro_h_ticket, finding_id]` — the operator dispositions in Retro-H + the corrective-action-B children reference Retro-H. A corrective-action-B child with any of the forbidden parent edges is a v0.9.0 violation; the dispatcher MUST refuse the parent-edge promotion.
+- **Corrective-action-B children shipping before the operator dispositions.** Wrong (Amendment 6). All corrective-action-B children fire with `initial_status=blocked/needs_input`; the orchestrator only unblocks them when the Retro-H ticket reaches `done`. A corrective-action-B child that fires before Retro-H is `done` is a v0.9.0 violation (the operator hasn't dispositioned the finding yet).
+- **ADDITIONAL finding without disposition.** Wrong (Amendment 6). Every ADDITIONAL finding the operator adds must have an ACCEPT / DEFER / REJECT disposition. An ADDITIONAL finding without a disposition is a v0.9.0 violation; the Retro-H ticket blocks until the operator dispositions the ADDITIONAL finding.
 
-The full rules are in Part 2 (Rules 1–6); the lifecycle is in Part 3; the disposition step is in Part 4; the worked example is in Part 8.
+The full rules are in Part 2 (Rules 1–6 + Rule 5.b); the lifecycle is in Part 3; the disposition step is in Part 4; the worked example is in Part 8.
 
 ---
 
@@ -1137,6 +1208,30 @@ Amendment 3 (per `t_323ad698`, 2026-08-07) split the retro into two parts: Retro
 
 The doc is canonical as of Amendment 3. Future amendments (Q7, Q8 in the Future amendment candidates section above) track remaining open questions about Retro-H's title prefix and the follow-up amendment to `methodology/04c-decide-master-ticket.md` Part 7.5.
 
+## Historical note: Amendment 4 (2026-08-11, t_33843787) — Retro-H parent edge is `[retro_a]` only (circular-gate bug fix)
+
+Amendment 3 specified Retro-H's parent list as `parents=[master, retro_a]`. The intent was sound (Retro-H is in the master's required-children set AND Retro-H blocks on Retro-A being `done`), but putting master in Retro-H's parent list created a circular gate — the master's done-gate waits for Retro-H `done`, Retro-H's parent edge waits for master `done`, neither could transition. The verified wandermist article-3 master (`t_6c49fbd9`) required a manual `hermes kanban unlink` to clear the circular gate.
+
+Amendment 4 codifies the structural fix: Retro-H's parent edge is `parents=[retro_a]` only. The master is in Retro-H's required-children set via the done-gate (NOT via parent edge). Rule 4 §"Parent edges" updated; Rule 5 §"Order: Retro-A → Retro-H" updated; Rule 5 anti-pattern extended with `parents=[master, retro_a]` (circular-gate violation); Part 2.5 reference card retro_h's `parents:` line changed from `[t_M, t_RA]` to `[t_RA]`; Part 5 worked example retro_h's `parents` changed from `[t_404, t_410]` to `[t_410]`; Q&A 17 updated; touch-points with 04c Part 7.5 updated to clarify required-children-set vs parent-edge.
+
+## Historical note: Amendment 5 (2026-08-11, t_42e0c91c) — Retro-A spawns post-council with parents=fan-in (premature master auto-close fix)
+
+Prior versions of this doc (Rules 1+4) plus the v0.5.0 done-gate codification of `~/.hermes/methodology/M-decide-x-article-review-flow.md` implied that Retro-A + Retro-H fired at Phase 0 (master creation). The Phase 0 retro spawn was the original structural fix for "master auto-closes before retro fires" (article-1 incident `t_62a99460`). The fix introduced a NEW defect that v0.7.0 closes: when Retro-A reached `done`, the dispatcher's auto-close logic fired `master_auto_done_via_children` and the master auto-closed even with Retro-H still `blocked`. The verified wast3 article incident (`t_092e629c`; Retro-A `t_3f241047` reached `done` 2026-08-11 06:41:37 and triggered the master auto-close the same second, stranding Retro-H `t_057d6495` at `blocked/kind=needs_input`).
+
+Amendment 5 codifies the durable fix: Retro-A's parent-edge list becomes the post-council fan-in `[master, P4, V-4, V-of-V, corrective-children-done, ship-done-when-applicable]`. Retro-A fires AFTER every upstream gate condition; Retro-A does NOT fire at Phase 0. Retro-H's parent edge remains `parents=[retro_a]` only (Amendment 4; unchanged).
+
+## Historical note: Amendment 6 (2026-08-11, t_5c687fae) — Retro-H HITL gate + corrective-action-B parent edge + Part 2.5 reference card extension
+
+Amendment 6 ships three coordinated changes to align this doc with the v0.9.0 Retro-H HITL gate promotion in `~/.hermes/methodology/M-decide-x-article-review-flow.md` Part 7.7:
+
+1. **Rule 5.b — corrective-action-B children parent edge (new sub-rule).** Retro-H is now a HITL gate that dispositions Retro-A findings with ACCEPT / DEFER / REJECT / ADDITIONAL. ACCEPT / ADDITIONAL-ACCEPT dispositions spawn **corrective-action-B children** with `parents=[retro_h_ticket, finding_id]` and `initial_status=blocked/needs_input`. The dispatcher MUST refuse the parent-edge promotion if a corrective-action-B child has any of the four forbidden parent edges: `[master, finding_id]`, `[retro_a, finding_id]`, `[hitl_a, finding_id]`, or `[retro_h]` only (without `finding_id`). The two corrective-action sets are disjoint in parent edge + scope — corrective-action-A lives under `[hitl_a, finding_id]` (Alice-content improvements) per v0.8.0 amendment 7; corrective-action-B lives under `[retro_h, finding_id]` (local-instance improvements) per v0.9.0 amendment 8. Rule 5.b also codifies the scope-separation table (corrective-action-A vs corrective-action-B: parent edge, source of findings, scope, worker profile, done-gate) + initial-status/unblock semantics.
+
+2. **Part 2.5 reference card extension.** The reference card now documents the Retro-H HITL gate semantics in addition to the Amendment 3 retro-as-2-kanban-tasks shape: the HITL pattern (`[HUMAN ACTION]` title prefix + per-finding ACCEPT/DEFER/REJECT/ADDITIONAL disposition fields + initial_status=blocked/needs_input + script-driven Markdown → PDF → Discord DM → ticket comment → vault copy 5-step delivery); the mandatory PDF + Discord DM delivery via `post_executive_report_pdf.py --source retro-h` (fail-closed to `kind=needs_input`); the corrective-action-B children structure under Retro-H with `parents=[retro_h_ticket, finding_id]`; the master auto-close condition (BOTH retro halves `done` AND all corrective-action-B children `done` AND every other condition in the master-ticket-flow's done-gate fires). The Part 2.5 anti-patterns list gained four new entries: missing per-finding ACCEPT/DEFER/REJECT/ADDITIONAL disposition table (REFUSED with `Retro-H REFUSED — missing per-finding disposition table` pointer comment); missing Retro-H PDF + Discord DM delivery (surfaces a `[HUMAN ACTION] retro-h-pdf-delivery-failed` child ticket per op-guard-3); corrective-action-B children parented to `[master, finding_id]` or `[retro_a, finding_id]` or `[hitl_a, finding_id]` (dispatcher MUST refuse); ADDITIONAL finding without disposition (Retro-H ticket blocks until the operator dispositions the ADDITIONAL finding).
+
+3. **Frontmatter + Rule count history updated.** version: 0.1.5 → 0.1.6; title gains `+ Amendment 6` + the Retro-H HITL + corrective-action-B parent edge descriptions; `amended_by` adds `t_5c687fae`; new `amendment_6_by: [[ticket:t_5c687fae]]` field; tags gain `kind:retro-h-hitl`, `kind:hitl-gate`, `kind:corrective-action-b`, `kind:per-finding-disposition`, `kind:pdf-delivery`, `kind:dispatcher-parent-edge-guard`, `amendment:6`; links add `[[methodology/03b-decide-operator-agent-interaction.md]]` (the canonical HITL pattern); H1 title updated. Rule count history paragraph gains an Amendment 6 sub-paragraph explaining Rule 5.b + the forbidden parent edges + the corrective-action-A vs corrective-action-B scope separation. Part 2 H2 sub-title updates from "(4 original + 2 from Amendment 3)" to "(4 original + 2 from Amendment 3 + 1 sub-rule from Amendment 6)".
+
+**The doc is canonical as of Amendment 6 (v0.1.6).** Future amendments track remaining open questions about Retro-H's title prefix (Q7; canonical `[HUMAN ACTION]`), the follow-up amendment to `methodology/04c-decide-master-ticket.md` Part 7.5 wording (Q8), and the per-finding anchor pattern (now codified in Rule 5.b).
+
 ## Audit-line
 
 `## [2026-08-06T07:40Z] retro-v2-methodology — methodology/06a-decide-retro-v2.md shipped; 4 rules (different agent / 6 axes / master-only / structured findings), flow-level scope, supersedes v1. Open questions Q1–Q4 await operator answers; v1 preserved in git history.`
@@ -1144,3 +1239,9 @@ The doc is canonical as of Amendment 3. Future amendments (Q7, Q8 in the Future 
 `## [2026-08-06T08:00Z] retro-v2-amendment-1+2 — methodology/06a-decide-retro-v2.md amended per t_f0cd340b. Rule 4 added (retro is a kanban task, not a file); prior Rule 4 (structured findings) renumbered to Rule 5. Window length restored to fixed 24h (Amendment 2). Operator disposition is per-finding ACCEPT/REJECT/DEFER (Amendment 1); verifier-gate at applied→done (op-guard-13). Q1, Q2, Q3, Q4 resolved. Operator-env implication: existing post-graph-retro cron (if any) is superseded; cron-update is a separate ticket (per spec-first flow, op-guard-16). Doc is canonical as of this amendment.`
 
 `## [2026-08-07T18:30Z] retro-v2-amendment-3 — methodology/06a-decide-retro-v2.md amended per t_323ad698 (operator clarification 2026-08-07). The retro is now 2 parts: Retro-A (agent half, assignee=verifier, runs the 6-axis evaluation + proposes findings) + Retro-H (human half, assignee=operator, dispositions findings ACCEPT/REJECT/DEFER). The master has TWO retro children under done-gate: operator-LGTM-done; both must reach done for the master to auto-close. New Rule 5 codifies the split; old Rule 5 renumbered to Rule 6. Rule 4 updated: 2 body templates (Retro-A + Retro-H), 2 closure paths. Part 3 lifecycle updated to dual-path (Retro-A runs drafting→ready→running→open→done; Retro-H runs drafting→ready→running→open→applied→done and starts only after Retro-A is done). Part 2.5 added: reference card for workers filing retro children at Phase 0. Part 5 worked example updated to show t_410 (Retro-A) + t_411 (Retro-H) + t_412 (F-1 child). Cross-references to 04c Part 7.5 + t_248722d8 updated to note that 04c's "retro child" language is interpreted as 2 children per this amendment; a follow-up amendment to 04c will update the wording. Doc is canonical as of Amendment 3. Frontmatter version 0.1.3, updated 2026-08-07T18:30Z, amended_by adds t_323ad698, tags add amendment:3 + kind:two-part + kind:retro-a + kind:retro-h.`
+
+`## [2026-08-11T16:00Z] retro-v2-amendment-4 — methodology/06a-decide-retro-v2.md amended per t_33843787 (circular-gate bug fix). Retro-H's parent edge is parents=[retro_a] ONLY (was parents=[master, retro_a] in Amendment 3). The master is in Retro-H's required-children set via the done-gate, NOT via parent edge. Rule 4 §Parent edges clarified; Rule 5 §Order updated; Rule 5 anti-pattern extended (parents=[master, retro_a] is now a circular-gate violation); Part 2.5 reference card retro_h's parents: line changed from [t_M, t_RA] to [t_RA]; Part 5 worked example retro_h's parents changed from [t_404, t_410] to [t_410]; Q&A 17 updated; touch-points with 04c Part 7.5 updated. Verified state: t_6c49fbd9 (wandermist article-3 master) required a manual hermes kanban unlink t_6c49fbd9 t_993f88f7 to clear the circular gate before Retro-H t_993f88f7 could close. Doc is canonical as of Amendment 4. Frontmatter version 0.1.4, amended_by adds t_33843787.`
+
+`## [2026-08-11T17:30Z] retro-v2-amendment-5 — methodology/06a-decide-retro-v2.md amended per t_42e0c91c (premature master auto-close fix). Retro-A's parent-edge shape changed from parents=[master] (Phase 0 retro spawn) to the post-council fan-in list [master, P4, V-4, V-of-V, corrective-children-done, ship-done-when-applicable]. Retro-A fires AFTER every upstream gate condition (Phase 4 + V-4 + V-of-V + corrective-action children + ship lane); Retro-A does NOT fire at Phase 0. Retro-H's parent edge remains parents=[retro_a] only (Amendment 4; unchanged). Verified state: t_092e629c (wast3 article master) auto-closed 2026-08-11 06:41:37 the same second Retro-A t_3f241047 reached done, stranding Retro-H t_057d6495 at blocked/kind=needs_input. Doc is canonical as of Amendment 5. Frontmatter version 0.1.5, amended_by adds t_42e0c91c.`
+
+`## [2026-08-11T23:55Z] retro-v2-amendment-6 — methodology/06a-decide-retro-v2.md amended per t_5c687fae (paired-wiki amendment for Retro-H HITL gate + corrective-action-B parent edge). Three coordinated changes: (1) new Rule 5.b — corrective-action-B children parent edge: parents=[retro_h_ticket, finding_id] + initial_status=blocked/needs_input; dispatcher MUST refuse [master, finding_id], [retro_a, finding_id], [hitl_a, finding_id], and [retro_h] without finding_id; corrective-action-A vs corrective-action-B scope-separation table (parent edge, source of findings, scope, worker profile, done-gate); initial-status/unblock semantics. (2) Part 2.5 reference card extension: documents Retro-H HITL gate semantics (HITL pattern + mandatory PDF + Discord DM delivery via post_executive_report_pdf.py --source retro-h + corrective-action-B children structure); Part 2.5 anti-patterns list gains 4 entries (missing disposition table REFUSED; missing PDF delivery surfaces [HUMAN ACTION] retro-h-pdf-delivery-failed; corrective-action-B with forbidden parent edge MUST refuse; ADDITIONAL finding without disposition blocks Retro-H). (3) Frontmatter + Rule count history updated: version 0.1.5 → 0.1.6; title gains Amendment 6 + Retro-H HITL + corrective-action-B; amended_by adds t_5c687fae; new amendment_6_by field; tags gain kind:retro-h-hitl + kind:hitl-gate + kind:corrective-action-b + kind:per-finding-disposition + kind:pdf-delivery + kind:dispatcher-parent-edge-guard + amendment:6; links add methodology/03b-decide-operator-agent-interaction.md; H1 title updated. Rule count history gains Amendment 6 sub-paragraph; Part 2 H2 sub-title updates. Doc is canonical as of Amendment 6 (v0.1.6). Per op-guard-5 paired-wiki integrity + op-guard-17 alice-first/instance-second/compliance-gate; this is the alice-framework paired-wiki for the instance-side M-decide-x-article-review-flow.md v0.9.0 amendment 8 (t_5c687fae). Companion paired-wiki: t_5c687fae-paired-wiki-04a (Part 3.5 amendment). Compliance verifier: t_5c687fae-compliance.`

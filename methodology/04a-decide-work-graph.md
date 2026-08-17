@@ -1,16 +1,16 @@
 ---
 id: alice-methodology-04a-decide-work-graph
 created: 2026-08-04T12:30:00Z
-updated: 2026-08-09T18:30:00Z
+updated: 2026-08-17T22:00:00Z
 title: "Methodology 04a — Decide your work graph (stateful work + relationships)"
 type: methodology
 status: draft
 source: alice-framework
-version: 0.1.3
-amended_by: ["[[ticket:t_94c0c7cf]]", "[[ticket:t_323ad698]]", "[[ticket:t_78936c6e]]"]
+version: 0.1.5
+amended_by: ["[[ticket:t_94c0c7cf]]", "[[ticket:t_323ad698]]", "[[ticket:t_78936c6e]]", "[[ticket:t_5c687fae]]", "[[ticket:t_ab1f3081]]", "[[ticket:t_7419d73e]]", "[[ticket:t_0e7b941a]]"]
 tags: [kind:methodology, kind:work-graph, kind:node-types, project:alice]
 confidence: 0.0
-links: ["[[methodology/04-decide-crons.md]]", "[[methodology/05-op-guards.md]]", "[[methodology/07-council-methodology.md]]", "[[methodology/M-decide-spec-first-flow.md]]", "[[worked-examples/01-solo-founder-skeleton/AGENTS.md]]", "[[methodology/references/04a-node-admission-taxonomy.md]]"]
+links: ["[[methodology/04-decide-crons.md]]", "[[methodology/05-op-guards.md]]", "[[methodology/07-council-methodology.md]]", "[[methodology/M-decide-spec-first-flow.md]]", "[[methodology/M-decide-graph-readiness.md]]", "[[methodology/M-decide-skill-curator.md]]", "[[methodology/M-decide-wiki-lint.md]]", "[[methodology/M-decide-graph-audit-promotion-flow.md]]", "[[worked-examples/01-solo-founder-skeleton/AGENTS.md]]", "[[methodology/references/04a-node-admission-taxonomy.md]]"]
 ---
 
 # Methodology 04a — Decide your work graph
@@ -466,6 +466,72 @@ The verifier-gate rule above is paired with a second rule that names the **dashe
 The canonical guard that enforces this at the protocol level is `op-guard-15-must-call-terminal-2026-07-29.md` (the "must call `kanban_complete` or `kanban_block` before exit" rule, surfaced via `methodology/05-op-guards.md` in Alice's umbrella). op-guard-15 guarantees that the worker's exit from a graph node is an explicit terminal transition; the loop's detect leg then reads the exit + the verifier's verdict and dispatches the retry. A worker that exits a graph node without a terminal call is a worker that has not classified its exit, and the loop cannot tell whether to retry the node (verifier-FAIL) or escalate it (verifier-Error per Part 6).
 
 **Reversibility / shelf-life.** This callout names a pattern that has existed in Alice since v0.1.0 — the dashed graph-to-loop return arrow is implicit in every work-graph diagram that uses the iteration loop as its act leg, and the verifier-FAIL → loop-retry path is implicit in every verifier-gate example above. Promoting it from implicit-in-prose to named-in-section is shelf-life-immune; the pattern does not drift as Alice evolves. The verifier gate (above) and the verifier-FAIL re-dispatch path (here) are two halves of the same rule: the gate produces the verdict, the path consumes it.
+
+### Gate counts per amendment (canonical verifier-count progression)
+
+The verifier-gate pattern above is **counted concretely** in each successive article-review flow amendment, where the canonical instance of this methodology is `~/.hermes/methodology/M-decide-x-article-review-flow.md` Part 7.5 (the META done-gate). The gate count table below preserves the per-amendment progression so a reader can see how the gate has grown as new HITL gates, corrective-action sets, and PDF-delivery requirements have been added.
+
+| Amendment | Version | Conditions | Conditions added (vs. prior) | Source ticket |
+|---|---|---|---|---|
+| 6 (v0.7.0, 2026-08-09) | `0.7.0` | **8** | Phase completion + V-4 + V-of-V + Retro-A + Retro-H + compliance + ship-lane + per-finding disposition | `[[ticket:t_42e0c91c]]` |
+| 7 (v0.8.0, 2026-08-09) | `0.8.0` | **9** | `(d-1)` HITL-A done (the HITL-A gate between Phase 4 and corrective-A actions; per-finding ACCEPT / REJECT / DEFER disposition; corrective-A children parented to `[hitl_a_ticket, finding_id]`) | `[[ticket:t_00da182d]]` |
+| 8 (v0.9.0, 2026-08-11, **this amendment**) | `0.9.0` | **10** | `(d-2)` all corrective-action-A children done; `(f-1)` Retro-H done with PDF + Discord DM delivery (Retro-H promoted from free-form operator retro to a HITL gate mirroring HITL-A); `(f-2)` all corrective-action-B children done (parented to `[retro_h, finding_id]`, local-instance scope) | `[[ticket:t_5c687fae]]` |
+
+#### v0.7.0 (amendment 6) — the 8-condition baseline
+
+The 8 conditions established at amendment 6 are:
+
+| # | Condition | Trigger | Verifier check |
+|---|---|---|---|
+| (a) | Phase 1–4 done | Every phase child transitioned to `done` | `kanban.list(master=master.id, kind=phase).all(status=done)` |
+| (b) | V-4 done | Phase 4 verifier transitioned to `done` | `kanban.show(v4_id).status == "done"` |
+| (c) | V-of-V done | Validating verifier transitioned to `done` (verifier-of-the-verifier, per the canonical pattern) | `kanban.show(voff_id).status == "done"` |
+| (d) | Per-finding disposition | Every finding carries a per-finding ACCEPT / REJECT / DEFER line in the master body | master body has `## Findings` block with `### F-N — disposition: <ACCEPT|REJECT|DEFER>` per finding |
+| (e) | Retro-A done | Flow Retro-A child transitioned to `done` (6-axis evaluation + structured findings) | `kanban.show(retroa_id).status == "done"` |
+| (f) | Retro-H done | Flow Retro-H child transitioned to `done` (the v0.7.0 free-form operator retro; supersedes by amendment 8) | `kanban.show(retroh_id).status == "done"` |
+| (g) | Compliance-PASS when applicable | The compliance-verifier child confirmed the applied instance conforms to the methodology doc | `kanban.show(compliance_id).status == "done"` AND verdict=pass |
+| (h) | push-done when ship lane ran | When `## Alice amendment path` was non-empty AND the conditional ship lane ran, the 4-part push-done evidence must exist | push-done evidence triple exists |
+
+When all 8 conditions fire (or conditions (g) + (h) are N/A and the other 6 fire), the master auto-promotes to `done`.
+
+#### v0.8.0 (amendment 7) — extending the gate to 9 conditions
+
+Amendment 7 inserts the HITL-A gate between Phase 4 and corrective-A actions. The 9-condition gate adds **one row** to the v0.7.0 baseline:
+
+| # | Condition | Trigger | Verifier check |
+|---|---|---|---|
+| (d-1) | **HITL-A done** | The operator's HITL-A ticket transitioned to `done` (per-finding ACCEPT / REJECT / DEFER disposition + per-finding corrective-action-A child fired for ACCEPT) | `kanban.show(hitl_a_id).status == "done"` |
+
+The v0.7.0 condition `(d)` (per-finding disposition) is **preserved** — the disposition line is recorded against the master body, and the HITL-A ticket carries the disposition + the corrective-A child list. Condition `(d-1)` is the **gate** (the operator signed off on the disposition); condition `(d)` is the **evidence** (the disposition lines exist in the master body). Both are required; the v0.8.0 amendment makes the gate explicit and inserts the HITL-A as a first-class ticket between Phase 4 and corrective-A actions.
+
+When all 9 conditions fire, the master auto-promotes to `done`.
+
+#### v0.9.0 (amendment 8, **this amendment**) — extending the gate to 10 conditions
+
+Amendment 8 promotes Retro-H from a plain operator-action retro child into a **HITL gate** that mirrors the HITL-A pattern. The 10-condition gate adds **three additional rows** to the v0.8.0 9-condition gate:
+
+| # | Condition | Trigger | Verifier check |
+|---|---|---|---|
+| (d-2) | **All corrective-action-A children done** | Every spec-first child ticket filed for an HITL-A ACCEPTED finding has reached `done` | `kanban.list(master=master.id, kind=corrective_action_a).all(status=done)` |
+| (f-1) | **Retro-H done** | The Retro-H HITL gate transitioned to `done` — operator disposed each Retro-A finding + ADDITIONAL findings + Retro-H executive-report PDF delivered to Discord DM | `kanban.show(retroh_id).status == "done"` AND Retro-H ticket body has `## Retro-H PDF` block with `Discord DM: delivered at <ISO8601-UTC>` line |
+| (f-2) | **All corrective-action-B children done** | Every corrective-action-B child ticket filed for an ACCEPT / ADDITIONAL-ACCEPT Retro-H disposition has reached `done` | `kanban.list(master=master.id, kind=corrective_action_b).all(status=done)` |
+
+The v0.8.0 condition `(f)` (Retro-H done as a free-form operator retro) is **superseded** by condition `(f-1)` — the v0.9.0 Retro-H is a HITL gate with a PDF + Discord DM delivery requirement, not a free-form retro. The v0.9.0 condition `(e)` (Retro-A done) is **preserved** as the precondition for Retro-H; Retro-H is parented to `parents=[retro_a]` only (per Amendment 4 of `methodology/06a-decide-retro-v2.md`).
+
+The corrective-action-A set (parented to `[hitl_a_ticket, finding_id]`) and the corrective-action-B set (parented to `[retro_h_ticket, finding_id]`) are **distinct**: the corrective-A set is Alice-content improvements (methodology / templates / references); the corrective-B set is local-instance improvements (graph fixes, verifier tightening, PDF delivery reliability). The two corrective-action sets do not share children; the parent edges disambiguate them at the kanban layer.
+
+When all 10 conditions fire (or conditions (g) + (h) are N/A and the other 8 fire), the master auto-promotes to `done`.
+
+#### Why the gate count grows by amendment
+
+The progression is **evidence-driven, not ceremonial**. Each amendment adds conditions when a new evidence surface is introduced:
+
+- v0.7.0 → v0.8.0: HITL-A gate (the operator disposition is now a first-class ticket, not a comment on Phase 4). One row added because one new evidence surface exists.
+- v0.8.0 → v0.9.0: Retro-H HITL gate with PDF + Discord DM delivery + corrective-B set. Three rows added because the gate introduces **three** new evidence surfaces: corrective-A children completion (already implicit in v0.8.0 but now explicit because Retro-H cannot fire until corrective-A ships), Retro-H PDF delivery (a new evidence path), and corrective-B children completion (a new child-set whose completion is the post-Retro-H final state).
+
+A flow that adds new evidence surfaces without extending the gate count is a flow that has un-audited transitions. A gate that grows by amendment is a gate that keeps its evidence trail current. The progression 8 → 9 → 10 is the canonical count for the article-review flow; future amendments that add new HITL gates, PDF deliveries, or corrective sets will extend the table above.
+
+**Cross-reference.** The canonical gate table for the article-review flow lives at `~/.hermes/methodology/M-decide-x-article-review-flow.md` Part 7.5 (the META done-gate). The instance-side table is authoritative; this table is the methodology-side paired-wiki per op-guard-5 (paired-wiki integrity: every decision-changing change ships a code/config edit AND a concept-note update). The two tables MUST agree on the per-amendment count; a methodology table that says 9 conditions when the instance says 10 is a paired-wiki integrity violation that the compliance-verifier child (per op-guard-17) catches.
 
 ---
 

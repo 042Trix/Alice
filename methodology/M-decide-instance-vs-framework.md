@@ -1,20 +1,21 @@
 ---
 id: alice-methodology-M-decide-instance-vs-framework
 created: 2026-08-11T22:00:00Z
-updated: 2026-08-11T22:00:00Z
+updated: 2026-08-17T10:50:00Z
 title: "Methodology M — Decide framework-vs-instance: where does a new doc belong?"
 type: methodology
 status: draft
 source: alice-framework
 tags: [kind:methodology, kind:meta, kind:scope, kind:framework-vs-instance, kind:gate, kind:durable-fix, project:alice]
 confidence: 0.9
-version: 0.1.0
+version: 0.1.1
 alice-ticket: t_7aa96032
-companion: ["[[references/instance-leak-check-spec.md]]", "[[templates/instance-leak-check.py.template]]"]
-links: ["[[methodology/00-decide-ticket-naming.md]]", "[[methodology/01-decide-vault-tier.md]]", "[[methodology/02-decide-skills.md]]", "[[methodology/04b-decide-board-routing.md]]", "[[methodology/09-inbox-from-external-sources.md]]", "[[methodology/05-op-guards.md]]"]
+companion: ["[[references/instance-leak-check-spec.md]]", "[[templates/instance-leak-check.py.template]]", "[[methodology/M-decide-alice-publish-flow.md]]", "[[methodology/M-decide-graph-audit-promotion-flow.md]]"]
+links: ["[[methodology/00-decide-ticket-naming.md]]", "[[methodology/01-decide-vault-tier.md]]", "[[methodology/02-decide-skills.md]]", "[[methodology/04b-decide-board-routing.md]]", "[[methodology/05-op-guards.md]]", "[[methodology/09-inbox-from-external-sources.md]]", "[[methodology/M-decide-alice-publish-flow.md]]", "[[methodology/M-decide-graph-audit-promotion-flow.md]]"]
+amended_by: ["t_7aa96032", "t_f38bd852", "t_0e7b941a"]
 ---
 
-# Methodology M — Decide framework-vs-instance (v0.1.0)
+# Methodology M — Decide framework-vs-instance (v0.1.1)
 
 > **The repo's job is to publish the framework canon. Instance operational flows belong next to the instance, not in the repo.** This methodology is the durable fix for the recurring pattern where new flows land in Alice because the publishing pipeline routes `~/Documents/alice-framework/methodology/*.md` to GitHub. Without a clear rule + an automated check, the line between "Alice framework concepts" and "Hermes-instance operational flows" blurs.
 
