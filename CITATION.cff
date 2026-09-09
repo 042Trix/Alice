@@ -7,6 +7,7 @@
 # Gate re-opened rationale (v0.1.3, 2026-08-11): alice-framework v0.1.3 ships (post-v0.1.2 working-tree delta: 6 new methodology + 2 templates + 4 modified files + Retro-H parent-edge fix on 06a Amendment 4).
 # Gate re-opened rationale (v0.1.4, 2026-08-11): alice-framework v0.1.4 PATCH ships (canonical-form CHANGELOG v0.1.3 entry + CITATION.cff gate-comment dedup + post_alice_release_discord.py STEP 11 delivery for v0.1.3).
 # Gate re-opened rationale (v0.2.0, 2026-08-11): alice-framework v0.2.0 MINOR ships per Path A operator decision (recorded in kanban:t_a7a26ea4 closed 2026-08-11T16:50Z). Consolidates the 5 MINOR features (x-article-review master-title shape + retro-position amendment + framework-vs-instance distinction + 06b-decide-blocked-ticket-recovery promotion + semver discipline) + the audit-reorg tooling (file moves + CONTRIBUTING + ci.yml + 4 stale x-refs) into a single MINOR release. Strict semver (0.1.4 → 0.2.0 = MINOR per Semver.org §8) passes the alice-publish Step 0 pre-flight (kanban:t_604c0927). Drop pre-staged placeholders v0.1.5/v0.1.6/v0.1.7/v0.1.8 per Path A. Publish ticket: t_b0d6dd79 (the consolidated re-frame; supersedes t_60859140 + absorbs t_773fb4a8).
+# Gate re-opened rationale (v0.3.0, 2026-09-05): alice-framework v0.3.0 MINOR ships the 5 working-tree amendments (t_653117e5 + t_003a07e2 + t_eaba90cb + t_0383361a + t_eb817293) + 4 new files (M-decide-x-article-review-flow v0.2.0 + M-decide-alice-local-align-flow v0.1.0 + M-decide-task-runs-lifecycle v0.1.0 + templates/graph-audit-findings-report.md.template). Strict semver (0.2.0 → 0.3.0 = MINOR per Semver.org §8, MINOR digit +1, PATCH resets to 0; MINOR trigger = new methodology files). Publish ticket: t_e11bbec1 (the consolidated re-frame; supersedes the 5 working-tree amendment tickets).
 #
 # Confirmed CFF string values (still under operator gate; do NOT edit without re-opening the gate again):
 #   title:           "Alice — A framework for deriving your own agent-augmented operating system"
@@ -14,8 +15,8 @@
 #   license:         MIT             (Card C; ticket t_d7868cd3 done; mechanical sync t_209c09be)
 #
 # Version field policy:
-#   version:         0.2.0           (release tag v0.2.0 MINOR; bumped from 0.1.4 per Path A operator decision; consolidated per canonical rule)
-#   date-released:   2026-08-11      (release tag v0.2.0 ship date; bumped from 2026-08-11 per the same operator decision)
+#   version:         0.3.0           (release tag v0.3.0 MINOR; bumped from 0.2.0 per t_e11bbec1 publish decision; consolidated per canonical rule)
+#   date-released:   2026-09-05      (release tag v0.3.0 ship date; bumped from 2026-08-11 per the same operator decision)
 #
 # Deferred until the public repository and tag exist (filled by jarvis at tag time,
 # under the release card — do NOT fabricate earlier):
@@ -38,8 +39,8 @@ abstract: >-
   applying Alice is the reader's own setup, derived from their own context.
 authors:
   - name: "042Trix"
-version: 0.2.0
-date-released: "2026-08-11"
+version: 0.3.0
+date-released: "2026-09-05"
 license: MIT
 # repository-code: <TODO jarvis at tag time>
 # identifiers:

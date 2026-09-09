@@ -1,0 +1,178 @@
+---
+id: alice-template-graph-audit-findings-report
+created: 2026-08-27T22:30:00Z
+updated: 2026-08-27T22:30:00Z
+title: "Graph Audit Findings report — fillable template (V-of-V artifact, operator-facing HITL #2 surface)"
+type: template
+status: draft
+source: alice-framework
+derived_from:
+  project: Alice
+  template: templates/graph-audit-findings-report.md.template
+  version: 0.1.0
+  customized_on: <YYYY-MM-DD>
+tags: [kind:template, kind:findings-report, kind:graph-audit, kind:verifier-artifact, kind:operator-facing, kind:mermaid-diagram, project:alice]
+confidence: 0.0
+links: ["[[methodology/M-decide-graph-readiness.md]]", "[[methodology/M-decide-graph-audit-promotion-flow.md]]", "[[methodology/M-decide-spec-first-flow.md]]", "[[templates/parity-check.md.template]]", "[[templates/human-digest.md.template]]"]
+teaching-example: false
+---
+
+# Graph Audit Findings — <loop-id> v<X.Y.Z>
+
+> Canonical fillable form for the verifier profile's V-of-V artifact. The report is the operator-facing surface the operator reads at HITL #2 to disposition PROMOTE / DEFER / ARCHIVE per `op-guard-29` + `op-guard-32`. **§4 Graph (Mermaid) is REQUIRED** — the report is FAIL if absent (per `methodology/M-decide-graph-readiness.md` v0.2.7 Part 4 §B.5 + Part 5 check 9; this template is the canonical compliance surface for DRY-RUN-5 success criterion 2 fix, ticket `t_3a6b8cfe`). For DRY-RUN placeholder loops (per amend-123; `trigger.kind: none` + zero child nodes — e.g., `graph-audit-dry-run-test-loop-5`), §4 carries a labeled sentinel Mermaid block rather than a missing section.
+
+---
+
+## 1. What was audited
+
+- **Loop id:** `<loop-id>`
+- **Loop version:** `v<X.Y.Z>`
+- **Status (pre-audit):** `<live-pending-test | live>`
+- **Intent doc:** `~/.hermes/loops/intents/<loop-id>-intent.md` (version `<X.Y.Z>`)
+- **Yaml entry:** `~/.hermes/loops/hermes.yaml` line `<N>` (loop entry id `<loop-id>`)
+- **Master ticket:** `<t_xxx>` (filed on `<board>` board)
+- **Per-loop audit ticket:** `<t_xxx>` (assignee=`doc-writer`)
+- **Verdict this audit:** `<PASS | FAIL | PARTIAL-PASS>` — see §2 + §3 below.
+
+---
+
+## 2. 9-item rubric score (canonical phrasing: `6/6 verifier + 1 HITL + 1 flip`)
+
+| Group | Item | Verdict | Notes |
+|-------|------|---------|-------|
+| A — verifier | 1 — methodology doc | `<PASS \| FAIL>` | see §3.1 |
+| A — verifier | 2 — intent doc + version bump | `<PASS \| FAIL>` | see §3.2 |
+| A — verifier | 4 — regression suite + behavior-vs-tautology sub-check | `<PASS \| FAIL>` | see §3.3 |
+| A — verifier | 6 — paired-wiki integrity + atomicity sub-check | `<PASS \| FAIL>` | see §3.4 |
+| A — verifier | 8 — end-to-end run + run-success sub-check | `<PASS \| FAIL>` | see §3.5 |
+| A — verifier | 9 — node-type discipline | `<PASS \| FAIL>` | see §3.6 |
+| B — promotion | 3 — YAML status | `<pending flip \| live>` | see §5 |
+| B — promotion | 5 — compliance-verifier PASS | `<PASS \| FAIL>` | see §5 |
+| B — promotion | 7 — operator HITL (4-stage per op-guard-32) | `<awaiting operator \| CONFIRM / ACHIEVES / PASS / PROMOTE>` | see §5 |
+
+**Audit score:** `<N>/6 verifier + <HITL-dispositioned-yes/no> + <flipped-yes/no>` (per Part 3 canonical phrasing). Do NOT use "9/9" or "8/8" — those framings conflate the 3 distinct concerns.
+
+---
+
+## 3. Per-item evidence (6 verifier gates)
+
+### 3.1 Item 1 — methodology doc
+- **Source of truth:** `~/Documents/alice-framework/methodology/M-decide-<loop-name>.md` (or `04a-decide-work-graph.md` for cross-cutting) + the `links:` field naming this loop id.
+- **Sub-check (item 1, doc-accurately-describes-behavior per Part 5 check 3d):** `<PASS | FAIL>` — the methodology doc's per-node descriptions match the actual child tickets' worker profiles / scopes / outcomes.
+- **Evidence:** `<file path + line range OR audit-line id>`.
+
+### 3.2 Item 2 — intent doc + version bump
+- **Source of truth:** `~/.hermes/loops/intents/<loop-id>-intent.md` — frontmatter `version:` field tracks semver per `loop-updater` discipline.
+- **Evidence:** `<file path + frontmatter excerpt>`.
+
+### 3.3 Item 4 — regression suite + behavior-vs-tautology sub-check
+- **Source of truth:** `~/.hermes/tests/test_<loop_id>_*.py` (or `test_<loop_id>_<aspect>_*.py`).
+- **Sub-check (item 4, behavior-vs-tautology per Part 5 check 1d):** `<PASS | FAIL>` — classifier verdict per `~/.hermes/tools/verifier_test_classifier.py` (`{tautology_count, trivial_count, behavior_count}`).
+- **Evidence:** `<pytest output + classifier report>`.
+
+### 3.4 Item 6 — paired-wiki integrity + atomicity sub-check
+- **Source of truth:** same-change-set check + `git log --format=%H --grep='<change set name>' -10` per Part 5 check 4d.
+- **Sub-check (item 6, atomicity per Part 5 check 4d):** `<PASS | FAIL>` — no intermediate commit where one artifact shipped without the others.
+- **Evidence:** `<git log excerpt + kanban_complete file-list>`.
+
+### 3.5 Item 8 — end-to-end run + run-success sub-check
+- **Source of truth:** `kanban show <loop_run_card>` per Part 5 check 2c — terminal status must be `done`, not `blocked`, not `running-then-blocked`. Retry storm threshold: `<3` retries in a 5-min window. Escalation threshold: `0` `operator-action-dm` triggers tied to this run.
+- **Evidence:** `<run card id + terminal status + retry count + escalation count>`.
+
+### 3.6 Item 9 — node-type discipline
+- **Source of truth:** methodology doc + intent doc per Part 5 check 8 — every node has a type (Human / Scripts/Code / Agents) + rationale documented.
+- **Evidence:** `<design doc section + per-node type table>`.
+
+---
+
+## 4. Graph (Mermaid) — REQUIRED
+
+> **This section is REQUIRED** per `methodology/M-decide-graph-readiness.md` v0.2.7 Part 4 §B.5 + Part 5 check 9. The verifier emits a FAIL when this section is missing or when the Mermaid block fails the syntax check. The canonical Mermaid helper is `~/.hermes/tools/graph_to_mermaid.py` v0.1.0 (sister tool to `~/.hermes/tools/post_graph_audit_disposition_pdf.py` v0.6.1). For DRY-RUN placeholder loops (per amend-123; `trigger.kind: none` + zero child nodes), this section carries a labeled sentinel Mermaid block rather than a missing section — see "DRY-RUN sentinel" subsection below.
+
+### 4.1 Mermaid diagram
+
+```mermaid
+<!-- Canonical Mermaid block, generated by ~/.hermes/tools/graph_to_mermaid.py v0.1.0.
+     For non-placeholder loops: the loop entry + 6 verifier gate sub-nodes + 4 HITL gate
+     sub-nodes + parent-edge chain (master → per_loop_audit → V-1 → ... → V-of-V → Retro-A → Retro-H)
+     + operator-facing retro + corrective-B terminals.
+     Mermaid syntax rules per ~/.hermes/skills/productivity/executive-reporting/references/mermaid-syntax-rules.md
+     (sanitize: -- > →, \n → <br/>, backtick + double-quote escaping, whitespace collapse). -->
+graph TD
+  <TODO — filled by helper at report-generation time>
+```
+
+### 4.2 DRY-RUN sentinel (placeholder loops ONLY — per amend-123)
+
+For DRY-RUN placeholder loops (e.g., `graph-audit-dry-run-test-loop-5` v0.0.1-dryrun, `trigger.kind: none`, zero child nodes), render the labeled sentinel block below INSTEAD of the empty 4.1 block:
+
+```mermaid
+graph TD
+  A[<loop-id>: dry-run-placeholder per amend-123]
+  style A fill:#eee
+```
+
+The sentinel is NOT a FAIL per Part 5 check 9(d). The canonical helper v0.1.0 emits the sentinel automatically when `loop_yaml_entry.trigger.kind == "none"` AND the loop has no children in the chain.
+
+### 4.3 Mermaid syntax validation
+
+- **Helper mode:** `python3 ~/.hermes/tools/graph_to_mermaid.py --loop-id <loop-id> --validate-mermaid-syntax-only`
+- **Sanitizer:** `_sanitize_mermaid_label` per `post_graph_audit_disposition_pdf.py` v0.6.1 contract (`-->` → `→`, `\\n` → `<br/>`, backtick + double-quote escaping, whitespace collapse).
+- **On render error:** FAIL with `compliance: fail — findings-report-mermaid-invalid — <loop-id> v<X.Y.Z>: <render error message>`.
+
+---
+
+## 5. Promotion gates (items 3 + 5 + 7)
+
+- **Item 3 — YAML status:** `<pending flip | flipped to live at YYYY-MM-DDTHH:MMZ by ticket t_xxx>`.
+- **Item 5 — compliance-verifier PASS:** `<PASS at YYYY-MM-DDTHH:MMZ by ticket t_xxx (op-guard-17 compliance-verifier PASS for amend-YY instance-conformance)>`.
+- **Item 7 — operator HITL (4-stage per op-guard-32):**
+  - HITL #1 — scope/intent: `<CONFIRM | REVISE | ABANDON> at clarify-<ISO-timestamp>-scope-intent`
+  - HITL #2 — intent-achievement: `<ACHIEVES | PARTIALLY-ACHIEVES | DOES-NOT-ACHIEVE> at clarify-<ISO-timestamp>-intent-achievement`
+  - HITL #3 — compliance: `<CONFIRM | DISPUTE | EXEMPTION> at clarify-<ISO-timestamp>-compliance`
+  - HITL #4 — disposition: `<PROMOTE | DEFER | ARCHIVE> at clarify-<ISO-timestamp>-disposition`
+
+---
+
+## 6. Verifier FAIL findings + corrective actions
+
+- **Finding F1:** `<one-line description>` → **Corrective action:** `<ticket t_xxx (assigned to coder)>`. **Status:** `<open | resolved>`.
+- **Finding F2:** ... (one row per finding).
+
+---
+
+## 7. HITL #2 prompt (operator disposition)
+
+The operator dispositions HITL #2 via `clarify` per `op-guard-24` + `op-guard-28` + `op-guard-29` + `op-guard-32`. Canonical prompt format:
+
+```
+<loop-id> audit findings ready. Score: <N>/6 verifier + <HITL-y/n> + <flip-y/n>.
+9-item rubric: see §2 + §3. Mermaid graph: see §4.
+Findings: <count open / count resolved> (see §6).
+Disposition:
+
+1. PROMOTE — flip yaml status: to live + bump intent doc version: + audit-line
+2. DEFER — keep at live-pending-test; re-disposition at next audit cycle
+3. ARCHIVE — close the loop with closed_per_decision per op-guard-10 v2 §1.3
+
+choice: <PROMOTE | DEFER | ARCHIVE>  — decision_ref: clarify-<ISO-timestamp>-disposition
+```
+
+---
+
+## Cross-references
+
+- `methodology/M-decide-graph-readiness.md` v0.2.7 (this template's contract; Part 4 §B.5 + Part 5 check 9)
+- `methodology/M-decide-graph-audit-promotion-flow.md` v0.10.0 (the V-of-V round that emits this report)
+- `templates/parity-check.md.template` (the per-ticket parity check, surfaced in §3 per-item evidence)
+- `templates/human-digest.md.template` (the retro-digest parallel — Retro-A fills the human-digest for retro cycles; this template fills the findings-report for graph-audit cycles)
+- `~/.hermes/tools/graph_to_mermaid.py` v0.1.0 (the canonical §4 Mermaid helper; ships via coder follow-up per op-guard-16 + op-guard-17)
+- `~/.hermes/tools/post_graph_audit_disposition_pdf.py` v0.6.1 + v0.6.2 (the sister tool — Mermaid extractor for the master-ticket summary PDF at HITL #2; the findings-report's §4 + the disposition-PDF's §3 share the canonical Mermaid extraction contract)
+
+---
+
+## Audit-line
+
+```
+## [YYYY-MM-DDTHH:MMZ] doc-writer-shipped — templates/graph-audit-findings-report.md.template v0.1.0 (canonical fillable form for V-of-V Graph Audit Findings report; §4 "Graph (Mermaid)" REQUIRED per methodology M-decide-graph-readiness.md v0.2.7 Part 4 §B.5 + Part 5 check 9). Closes DRY-RUN-5 success criterion 2 fix per ticket t_3a6b8cfe. Companion helper ~/.hermes/tools/graph_to_mermaid.py v0.1.0 ships via coder follow-up per op-guard-16 + op-guard-17 (alice-first / instance-second / compliance-gate). DRY-RUN sentinel contract: loops with trigger.kind=none + zero children emit a labeled sentinel Mermaid block (per amend-123) rather than a missing section. Frontmatter version: 0.1.0; tags: kind:template, kind:findings-report, kind:graph-audit, kind:verifier-artifact, kind:operator-facing, kind:mermaid-diagram. Source: t_3a6b8cfe.
+```

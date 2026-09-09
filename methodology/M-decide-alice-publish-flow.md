@@ -1,16 +1,16 @@
 ---
 id: alice-methodology-decide-alice-publish-flow
 created: 2026-08-08T20:30:00Z
-updated: 2026-08-17T10:35:00Z
+updated: 2026-09-08T15:30:00Z
 title: "Methodology M — Decide the alice-publish flow (the canonical publish pipeline with STEP 0 version-discipline pre-flight + 6 gates + topic-only release message)"
 type: methodology
 status: draft
 source: alice-framework
-version: 1.0.0
+version: 1.0.1
 tags: [kind:methodology, kind:flow-spec, kind:publish, kind:git, kind:gate, kind:pre-verify, kind:release, kind:version-discipline, project:alice]
 confidence: 0.95
 alice-ticket: t_f38bd852
-amended_by: ["t_fdba17e5", "t_a92c1f88", "t_4d9bd6c5", "t_f38bd852"]
+amended_by: ["t_fdba17e5", "t_a92c1f88", "t_4d9bd6c5", "t_f38bd852", "t_3203ac1f", "t_653117e5", "t_003a07e2"]
 parent-meta: t_55240868
 companion: ["[[methodology/04d-decide-flow-spec.md]]", "[[methodology/04a-decide-work-graph.md]]", "[[methodology/04c-decide-master-ticket.md]]", "[[methodology/00-decide-ticket-naming.md]]", "[[methodology/M-decide-instance-vs-framework.md]]", "[[methodology/M-decide-graph-readiness.md]]", "[[methodology/M-decide-x-article-review-flow.md]]", "[[references/instance-leak-check-spec.md]]", "[[templates/check_version_discipline.py.template]]", "[[templates/instance-leak-check.py.template]]"]
 links: ["[[methodology/04d-decide-flow-spec.md]]", "[[methodology/04a-decide-work-graph.md]]", "[[methodology/04c-decide-master-ticket.md]]", "[[methodology/00-decide-ticket-naming.md]]", "[[methodology/M-decide-instance-vs-framework.md]]", "[[methodology/M-decide-versioning-discipline.md]]", "[[methodology/M-decide-graph-readiness.md]]", "[[methodology/M-decide-x-article-review-flow.md]]", "[[2-ATOMIC/rules/op-guard-16-spec-first-flow-2026-08-05.md]]", "[[2-ATOMIC/rules/op-guard-17-methodology-canonical-instance-conforms-2026-08-08.md]]", "[[2-ATOMIC/rules/op-guard-19-pre-verify-artifact-state-2026-08-08.md]]"]
@@ -126,11 +126,12 @@ The 7 steps run in order. Each step is verifier-gated (the gate is the verifier 
 
 #### STEP 1 — Instance-leak gate (new in v1.0.0)
 
-- **Run:** `python3 ~/.hermes/tools/check_instance_leaks.py ~/Documents/alice-framework --ticket-id T_xxx`.
+- **Run (operator-run strict path):** `python3 ~/.hermes/tools/check_instance_leaks.py ~/Documents/alice-framework --ticket-id T_xxx` (no flag). Gate: exit 0; any H1/H2/H3/H4/H5/X1 leak halts the publish.
+- **Run (v1.0.1 dryrun variant — synthetic release pipelines):** same command with `--allow-deliberate-fixtures` appended: `python3 ~/.hermes/tools/check_instance_leaks.py ~/Documents/alice-framework --ticket-id T_xxx --allow-deliberate-fixtures`. The dryrun variant is selected automatically when the master ticket body carries a version string matching `v<X.Y.Z>-dryrun` (e.g. `v0.5.1-dryrun` per `t_ac12ffb3`'s master). The flag downgrades the 2 on-disk H1 deliberate fixtures (`methodology/M-decide-h1-leak.md` + `methodology/M-decide-instance-leak-test.md`, per `references/instance-leak-check-spec.md` Part 2 line 139) from `ERROR` to `INFO` and exits 0; genuine H1 leaks (files matching the structural pattern but lacking the canonical `kind:fixture` + `leak:deliberate` tag tokens) still fire `ERROR` regardless of the flag. The operator-run variant stays strict (no flag, exit 1 on any H1) — the dryrun variant is a synthetic-pipeline test surface, not a release-side override. The `M-decide-h1-leak.md` + `M-decide-instance-leak-test.md` fixtures MUST remain at `methodology/` (regression suite depends on them; `CHANGELOG.md` line 120 codifies "MUST keep firing"; `references/instance-leak-check-spec.md` Part 2 line 139 codifies "cannot be removed or fixed"). Per `references/instance-leak-check-spec.md` Part 2 line 168: "the publish gate enforces the stricter rule but operators can manually override" — the dryrun variant IS the manual override, automated for synthetic release pipelines. amended_by_v1_0_1: t_3203ac1f.
 - **Gate:** the script returns exit 0 (no H1/H2/H3/H4/H5/X1 leaks per `references/instance-leak-check-spec.md`). The master ticket body MUST carry a `## Verified state (STEP 1)` section with the script's full output captured at ticket-filing time.
 - **Output captured:** per-file leak classification (A/H/U), the H-pattern counts (H1 instance kind frontmatter, H2 `~/.hermes/` body references, H3 profile-name patterns, H4 `~/.hermes/loops/...` paths, H5 `~/.hermes/skills/...` paths), the X1 audit-artifact pattern count, the exit code, and the resolved list of offending files (or `clean`).
 - **Failure mode:** exit 1 halts the publish immediately; the master ticket is blocked on `kind=needs_input` with the check's output as the reason, and the operator is notified via Discord. The publish worker does NOT skip, this gate; the surface is closed end-to-end before any commit.
-- **Three surfaces where the gate runs:** (a) local pre-commit hook at `~/.hermes/hooks/instance-leak-pre-commit`; (b) GitHub Actions CI at `~/Documents/alice-framework/.github/workflows/ci.yml`; (c) `alice-publish` loop STEP 1 (this gate). Per `methodology/M-decide-instance-vs-framework.md` Part 4 (publishing gate).
+- **Three surfaces where the gate runs:** (a) local pre-commit hook at `~/.hermes/hooks/instance-leak-pre-commit` — **ALWAYS passes `--allow-deliberate-fixtures`** so the 2 on-disk H1 fixtures don't block every commit; (b) GitHub Actions CI at `~/Documents/alice-framework/.github/workflows/ci.yml` — strict by default, operator can override with the same flag; (c) `alice-publish` loop STEP 1 (this gate) — operator-run variant stays strict; dryrun variant (`v<X.Y.Z>-dryrun` version string) passes the flag per the v1.0.1 amendment. Per `methodology/M-decide-instance-vs-framework.md` Part 4 (publishing gate).
 - **Source of truth:** `methodology/M-decide-instance-vs-framework.md` v0.1.0 (the framework-vs-instance distinction rule) + `references/instance-leak-check-spec.md` (the H1-H5 + X1 pattern catalog) + `templates/instance-leak-check.py.template` (the tool-agnostic script template).
 
 #### STEP 2 — Pre-verify gate (new in v0.2.0)
@@ -476,5 +477,7 @@ Before marking any alice-publish loop iteration complete, verify:
 ## Audit-line
 
 ```
+## [2026-08-23T15:40Z] doc-writer-amend — methodology/M-decide-alice-publish-flow.md v1.0.1 — wire --allow-deliberate-fixtures into STEP 1 dryrun variant (t_3203ac1f). Adds a one-paragraph note in STEP 1 'Run' section explaining the dryrun/operator-run variance: dryrun (synthetic release pipelines with version string suffix `-dryrun`, e.g. v0.5.1-dryrun per t_ac12ffb3) passes `--allow-deliberate-fixtures`; operator-run stays strict (no flag, exit 1 on any H1). The 2 on-disk H1 deliberate fixtures (M-decide-h1-leak.md + M-decide-instance-leak-test.md) remain at `methodology/` per `references/instance-leak-check-spec.md` Part 2 line 139 + `CHANGELOG.md` line 120. Per op-guard-16 (spec-first flow) the doc-writer's canonical concept note (2-ATOMIC/concepts/h1-deliberate-fixtures-canonical-non-move-2026-08-23.md, t_97f8a7c1) preceded this amendment. Per op-guard-17 (alice-first / instance-second / compliance-gate) the instance-side wire-up (hermes.yaml v0.5.2, intent doc v0.5.2) follows the methodology amendment; the compliance-verifier child ticket will fire on the instance side. Regression: tests/test_check_instance_leaks.py +2 cases. amended_by_v1_0_1: t_3203ac1f. source: t_3203ac1f.
+
 ## [2026-08-17T10:35Z] doc-writer-ship — methodology/M-decide-alice-publish-flow.md v1.0.0 — canonical-promote of the alice-publish flow spec from instance-side to alice-framework-side. Adds STEP 1 instance-leak gate (closes the framework-vs-instance leak surface from t_7aa96032), expands Process to 7 steps + 6 gates, Field 6 acceptance criteria to 11 items, and adds Part 7 node-type discipline section (every graph node named with type + rationale per methodology/04a-decide-work-graph.md Part 4; satisfies per-loop-audit item 9). Per-loop audit item 1 flips to ✅ (canonical methodology doc exists at ~/Documents/alice-framework/methodology/M-decide-alice-publish-flow.md with loop-id cross-reference) and item 9 flips to ✅ (node-type discipline phrase present). Source: META t_55240868 (alice-publish demotion per op-guard-30 enforcement) + child t_f38bd852 (this doc's canonical-promote ticket). Follow-ups flagged: instance-side pointer update + alice-publish loop yaml comment block + intent-doc amended_by_v0_2_0_methodology_doc field (out of scope per op-guard-16 + op-guard-17 alice-first/instance-second; ship via coder follow-up).
 ```

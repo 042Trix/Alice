@@ -1,13 +1,13 @@
 ---
 id: alice-methodology-04a-decide-work-graph
 created: 2026-08-04T12:30:00Z
-updated: 2026-08-17T22:00:00Z
+updated: 2026-09-05T22:15:00Z
 title: "Methodology 04a — Decide your work graph (stateful work + relationships)"
 type: methodology
 status: draft
-source: alice-framework
-version: 0.1.5
-amended_by: ["[[ticket:t_94c0c7cf]]", "[[ticket:t_323ad698]]", "[[ticket:t_78936c6e]]", "[[ticket:t_5c687fae]]", "[[ticket:t_ab1f3081]]", "[[ticket:t_7419d73e]]", "[[ticket:t_0e7b941a]]"]
+updated: 2026-09-08T15:30:00Z
+version: 0.1.8
+amended_by: ["[[ticket:t_94c0c7cf]]", "[[ticket:t_323ad698]]", "[[ticket:t_78936c6e]]", "[[ticket:t_5c687fae]]", "[[ticket:t_ab1f3081]]", "[[ticket:t_7419d73e]]", "[[ticket:t_0e7b941a]]", "[[ticket:t_a2e37aa7]]", "[[ticket:t_097d469a]]", "[[ticket:t_653117e5]]", "[[ticket:t_003a07e2]]"]
 tags: [kind:methodology, kind:work-graph, kind:node-types, project:alice]
 confidence: 0.0
 links: ["[[methodology/04-decide-crons.md]]", "[[methodology/05-op-guards.md]]", "[[methodology/07-council-methodology.md]]", "[[methodology/M-decide-spec-first-flow.md]]", "[[methodology/M-decide-graph-readiness.md]]", "[[methodology/M-decide-skill-curator.md]]", "[[methodology/M-decide-wiki-lint.md]]", "[[methodology/M-decide-graph-audit-promotion-flow.md]]", "[[worked-examples/01-solo-founder-skeleton/AGENTS.md]]", "[[methodology/references/04a-node-admission-taxonomy.md]]"]
@@ -238,6 +238,8 @@ Without states, the system can't reason about the unit's lifecycle. Without rela
 >
 > The three-question test is the **node-admission gate** for Alice's work graph. It is per-design-review and per-retro, not per-dispatch — applying it as a per-node checkbox defeats its purpose. The fuller taxonomy of admission signals lives in `methodology/references/04a-node-admission-taxonomy.md` (per the F-2 amendment, 2026-08-09).
 
+**Cadence:** Alice's admission-gate discipline is per-design-review / per-retro (NOT per-dispatch); the three questions are evaluated when designing a new work graph or during a Retro-A scope review, not as a runtime check before every workflow launch.
+
 ### Alice's positive definition (do not import the "loop vs graph" framing)
 
 Alice defines the work graph in **its own terms**, not by contrast with simpler patterns:
@@ -278,6 +280,14 @@ The operator is the bottleneck. The work graph's job is to **reduce operator dec
 - Surfacing duplicate units (so the operator can de-duplicate)
 
 A work graph that doesn't reduce operator decisions is a work graph that's not paying for itself.
+
+---
+
+## Related operator-facing references
+
+For an operator-facing articulation of the loop-vs-graph reduction:
+
+- **wandermist, "The biggest Graph Engineering mistake everyone makes"** (2026-07-30, https://x.com/wandermist/status/2082757212770898333): "a loop is a graph with one node and an edge back to itself." Three independent industry sources independently articulate the same reduction (see Phase 2 sources in master t_b9af0edd). This is an operator-facing register, not a methodology contract — Alice's loop-vs-graph framing is defined in `## Work graphs` / `## Node admission gate` above on Alice's own terms.
 
 ---
 
@@ -341,6 +351,12 @@ A flow "ship a methodology release" might decompose as: `[Human] LGTM on spec �
 3. Collapse condition: if the methodology is small enough that a producer can self-verify against a deterministic test, the reviewer node can collapse into the producer.
 
 Without those three answers, the reviewer is a permanent cost the methodology cannot justify.
+
+### Known dissent
+
+PawelHuryn ("I call BS on graph engineering", 2026-08-15, https://x.com/PawelHuryn/status/2078755464754376719) rejects the loop-vs-graph dichotomy entirely and proposes **objective-as-spec** as a third architectural option: "Give your agent the objective, why it matters, and how success will be measured." This view is documented here for awareness; Alice's three-question node-admission gate (per Part 3 / Part 3.6 above) remains the canonical contract for non-root node admission.
+
+Operators using Alice may choose to apply the objective-as-spec pattern at the per-design-review level on a per-loop basis; doing so is a conscious departure from Alice's standard three-question gate and should be recorded as a loop-level decision (e.g., in the loop's intent doc or Retro-A scope statement). The per-loop escape hatch does not change the methodology contract; it just records that the operator knowingly deviated at one design-review surface.
 
 ## Part 3.7: Parallel fan-out / fan-in contract
 
