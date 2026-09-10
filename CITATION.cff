@@ -18,8 +18,8 @@
 #   version:         0.3.0           (release tag v0.3.0 MINOR; bumped from 0.2.0 per t_e11bbec1 publish decision; consolidated per canonical rule)
 #   date-released:   2026-09-05      (release tag v0.3.0 ship date; bumped from 2026-08-11 per the same operator decision)
 #
-# Deferred until the public repository and tag exist (filled by jarvis at tag time,
-# under the release card — do NOT fabricate earlier):
+# Filled at tag time (v0.3.0, 2026-09-05; canonical repo 042Trix/Alice confirmed via
+# `gh release list --repo 042Trix/Alice`):
 #   repository-code: https://github.com/042Trix/Alice
 #   identifiers:     <TODO jarvis at tag time: Zenodo collection DOI + v0.2.0 archived-snapshot DOI>
 #
@@ -42,7 +42,7 @@ authors:
 version: 0.3.0
 date-released: "2026-09-05"
 license: MIT
-# repository-code: <TODO jarvis at tag time>
+repository-code: https://github.com/042Trix/Alice
 # identifiers:
 #   - description: "This is the collection of archived snapshots of all versions"
 #     type: doi
